@@ -49,6 +49,10 @@
       <HintPath>..\packages\Common.Logging.Core.3.1.0\lib\net40\Common.Logging.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Elasticsearch.Net, Version=2.0.0.0, Culture=neutral, PublicKeyToken=96c599bbe3e70f5d, processorArchitecture=MSIL">
+      <HintPath>..\packages\Elasticsearch.Net.2.4.3\lib\net45\Elasticsearch.Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.dll</HintPath>
       <Private>True</Private>
@@ -57,8 +61,60 @@
       <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Lucene.Net, Version=3.0.3.0, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lucene.Net.3.0.3\lib\NET40\Lucene.Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Lucene.Net.Contrib.Analyzers, Version=3.0.3.0, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lucene.Net.Contrib.3.0.3\lib\net40\Lucene.Net.Contrib.Analyzers.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Lucene.Net.Contrib.Core, Version=3.0.3.0, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lucene.Net.Contrib.3.0.3\lib\net40\Lucene.Net.Contrib.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Lucene.Net.Contrib.FastVectorHighlighter, Version=3.0.3.0, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lucene.Net.Contrib.3.0.3\lib\net40\Lucene.Net.Contrib.FastVectorHighlighter.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Lucene.Net.Contrib.Highlighter, Version=2.3.2.1, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lucene.Net.Contrib.3.0.3\lib\net40\Lucene.Net.Contrib.Highlighter.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Lucene.Net.Contrib.Memory, Version=1.0.0.0, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lucene.Net.Contrib.3.0.3\lib\net40\Lucene.Net.Contrib.Memory.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Lucene.Net.Contrib.Queries, Version=3.0.3.0, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lucene.Net.Contrib.3.0.3\lib\net40\Lucene.Net.Contrib.Queries.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Lucene.Net.Contrib.Regex, Version=3.0.3.0, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lucene.Net.Contrib.3.0.3\lib\net40\Lucene.Net.Contrib.Regex.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Lucene.Net.Contrib.SimpleFacetedSearch, Version=3.0.3.0, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lucene.Net.Contrib.3.0.3\lib\net40\Lucene.Net.Contrib.SimpleFacetedSearch.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Lucene.Net.Contrib.Snowball, Version=2.0.0.1, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lucene.Net.Contrib.3.0.3\lib\net40\Lucene.Net.Contrib.Snowball.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Lucene.Net.Contrib.SpellChecker, Version=3.0.3.0, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lucene.Net.Contrib.3.0.3\lib\net40\Lucene.Net.Contrib.SpellChecker.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Moq, Version=4.5.21.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <HintPath>..\packages\Moq.4.5.21\lib\net45\Moq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Nest, Version=2.0.0.0, Culture=neutral, PublicKeyToken=96c599bbe3e70f5d, processorArchitecture=MSIL">
+      <HintPath>..\packages\NEST.2.4.3\lib\net45\Nest.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -111,8 +167,9 @@
       <HintPath>..\packages\VirtoCommerce.PricingModule.Data.2.13.0\lib\net451\VirtoCommerce.PricingModule.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="VirtoCommerce.SearchModule.Data">
-      <HintPath>..\..\vc-module-search\VirtoCommerce.SearchModule.Data\bin\Debug\VirtoCommerce.SearchModule.Data.dll</HintPath>
+    <Reference Include="VirtoCommerce.SearchModule.Data, Version=2.11.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\VirtoCommerce.SearchModule.Data.2.12.0-rc\lib\net451\VirtoCommerce.SearchModule.Data.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="VirtoCommerce.StoreModule.Data, Version=2.11.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\VirtoCommerce.StoreModule.Data.2.11.0\lib\net451\VirtoCommerce.StoreModule.Data.dll</HintPath>
@@ -157,6 +214,9 @@
       <Project>{2f620ba6-ca32-48b6-9f34-73d287a0e2ad}</Project>
       <Name>VirtoCommerce.SearchApiModule.Web</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Model\Filters\Filters.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
