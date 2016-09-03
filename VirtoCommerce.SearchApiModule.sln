@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.SearchApiModule.Web", "VirtoCommerce.SearchApiModule.Web\VirtoCommerce.SearchApiModule.Web.csproj", "{2F620BA6-CA32-48B6-9F34-73D287A0E2AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.SearchApiModule.Test", "VirtoCommerce.SearchApiModule.Test\VirtoCommerce.SearchApiModule.Test.csproj", "{662BD018-9A44-4C96-AFE3-6D080D9A6222}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2F620BA6-CA32-48B6-9F34-73D287A0E2AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F620BA6-CA32-48B6-9F34-73D287A0E2AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F620BA6-CA32-48B6-9F34-73D287A0E2AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F620BA6-CA32-48B6-9F34-73D287A0E2AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{662BD018-9A44-4C96-AFE3-6D080D9A6222}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{662BD018-9A44-4C96-AFE3-6D080D9A6222}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{662BD018-9A44-4C96-AFE3-6D080D9A6222}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{662BD018-9A44-4C96-AFE3-6D080D9A6222}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
