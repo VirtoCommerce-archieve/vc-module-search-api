@@ -176,6 +176,47 @@ namespace VirtoCommerce.SearchModule.Tests
         [InlineData("Lucene")]
         [InlineData("Elastic")]
         [Trait("Category", "CI")]
+        public void Can_sort_using_search(string providerType)
+        {
+            var scope = _DefaultScope;
+            var provider = GetSearchProvider(providerType, scope);
+            SearchHelper.CreateSampleIndex(provider, scope);
+
+            var criteria = new CatalogItemSearchCriteria
+            {
+                Catalog = "goods",
+                RecordsToRetrieve = 10,
+                StartingRecord = 0,
+                Pricelists = new string[] { },
+                Sort = new SearchSort("name")
+            };
+
+            var results = provider.Search<DocumentDictionary>(scope, criteria);
+
+            Assert.True(results.DocCount == 6, string.Format("Returns {0} instead of 1", results.DocCount));
+            var productName = results.Documents.ElementAt(0)["name"] as string; // black sox
+            Assert.True(productName == "black sox");
+
+            criteria = new CatalogItemSearchCriteria
+            {
+                Catalog = "goods",
+                RecordsToRetrieve = 10,
+                StartingRecord = 0,
+                Pricelists = new string[] { },
+                Sort = new SearchSort("name", true)
+            };
+
+            results = provider.Search<DocumentDictionary>(scope, criteria);
+
+            Assert.True(results.DocCount == 6, string.Format("\"Sample Product\" search returns {0} instead of 1", results.DocCount));
+            productName = results.Documents.ElementAt(0)["name"] as string; // sample product
+            Assert.True(productName == "sample product");
+        }
+
+        [Theory]
+        [InlineData("Lucene")]
+        [InlineData("Elastic")]
+        [Trait("Category", "CI")]
         public void Can_get_item_facets(string providerType)
         {
             var scope = _DefaultScope;

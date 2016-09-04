@@ -45,7 +45,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Extensions
 
                 result.AddRange(query
                         .Select(item => item.Split(directionDelimeter, 2))
-                        .Select(item => new SortInfo { SortColumn = item[0], SortDirection = SortDirection.Ascending })
+                        .Select(item => new SortInfo { SortColumn = item[0], SortDirection = item.Length == 1 ? SortDirection.Ascending : item[1] == "desc" ? SortDirection.Descending : SortDirection.Ascending })
                     );
             }
 

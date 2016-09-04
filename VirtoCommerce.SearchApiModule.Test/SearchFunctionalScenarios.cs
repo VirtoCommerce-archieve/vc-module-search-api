@@ -191,7 +191,7 @@ namespace VirtoCommerce.SearchModule.Tests
         }
 
         [Theory]
-        //[InlineData("Lucene")]
+        [InlineData("Lucene")]
         [InlineData("Elastic")]
         public void Can_web_search_products(string providerType)
         {
@@ -245,6 +245,34 @@ namespace VirtoCommerce.SearchModule.Tests
 
             var brandAggregation = searchResults.Aggregations.SingleOrDefault(a => a.Field.Equals("brand", StringComparison.OrdinalIgnoreCase));
             Assert.True(brandAggregation.Items.Where(x => x.Value.ToString().Equals("Beats By Dr Dre", StringComparison.OrdinalIgnoreCase)).SingleOrDefault().Count == 3);
+
+            // now test sorting
+            criteria = new ProductSearch()
+            {
+                Catalog = catalog.Id,
+                Currency = "USD",
+                Sort = new [] { "name" }
+            };
+
+            serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(filters);
+            searchResults = ibs.SearchItems(scope, serviceCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
+
+            var productName = searchResults.Products[0].Name;
+            Assert.True(productName == "2 Pack White Gem Burst Earcuffs");
+
+            criteria = new ProductSearch()
+            {
+                Catalog = catalog.Id,
+                Currency = "USD",
+                Sort = new[] { "name desc" }
+            };
+
+            serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(filters);
+            searchResults = ibs.SearchItems(scope, serviceCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
+
+            productName = searchResults.Products[0].Name;
+
+            Assert.True(productName == "xFold CINEMA X12 RTF U7");
         }
 
         private ItemBrowsingService GetItemBrowsingService(Data.Model.ISearchProvider provider)
