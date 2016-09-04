@@ -217,6 +217,7 @@
     </Compile>
     <Compile Include="Controllers\Api\SearchApiModuleController.cs" />
     <Compile Include="Converters\AggregationConverters.cs" />
+    <Compile Include="Extensions\SearchCriteriaExtensions.cs" />
     <Compile Include="Extensions\SearchFilterExtensions.cs" />
     <Compile Include="Extensions\TermsQueryStringExtensions.cs" />
     <Compile Include="Helpers\BrowseFilterHelper.cs" />
