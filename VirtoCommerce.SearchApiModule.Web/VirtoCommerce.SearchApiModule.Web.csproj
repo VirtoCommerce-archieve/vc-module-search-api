@@ -219,11 +219,12 @@
     <Compile Include="Converters\AggregationConverters.cs" />
     <Compile Include="Extensions\SearchCriteriaExtensions.cs" />
     <Compile Include="Extensions\SearchFilterExtensions.cs" />
-    <Compile Include="Extensions\TermsQueryStringExtensions.cs" />
+    <Compile Include="Extensions\QueryStringExtensions.cs" />
     <Compile Include="Helpers\BrowseFilterHelper.cs" />
     <Compile Include="Model\CatalogItemSearchCriteria.cs" />
     <Compile Include="Model\CategorySearchCriteria.cs" />
     <Compile Include="Model\ProductSearch.cs" />
+    <Compile Include="Model\ProductSearchResult.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\ElasticSearch.Nest\CatalogESQueryBuilder.cs" />

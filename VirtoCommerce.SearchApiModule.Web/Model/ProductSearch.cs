@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Web.Extensions;
 using VirtoCommerce.SearchApiModule.Web.Helpers;
 using VirtoCommerce.SearchModule.Data.Model.Filters;
@@ -20,6 +22,9 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
 
         public string SearchPhrase { get; set; }
 
+        /// <summary>
+        /// CatalogId/CategoryId/CategoryId
+        /// </summary>
         public string Outline { get; set; }
 
         public string[] PriceLists { get; set; }
@@ -114,30 +119,65 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
             // TODO: add sorting, parse things like "name desc", which means sort by field name "name" in descending order. Also handle special cases like price or priority
             // TODO: handle vendor, probably through filters
 
-            return criteria as T;
-        }
+            #region Sorting
 
-        private SearchSortField[] ParseSortString(string[] query)
-        {
-            var result = new List<SearchSortField>();
+            var categoryId = Outline.AsCategoryId();
+            var sorts = Sort.AsSortInfoes();
+            var sortFields = new List<SearchSortField>();
+            var priorityFieldName = string.Format(CultureInfo.InvariantCulture, "priority_{0}_{1}", Catalog, categoryId).ToLower();
 
-            if (query != null)
+            if (!sorts.IsNullOrEmpty())
             {
-                var directionDelimeter = new[] { ' ' };
-                var valuesDelimeter = new[] { ',' };
 
-                /*
-                result.AddRange(query
-                    .Select(item => item.Split(directionDelimeter, 2))
-                    .Where(item => item.Length == 2)
-                    .Select(item => new StringKeyValues { Key = item[0], Values = item[1].Split(valuesDelimeter, StringSplitOptions.RemoveEmptyEntries) })
-                    .GroupBy(item => item.Key)
-                    .Select(g => new StringKeyValues { Key = g.Key, Values = g.SelectMany(i => i.Values).Distinct().ToArray() })
-                    );
-                    */
+                foreach (var sortInfo in sorts)
+                {
+                    var fieldName = sortInfo.SortColumn.ToLowerInvariant();
+                    var isDescending = sortInfo.SortDirection == SortDirection.Descending;
+
+                    switch (fieldName)
+                    {
+                        case "price":
+                            if (criteria.Pricelists != null)
+                            {
+                                sortFields.AddRange(
+                                    criteria.Pricelists.Select(
+                                        priceList =>
+                                            new SearchSortField(string.Format(CultureInfo.InvariantCulture, "price_{0}_{1}", criteria.Currency.ToLower(), priceList.ToLower()))
+                                            {
+                                                IgnoredUnmapped = true,
+                                                IsDescending = isDescending,
+                                                DataType = SearchSortField.DOUBLE
+                                            })
+                                        .ToArray());
+                            }
+                            break;
+                        case "priority":
+                            sortFields.Add(new SearchSortField(priorityFieldName, isDescending) { IgnoredUnmapped = true });
+                            sortFields.Add(new SearchSortField("priority", isDescending));
+                            break;
+                        case "name":
+                        case "title":
+                            sortFields.Add(new SearchSortField("name", isDescending));
+                            break;
+                        default:
+                            sortFields.Add(new SearchSortField(fieldName, isDescending));
+                            break;
+                    }
+                }
             }
 
-            return result.ToArray();
+            if (!sortFields.Any())
+            {
+                sortFields.Add(new SearchSortField(priorityFieldName, true) { IgnoredUnmapped = true });
+                sortFields.Add(new SearchSortField("priority", true));
+                sortFields.AddRange(CatalogItemSearchCriteria.DefaultSortOrder.GetSort());
+            }
+
+            criteria.Sort = new SearchSort(sortFields.ToArray());
+
+            #endregion
+
+            return criteria as T;
         }
     }
 }

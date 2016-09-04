@@ -3,10 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Web.Http;
 using System.Web.Http.Description;
-using VirtoCommerce.CatalogModule.Web.Converters;
-using VirtoCommerce.CatalogModule.Web.Model;
 using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Web.Common;
 using VirtoCommerce.Platform.Data.Common;
@@ -26,34 +23,32 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
         private readonly IBrowseFilterService _browseFilterService;
         private readonly IItemBrowsingService _browseService;
         private readonly ISecurityService _securityService;
-        private readonly IBlobUrlResolver _blobUrlResolver;
         private readonly ICacheManager<object> _cacheManager;
 
         public SearchApiModuleController(ISearchProvider searchProvider, ISearchConnection searchConnection, 
             IBrowseFilterService browseFilterService, IItemBrowsingService browseService, ISecurityService securityService,
-            IBlobUrlResolver blobUrlResolver, ICacheManager<object> cacheManager)
+            ICacheManager<object> cacheManager)
         {
             _searchProvider = searchProvider;
             _searchConnection = searchConnection;
             _browseFilterService = browseFilterService;
             _browseService = browseService;
             _securityService = securityService;
-            _blobUrlResolver = blobUrlResolver;
             _cacheManager = cacheManager;
         }
 
 
         [HttpPost]
         [Route("{store}/products")]
-        [ResponseType(typeof(CatalogSearchResult))]
+        [ResponseType(typeof(ProductSearchResult))]
         [ClientCache(Duration = 30)]
         public IHttpActionResult SearchProducts(string store, ProductSearch criteria)
         {
             var result = SearchProducts(_searchConnection.Scope, store, criteria, ItemResponseGroup.ItemLarge);
-            return Ok(result.ToWebModel(_blobUrlResolver));
+            return Ok(result);
         }
 
-        private Domain.Catalog.Model.SearchResult SearchProducts(string scope, string store, ProductSearch criteria, ItemResponseGroup responseGroup)
+        private ProductSearchResult SearchProducts(string scope, string store, ProductSearch criteria, ItemResponseGroup responseGroup)
         {
             var context = new Dictionary<string, object>
             {

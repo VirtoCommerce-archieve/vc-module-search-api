@@ -37,6 +37,7 @@ using Moq;
 using VirtoCommerce.Platform.Data.DynamicProperties;
 using VirtoCommerce.SearchApiModule.Web.Services;
 using VirtoCommerce.SearchApiModule.Web.Model;
+using VirtoCommerce.Platform.Data.Assets;
 
 namespace VirtoCommerce.SearchModule.Tests
 {
@@ -248,7 +249,7 @@ namespace VirtoCommerce.SearchModule.Tests
 
         private ItemBrowsingService GetItemBrowsingService(Data.Model.ISearchProvider provider)
         {
-            var service = new ItemBrowsingService(GetItemService(), provider);
+            var service = new ItemBrowsingService(GetItemService(), provider, new FileSystemBlobProvider("", "http://samplesite.com"));
             return service;
         }
 

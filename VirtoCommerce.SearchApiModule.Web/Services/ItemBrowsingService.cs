@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using VirtoCommerce.CatalogModule.Web.Converters;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
+using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Web.Converters;
 using VirtoCommerce.SearchApiModule.Web.Model;
@@ -17,14 +19,16 @@ namespace VirtoCommerce.SearchApiModule.Web.Services
     {
         private readonly IItemService _itemService;
         private readonly ISearchProvider _searchProvider;
+        private readonly IBlobUrlResolver _blobUrlResolver;
 
-        public ItemBrowsingService(IItemService itemService, ISearchProvider searchService)
+        public ItemBrowsingService(IItemService itemService, ISearchProvider searchService, IBlobUrlResolver blobUrlResolver)
         {
             _searchProvider = searchService;
             _itemService = itemService;
+            _blobUrlResolver = blobUrlResolver;
         }
 
-        public SearchResult SearchItems(string scope, ISearchCriteria criteria, ItemResponseGroup responseGroup)
+        public ProductSearchResult SearchItems(string scope, ISearchCriteria criteria, ItemResponseGroup responseGroup)
         {
             var items = new List<CatalogProduct>();
             var itemsOrderedList = new List<string>();
@@ -85,9 +89,13 @@ namespace VirtoCommerce.SearchApiModule.Web.Services
             while (foundItemCount > dbItemCount && searchResults!=null && searchResults.Documents.Any() && searchRetry <= 3 &&
                 (myCriteria.RecordsToRetrieve + myCriteria.StartingRecord) < searchResults.TotalCount);
 
-            var response = new SearchResult();
+            var response = new ProductSearchResult();
 
-            response.Products.AddRange(items);
+            if (items != null)
+            {
+                response.Products = items.Select(x => x.ToWebModel(_blobUrlResolver)).ToArray();
+            }
+
             response.ProductsTotalCount = (int)searchResults.TotalCount;
 
             // TODO need better way to find applied filter values
