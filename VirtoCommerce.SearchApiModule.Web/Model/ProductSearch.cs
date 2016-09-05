@@ -16,8 +16,6 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
 
         public string Currency { get; set; }
 
-        public string[] Facets { get; set; }
-
         public string[] Terms { get; set; }
 
         public string SearchPhrase { get; set; }
@@ -99,6 +97,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
             }
             #endregion
 
+            /*
             #region Facets
 
             // apply facet filters
@@ -115,6 +114,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
             }
 
             #endregion
+            */
 
             // TODO: add sorting, parse things like "name desc", which means sort by field name "name" in descending order. Also handle special cases like price or priority
             // TODO: handle vendor, probably through filters

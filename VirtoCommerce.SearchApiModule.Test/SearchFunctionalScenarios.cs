@@ -218,7 +218,7 @@ namespace VirtoCommerce.SearchModule.Tests
             {
                 Catalog = catalog.Id,
                 Currency = "USD",
-                Facets = new[] { "brand", "size", "price:0_to_5", "price:5_to_10" }
+                Terms = new[] { "size:0_to_5", "size:5_to_10" }
             };
 
 
