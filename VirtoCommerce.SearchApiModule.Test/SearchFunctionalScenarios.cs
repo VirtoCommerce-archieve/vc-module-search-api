@@ -53,7 +53,7 @@ namespace VirtoCommerce.SearchModule.Tests
         }
 
         [Theory]
-        //[InlineData("Lucene")]
+        [InlineData("Lucene")]
         [InlineData("Elastic")]
         public void Can_index_category_demo_data_and_search_using_outline(string providerType)
         {

@@ -25,6 +25,19 @@ namespace VirtoCommerce.SearchApiModule.Web.Providers.Lucene
 
             var fuzzyMinSimilarity = 0.7f;
             var isFuzzySearch = false;
+
+            #region CategorySearchCriteria
+            if (criteria is CategorySearchCriteria)
+            {
+                var c = criteria as CategorySearchCriteria;
+                if (c.Outlines != null && c.Outlines.Count > 0)
+                {
+                    AddQuery("__outline", query, c.Outlines);
+                }
+            }
+            #endregion
+
+            #region CatalogItemSearchCriteria
             if (criteria is CatalogItemSearchCriteria)
             {
                 var c = criteria as CatalogItemSearchCriteria;
@@ -59,6 +72,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Providers.Lucene
                 fuzzyMinSimilarity = c.FuzzyMinSimilarity;
                 isFuzzySearch = c.IsFuzzySearch;
             }
+            #endregion
 
             // add standard keyword search
 
