@@ -7,7 +7,7 @@ using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
 namespace VirtoCommerce.SearchApiModule.Web.Providers.ElasticSearch.Nest
 {
     [CLSCompliant(false)]
-    public class CatalogESQueryBuilder : ElasticSearchQueryBuilder
+    public class CatalogElasticSearchQueryBuilder : ElasticSearchQueryBuilder
     {
         #region ISearchQueryBuilder Members
         public override object BuildQuery<T>(string scope, ISearchCriteria criteria)

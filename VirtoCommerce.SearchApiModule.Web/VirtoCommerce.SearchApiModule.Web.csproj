@@ -233,7 +233,7 @@
     <Compile Include="Model\ProductSearchResult.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Providers\ElasticSearch.Nest\CatalogESQueryBuilder.cs" />
+    <Compile Include="Providers\ElasticSearch.Nest\CatalogElasticSearchQueryBuilder.cs" />
     <Compile Include="Providers\Lucene\CatalogLuceneQueryBuilder.cs" />
     <Compile Include="Services\CatalogItemIndexBuilder.cs" />
     <Compile Include="Services\CategoryIndexBuilder.cs" />

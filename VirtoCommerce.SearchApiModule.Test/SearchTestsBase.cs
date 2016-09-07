@@ -26,7 +26,7 @@ namespace VirtoCommerce.SearchModule.Tests
 
             if (searchProvider == "Elastic")
             {
-                var queryBuilder = new CatalogESQueryBuilder();
+                var queryBuilder = new CatalogElasticSearchQueryBuilder();
 
                 var conn = new SearchConnection("localhost:9200", scope);
                 var provider = new ElasticSearchProvider(queryBuilder, conn);

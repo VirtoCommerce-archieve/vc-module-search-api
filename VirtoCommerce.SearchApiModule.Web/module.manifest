@@ -6,6 +6,7 @@
     <dependencies>
         <dependency id="VirtoCommerce.Core" version="2.16.1" />
         <dependency id="VirtoCommerce.Catalog" version="2.14.1" />
+        <dependency id="VirtoCommerce.Search" version="2.12.0" />      
     </dependencies>
 
     <title>Search API module</title>

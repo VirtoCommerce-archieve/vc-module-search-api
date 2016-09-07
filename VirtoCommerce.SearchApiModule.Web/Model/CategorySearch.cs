@@ -32,6 +32,10 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
             {
                 criteria.Outlines.Add(string.Format("{0}/{1}", catalog, Outline));
             }
+            else
+            {
+                criteria.Outlines.Add(string.Format("{0}", catalog)); // everything in catalog
+            }
 
             #region Sorting
 
