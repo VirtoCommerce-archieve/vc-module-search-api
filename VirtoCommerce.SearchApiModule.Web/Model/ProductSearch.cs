@@ -36,9 +36,13 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
             var criteria = new T();
 
             criteria.Currency = Currency;
+            criteria.Pricelists = PriceLists;
+            criteria.SearchPhrase = SearchPhrase;
+            criteria.StartingRecord = Skip;
+            criteria.RecordsToRetrieve = Take;
 
             // add outline
-            if(!string.IsNullOrEmpty(Outline))
+            if (!string.IsNullOrEmpty(Outline))
             {
                 criteria.Outlines.Add(string.Format("{0}/{1}", catalog, Outline));
             }
