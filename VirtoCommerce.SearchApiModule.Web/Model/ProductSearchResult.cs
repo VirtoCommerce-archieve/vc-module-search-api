@@ -18,6 +18,6 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
 
         public Product[] Products { get; set; }
 
-        public int ProductsTotalCount { get; set; }
+        public long TotalCount { get; set; }
     }
 }

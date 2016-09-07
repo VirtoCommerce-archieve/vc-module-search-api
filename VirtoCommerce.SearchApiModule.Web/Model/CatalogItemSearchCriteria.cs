@@ -121,49 +121,5 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
             get { return _endDate; }
             set { ChangeState(); _endDate = value; }
         }
-
-        /// <summary>
-        /// Gets the cache key. Used to generate hash that will be used to store data in memory if needed.
-        /// </summary>
-        /// <value>The cache key.</value>
-        public override string CacheKey
-        {
-            get
-            {
-                var key = new StringBuilder();
-
-                key.Append("_rg" + ResponseGroups);
-                key.Append("_ct" + Catalog);
-                key.Append("_fs" + IsFuzzySearch.ToString());
-
-                if (Pricelists != null)
-                {
-                    key.Append("_pl" + String.Join("-", Pricelists));
-                }
-                //Because not null-able and  always cache key have new value 
-                // key.Append("_st" + StartDate.ToString("s"));
-                // key.Append("_ed" + (EndDate.HasValue ? EndDate.Value.ToString("s") : ""));
-                key.Append("_phr" + SearchPhrase);
-                // Add active fields
-
-                if (Outlines != null)
-                {
-                    foreach (var outline in Outlines)
-                    {
-                        key.Append("_out:" + outline);
-                    }
-                }
-
-                if (ClassTypes != null)
-                {
-                    foreach (var ct in ClassTypes)
-                    {
-                        key.Append("_ct:" + ct);
-                    }
-                }
-
-                return base.CacheKey + key;
-            }
-        }
     }
 }

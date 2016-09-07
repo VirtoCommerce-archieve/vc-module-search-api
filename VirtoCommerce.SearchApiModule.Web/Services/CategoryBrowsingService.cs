@@ -5,33 +5,32 @@ using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.SearchApiModule.Web.Converters;
 using VirtoCommerce.SearchApiModule.Web.Model;
 using VirtoCommerce.SearchModule.Data.Model;
 using VirtoCommerce.SearchModule.Data.Model.Indexing;
 using VirtoCommerce.SearchModule.Data.Model.Search;
 using VirtoCommerce.SearchModule.Data.Model.Search.Criterias;
-using VirtoCommerce.SearchModule.Data.Services;
 
 namespace VirtoCommerce.SearchApiModule.Web.Services
 {
-    public class ItemBrowsingService : IItemBrowsingService
+    public class CategoryBrowsingService : ICategoryBrowsingService
     {
-        private readonly IItemService _itemService;
+        private readonly ICategoryService _categoryService;
         private readonly ISearchProvider _searchProvider;
         private readonly IBlobUrlResolver _blobUrlResolver;
 
-        public ItemBrowsingService(IItemService itemService,
+        public CategoryBrowsingService(
+            ICategoryService categoryService,
             ISearchProvider searchService, IBlobUrlResolver blobUrlResolver)
         {
             _searchProvider = searchService;
-            _itemService = itemService;
+            _categoryService = categoryService;
             _blobUrlResolver = blobUrlResolver;
         }
-
-        public virtual ProductSearchResult SearchItems(string scope, ISearchCriteria criteria, ItemResponseGroup responseGroup)
+        
+        public virtual CategorySearchResult SearchCategories(string scope, ISearchCriteria criteria, CategoryResponseGroup responseGroup)
         {
-            var items = new List<CatalogProduct>();
+            var items = new List<Category>();
             var itemsOrderedList = new List<string>();
 
             var foundItemCount = 0;
@@ -56,7 +55,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Services
                 }
 
                 //Get only new found itemIds
-                var uniqueKeys = searchResults.Documents.Select(x=>x.Id.ToString()).Except(itemsOrderedList).ToArray();
+                var uniqueKeys = searchResults.Documents.Select(x => x.Id.ToString()).Except(itemsOrderedList).ToArray();
                 foundItemCount = uniqueKeys.Length;
 
                 if (!searchResults.Documents.Any())
@@ -74,7 +73,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Services
                 }
 
                 // Now load items from repository
-                var currentItems = _itemService.GetByIds(uniqueKeys.ToArray(), responseGroup, catalog);
+                var currentItems = _categoryService.GetByIds(uniqueKeys.ToArray(), responseGroup, catalog);
 
                 var orderedList = currentItems.OrderBy(i => itemsOrderedList.IndexOf(i.Id));
                 items.AddRange(orderedList);
@@ -87,24 +86,18 @@ namespace VirtoCommerce.SearchApiModule.Web.Services
                     myCriteria.RecordsToRetrieve += (foundItemCount - dbItemCount);
                 }
             }
-            while (foundItemCount > dbItemCount && searchResults!=null && searchResults.Documents.Any() && searchRetry <= 3 &&
+            while (foundItemCount > dbItemCount && searchResults != null && searchResults.Documents.Any() && searchRetry <= 3 &&
                 (myCriteria.RecordsToRetrieve + myCriteria.StartingRecord) < searchResults.TotalCount);
 
-            var response = new ProductSearchResult();
+            var response = new CategorySearchResult();
 
             if (items != null)
             {
-                response.Products = items.Select(x => x.ToWebModel(_blobUrlResolver)).ToArray();
+                response.Categories = items.Select(x => x.ToWebModel(_blobUrlResolver)).ToArray();
             }
 
             response.TotalCount = searchResults.TotalCount;
 
-            // TODO need better way to find applied filter values
-            var appliedFilters = criteria.CurrentFilters.SelectMany(x => x.GetValues()).Select(x => x.Id).ToArray();
-            if (searchResults.Facets != null)
-            {
-                response.Aggregations = searchResults.Facets.Select(g => g.ToModuleModel(appliedFilters)).ToArray();
-            }
             return response;
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
+using VirtoCommerce.Domain.Store.Model;
 using VirtoCommerce.Domain.Store.Services;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.SearchModule.Data.Model.Filters;
@@ -26,29 +27,25 @@ namespace VirtoCommerce.SearchApiModule.Web.Services
 
             var filters = new List<ISearchFilter>();
 
-            var storeId = GetStringValue(context, "StoreId");
-            if (!string.IsNullOrEmpty(storeId)) // include store filters
+            var store = GetObjectValue(context, "Store") as Store;
+            if (store != null)
             {
-                var store = _storeService.GetById(storeId);
-                if (store != null)
+                var browsing = GetFilteredBrowsing(store);
+                if (browsing != null)
                 {
-                    var browsing = GetFilteredBrowsing(store);
-                    if (browsing != null)
+                    if (browsing.Attributes != null)
                     {
-                        if (browsing.Attributes != null)
-                        {
-                            filters.AddRange(browsing.Attributes);
-                        }
+                        filters.AddRange(browsing.Attributes);
+                    }
 
-                        if (browsing.AttributeRanges != null)
-                        {
-                            filters.AddRange(browsing.AttributeRanges);
-                        }
+                    if (browsing.AttributeRanges != null)
+                    {
+                        filters.AddRange(browsing.AttributeRanges);
+                    }
 
-                        if (browsing.Prices != null)
-                        {
-                            filters.AddRange(browsing.Prices);
-                        }
+                    if (browsing.Prices != null)
+                    {
+                        filters.AddRange(browsing.Prices);
                     }
                 }
             }
@@ -58,9 +55,9 @@ namespace VirtoCommerce.SearchApiModule.Web.Services
         }
 
 
-        private static string GetStringValue(IDictionary<string, object> context, string key)
+        private static object GetObjectValue(IDictionary<string, object> context, string key)
         {
-            string result = null;
+            object result = null;
 
             if (context.ContainsKey(key))
             {
@@ -68,7 +65,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Services
 
                 if (value != null)
                 {
-                    result = value.ToString();
+                    result = value;
                 }
             }
 

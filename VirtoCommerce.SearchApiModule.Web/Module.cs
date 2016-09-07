@@ -24,6 +24,7 @@ namespace VirtoCommerce.SearchApiModule.Web
             _container.RegisterType<SearchModule.Data.Model.Indexing.ISearchIndexBuilder, CategoryIndexBuilder>();
 
             _container.RegisterType<IItemBrowsingService, ItemBrowsingService>();
+            _container.RegisterType<ICategoryBrowsingService, CategoryBrowsingService>();
             _container.RegisterType<SearchModule.Data.Model.Filters.IBrowseFilterService, FilterService>();
         }
 

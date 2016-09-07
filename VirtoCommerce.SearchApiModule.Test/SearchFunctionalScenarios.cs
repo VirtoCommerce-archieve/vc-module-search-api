@@ -110,7 +110,7 @@ namespace VirtoCommerce.SearchModule.Tests
             var ibs = GetItemBrowsingService(provider);
             var searchResults = ibs.SearchItems(scope, catalogCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
 
-            Assert.True(searchResults.ProductsTotalCount > 0, string.Format("Didn't find any products using {0} search", providerType));
+            Assert.True(searchResults.TotalCount > 0, string.Format("Didn't find any products using {0} search", providerType));
         }
 
         [Theory]
@@ -174,7 +174,7 @@ namespace VirtoCommerce.SearchModule.Tests
             var ibs = GetItemBrowsingService(provider);
             var searchResults = ibs.SearchItems(scope, catalogCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
 
-            Assert.True(searchResults.ProductsTotalCount > 0, string.Format("Didn't find any products using {0} search", providerType));
+            Assert.True(searchResults.TotalCount > 0, string.Format("Didn't find any products using {0} search", providerType));
             Assert.True(searchResults.Aggregations.Count() > 0, string.Format("Didn't find any aggregations using {0} search", providerType));
 
             var colorAggregation = searchResults.Aggregations.SingleOrDefault(a => a.Field.Equals("color", StringComparison.OrdinalIgnoreCase));
@@ -187,7 +187,7 @@ namespace VirtoCommerce.SearchModule.Tests
 
             var keywordSearchCriteria = new KeywordSearchCriteria(CatalogItemSearchCriteria.DocType) { Currency = "USD", Locale = "en-us", SearchPhrase = "sony" };
             searchResults = ibs.SearchItems(scope, keywordSearchCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
-            Assert.True(searchResults.ProductsTotalCount > 0);
+            Assert.True(searchResults.TotalCount > 0);
         }
 
         [Theory]
@@ -211,12 +211,13 @@ namespace VirtoCommerce.SearchModule.Tests
             var catalog = catalogRepo.Catalogs.SingleOrDefault(x => x.Name.Equals("electronics", StringComparison.OrdinalIgnoreCase));
 
             var storeRepo = GetStoreRepository();
-            var store = storeRepo.Stores.SingleOrDefault(x => x.Name.Equals(storeName, StringComparison.OrdinalIgnoreCase));
+            var storeObject = storeRepo.Stores.SingleOrDefault(x => x.Name.Equals(storeName, StringComparison.OrdinalIgnoreCase));
+            var store = GetStoreService().GetById(storeObject.Id);
 
             // find all prodducts in the category
             var criteria = new ProductSearch()
             {
-                Catalog = catalog.Id,
+                //Catalog = catalog.Id,
                 Currency = "USD",
                 Terms = new[] { "size:0_to_5", "size:5_to_10" }
             };
@@ -224,18 +225,18 @@ namespace VirtoCommerce.SearchModule.Tests
 
             var context = new Dictionary<string, object>
             {
-                { "StoreId", store.Id },
+                { "Store", store },
             };
 
             var filterService = GetBrowseFilterService();
             var filters = filterService.GetFilters(context);
-            var serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(filters);
+            var serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(catalog.Id, filters);
             var ibs = GetItemBrowsingService(provider);
 
             //Load ALL products 
             var searchResults = ibs.SearchItems(scope, serviceCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
 
-            Assert.True(searchResults.ProductsTotalCount > 0, string.Format("Didn't find any products using {0} search", providerType));
+            Assert.True(searchResults.TotalCount > 0, string.Format("Didn't find any products using {0} search", providerType));
             Assert.True(searchResults.Aggregations.Count() > 0, string.Format("Didn't find any aggregations using {0} search", providerType));
 
             var colorAggregation = searchResults.Aggregations.SingleOrDefault(a => a.Field.Equals("color", StringComparison.OrdinalIgnoreCase));
@@ -249,12 +250,12 @@ namespace VirtoCommerce.SearchModule.Tests
             // now test sorting
             criteria = new ProductSearch()
             {
-                Catalog = catalog.Id,
+                //Catalog = catalog.Id,
                 Currency = "USD",
                 Sort = new [] { "name" }
             };
 
-            serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(filters);
+            serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(catalog.Id, filters);
             searchResults = ibs.SearchItems(scope, serviceCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
 
             var productName = searchResults.Products[0].Name;
@@ -262,17 +263,32 @@ namespace VirtoCommerce.SearchModule.Tests
 
             criteria = new ProductSearch()
             {
-                Catalog = catalog.Id,
+                //Catalog = catalog.Id,
                 Currency = "USD",
                 Sort = new[] { "name desc" }
             };
 
-            serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(filters);
+            serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(catalog.Id, filters);
             searchResults = ibs.SearchItems(scope, serviceCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
 
             productName = searchResults.Products[0].Name;
 
             Assert.True(productName == "xFold CINEMA X12 RTF U7");
+
+            // now test filtering by outline
+            var category = catalogRepo.Categories.SingleOrDefault(x => x.Name.Equals("Cell phones", StringComparison.OrdinalIgnoreCase));
+
+            criteria = new ProductSearch()
+            {
+                Outline = category.Id,
+                Currency = "USD",
+                Sort = new[] { "name" }
+            };
+
+            serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(catalog.Id, filters);
+            searchResults = ibs.SearchItems(scope, serviceCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
+
+            Assert.True(searchResults.TotalCount == 6, string.Format("Expected 6, but found {0}", searchResults.TotalCount));
         }
 
         private ItemBrowsingService GetItemBrowsingService(Data.Model.ISearchProvider provider)

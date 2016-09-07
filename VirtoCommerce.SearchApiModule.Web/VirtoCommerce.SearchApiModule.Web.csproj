@@ -12,7 +12,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>VirtoCommerce.SearchApiModule.Web</RootNamespace>
-    <AssemblyName>VirtoCommerce.SearchApiModule</AssemblyName>
+    <AssemblyName>VirtoCommerce.SearchApiModule.Web</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
@@ -196,6 +196,10 @@
       <HintPath>..\packages\VirtoCommerce.SearchModule.Data.2.12.0-rc\lib\net451\VirtoCommerce.SearchModule.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="VirtoCommerce.StoreModule.Data, Version=2.11.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\VirtoCommerce.StoreModule.Data.2.11.0\lib\net451\VirtoCommerce.StoreModule.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Model\Filters\Filters.xml" />
@@ -223,7 +227,9 @@
     <Compile Include="Helpers\BrowseFilterHelper.cs" />
     <Compile Include="Model\CatalogItemSearchCriteria.cs" />
     <Compile Include="Model\CategorySearchCriteria.cs" />
+    <Compile Include="Model\CategorySearch.cs" />
     <Compile Include="Model\ProductSearch.cs" />
+    <Compile Include="Model\CategorySearchResult.cs" />
     <Compile Include="Model\ProductSearchResult.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -232,7 +238,9 @@
     <Compile Include="Services\CatalogItemIndexBuilder.cs" />
     <Compile Include="Services\CategoryIndexBuilder.cs" />
     <Compile Include="Services\FilterService.cs" />
+    <Compile Include="Services\ICategoryBrowsingService.cs" />
     <Compile Include="Services\IItemBrowsingService.cs" />
+    <Compile Include="Services\CategoryBrowsingService.cs" />
     <Compile Include="Services\ItemBrowsingService.cs" />
   </ItemGroup>
   <PropertyGroup>

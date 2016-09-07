@@ -38,7 +38,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Extensions
         {
             var result = new List<SortInfo>();
 
-            if (query != null)
+            if (query != null && query.Length > 0)
             {
                 var directionDelimeter = new[] { ' ' };
                 var valuesDelimeter = new[] { ',' };
@@ -65,6 +65,21 @@ namespace VirtoCommerce.SearchApiModule.Web.Extensions
                 return string.Empty;
 
             return outlineArray[outlineArray.Length - 1];
+        }
+
+        public static string AsCatalog(this string outline)
+        {
+            if (string.IsNullOrEmpty(outline))
+            {
+                return string.Empty;
+            }
+
+            var outlineArray = outline.Split(new[] { '/' });
+
+            if (outlineArray == null || outlineArray.Length == 0)
+                return string.Empty;
+
+            return outlineArray[0];
         }
     }
 

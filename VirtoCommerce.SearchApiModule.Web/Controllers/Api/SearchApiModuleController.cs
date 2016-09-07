@@ -1,9 +1,12 @@
 ﻿using CacheManager.Core;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Description;
 using VirtoCommerce.Domain.Catalog.Model;
+using VirtoCommerce.Domain.Catalog.Services;
+using VirtoCommerce.Domain.Store.Services;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Web.Common;
 using VirtoCommerce.Platform.Data.Common;
@@ -12,6 +15,8 @@ using VirtoCommerce.SearchApiModule.Web.Model;
 using VirtoCommerce.SearchApiModule.Web.Services;
 using VirtoCommerce.SearchModule.Data.Model;
 using VirtoCommerce.SearchModule.Data.Model.Filters;
+using VirtoCommerce.SearchModule.Data.Model.Indexing;
+using VirtoCommerce.SearchModule.Data.Model.Search;
 
 namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
 {
@@ -22,42 +27,76 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
         private readonly ISearchConnection _searchConnection;
         private readonly IBrowseFilterService _browseFilterService;
         private readonly IItemBrowsingService _browseService;
+        private readonly ICategoryBrowsingService _categoryBrowseService;
         private readonly ISecurityService _securityService;
         private readonly ICacheManager<object> _cacheManager;
+        private readonly IStoreService _storeService;
 
         public SearchApiModuleController(ISearchProvider searchProvider, ISearchConnection searchConnection, 
-            IBrowseFilterService browseFilterService, IItemBrowsingService browseService, ISecurityService securityService,
-            ICacheManager<object> cacheManager)
+            IBrowseFilterService browseFilterService, IItemBrowsingService browseService,
+            ICategoryBrowsingService categoryBrowseService, ISecurityService securityService,
+            IStoreService storeService, ICategoryService categoryService, ICacheManager<object> cacheManager)
         {
             _searchProvider = searchProvider;
             _searchConnection = searchConnection;
             _browseFilterService = browseFilterService;
             _browseService = browseService;
             _securityService = securityService;
+            _storeService = storeService;
+            _categoryBrowseService = categoryBrowseService;
             _cacheManager = cacheManager;
         }
 
 
         [HttpPost]
-        [Route("{store}/products")]
+        [Route("{storeId}/products")]
         [ResponseType(typeof(ProductSearchResult))]
         [ClientCache(Duration = 30)]
-        public IHttpActionResult SearchProducts(string store, ProductSearch criteria)
+        public IHttpActionResult SearchProducts(string storeId, ProductSearch criteria)
         {
-            var result = SearchProducts(_searchConnection.Scope, store, criteria, ItemResponseGroup.ItemLarge);
+            var result = SearchProducts(_searchConnection.Scope, storeId, criteria, ItemResponseGroup.ItemLarge);
             return Ok(result);
         }
 
-        private ProductSearchResult SearchProducts(string scope, string store, ProductSearch criteria, ItemResponseGroup responseGroup)
+        [HttpPost]
+        [Route("{storeId}/categories")]
+        [ResponseType(typeof(CategorySearchResult))]
+        [ClientCache(Duration = 30)]
+        public IHttpActionResult SearchCategories(string storeId, CategorySearch criteria)
         {
+            var result = SearchCategories(_searchConnection.Scope, storeId, criteria, CategoryResponseGroup.Full);
+            return Ok(result);
+        }
+
+        private CategorySearchResult SearchCategories(string scope, string storeId, CategorySearch criteria, CategoryResponseGroup responseGroup)
+        {
+            var store = _cacheManager.Get("GetStore-" + storeId, "StoreModuleRegion", TimeSpan.FromMinutes(5), () => _storeService.GetById(storeId));
+
+            if (store == null)
+                return null;
+
+            var serviceCriteria = criteria.AsCriteria<CategorySearchCriteria>(store.Catalog);
+            //serviceCriteria.ApplyRestrictionsForUser(User.Identity.Name, _securityService);
+
+            var searchResults = _categoryBrowseService.SearchCategories(scope, serviceCriteria, responseGroup);
+            return searchResults;
+        }
+
+        private ProductSearchResult SearchProducts(string scope, string storeId, ProductSearch criteria, ItemResponseGroup responseGroup)
+        {
+            var store = _cacheManager.Get("GetStore-" + storeId, "StoreModuleRegion", TimeSpan.FromMinutes(5), () => _storeService.GetById(storeId));
+
+            if (store == null)
+                return null;
+
             var context = new Dictionary<string, object>
             {
-                { "StoreId", store },
+                { "Store", store },
             };
 
-            var filters = _cacheManager.Get("GetFilters-" + store, "SearchProducts", TimeSpan.FromMinutes(5), () => _browseFilterService.GetFilters(context));
+            var filters = _cacheManager.Get("GetFilters-" + store, "StoreModuleRegion", TimeSpan.FromMinutes(5), () => _browseFilterService.GetFilters(context));
 
-            var serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(filters);
+            var serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Catalog, filters);
             serviceCriteria.ApplyRestrictionsForUser(User.Identity.Name, _securityService);
 
             //Load ALL products 

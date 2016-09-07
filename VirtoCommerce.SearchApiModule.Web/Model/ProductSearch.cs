@@ -12,8 +12,6 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
 {
     public class ProductSearch
     {
-        public string Catalog { get; set; }
-
         public string Currency { get; set; }
 
         public string[] Terms { get; set; }
@@ -21,7 +19,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
         public string SearchPhrase { get; set; }
 
         /// <summary>
-        /// CatalogId/CategoryId/CategoryId
+        /// CategoryId1/CategoryId2, no catalog should be included in the outline
         /// </summary>
         public string Outline { get; set; }
 
@@ -33,11 +31,17 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
 
         public int Take { get; set; }
 
-        public virtual T AsCriteria<T>(ISearchFilter[] filters) where T : CatalogItemSearchCriteria, new()
+        public virtual T AsCriteria<T>(string catalog, ISearchFilter[] filters) where T : CatalogItemSearchCriteria, new()
         {
             var criteria = new T();
 
             criteria.Currency = Currency;
+
+            // add outline
+            if(!string.IsNullOrEmpty(Outline))
+            {
+                criteria.Outlines.Add(string.Format("{0}/{1}", catalog, Outline));
+            }
 
             // Add all filters
             foreach (var filter in filters)
@@ -116,7 +120,6 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
             #endregion
             */
 
-            // TODO: add sorting, parse things like "name desc", which means sort by field name "name" in descending order. Also handle special cases like price or priority
             // TODO: handle vendor, probably through filters
 
             #region Sorting
@@ -124,7 +127,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
             var categoryId = Outline.AsCategoryId();
             var sorts = Sort.AsSortInfoes();
             var sortFields = new List<SearchSortField>();
-            var priorityFieldName = string.Format(CultureInfo.InvariantCulture, "priority_{0}_{1}", Catalog, categoryId).ToLower();
+            var priorityFieldName = string.Format(CultureInfo.InvariantCulture, "priority_{0}_{1}", catalog, categoryId).ToLower();
 
             if (!sorts.IsNullOrEmpty())
             {
