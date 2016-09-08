@@ -1,22 +1,16 @@
 ﻿using CacheManager.Core;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Description;
 using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Domain.Store.Services;
-using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Web.Common;
 using VirtoCommerce.Platform.Data.Common;
-using VirtoCommerce.SearchApiModule.Web.Extensions;
 using VirtoCommerce.SearchApiModule.Web.Model;
 using VirtoCommerce.SearchApiModule.Web.Services;
 using VirtoCommerce.SearchModule.Data.Model;
 using VirtoCommerce.SearchModule.Data.Model.Filters;
-using VirtoCommerce.SearchModule.Data.Model.Indexing;
-using VirtoCommerce.SearchModule.Data.Model.Search;
 
 namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
 {
@@ -44,7 +38,6 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
             _categoryBrowseService = categoryBrowseService;
             _cacheManager = cacheManager;
         }
-
 
         [HttpPost]
         [Route("{storeId}/products")]
