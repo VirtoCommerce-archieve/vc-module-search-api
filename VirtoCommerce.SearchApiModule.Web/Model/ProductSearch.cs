@@ -84,7 +84,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
                             }
                         }
                     }
-                    else
+                    else if(filter != null) // predefined filter
                     {
                         var attributeFilter = filter as AttributeFilter;
                         if (attributeFilter != null && attributeFilter.Values == null)
@@ -100,6 +100,14 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
 
                         var appliedFilter = BrowseFilterHelper.Convert(filter, term.Values);
                         criteria.Apply(appliedFilter);
+                    }
+                    else // custom term
+                    {
+                        if(!term.Key.StartsWith("_")) // ignore system terms, we can't filter by them
+                        {
+                            var attr = new AttributeFilter { Key = term.Key, Values = BrowseFilterHelper.CreateAttributeFilterValues(term.Values)};
+                            criteria.Apply(attr);
+                        }
                     }
                 }
             }

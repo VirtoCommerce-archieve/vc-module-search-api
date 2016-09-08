@@ -28,20 +28,18 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
         private readonly IBrowseFilterService _browseFilterService;
         private readonly IItemBrowsingService _browseService;
         private readonly ICategoryBrowsingService _categoryBrowseService;
-        private readonly ISecurityService _securityService;
         private readonly ICacheManager<object> _cacheManager;
         private readonly IStoreService _storeService;
 
         public SearchApiModuleController(ISearchProvider searchProvider, ISearchConnection searchConnection, 
             IBrowseFilterService browseFilterService, IItemBrowsingService browseService,
-            ICategoryBrowsingService categoryBrowseService, ISecurityService securityService,
-            IStoreService storeService, ICategoryService categoryService, ICacheManager<object> cacheManager)
+            ICategoryBrowsingService categoryBrowseService, 
+            IStoreService storeService, ICacheManager<object> cacheManager)
         {
             _searchProvider = searchProvider;
             _searchConnection = searchConnection;
             _browseFilterService = browseFilterService;
             _browseService = browseService;
-            _securityService = securityService;
             _storeService = storeService;
             _categoryBrowseService = categoryBrowseService;
             _cacheManager = cacheManager;
@@ -76,7 +74,6 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
                 return null;
 
             var serviceCriteria = criteria.AsCriteria<CategorySearchCriteria>(store.Catalog);
-            //serviceCriteria.ApplyRestrictionsForUser(User.Identity.Name, _securityService);
 
             var searchResults = _categoryBrowseService.SearchCategories(scope, serviceCriteria, responseGroup);
             return searchResults;
@@ -97,9 +94,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
             var filters = _cacheManager.Get("GetFilters-" + store, "StoreModuleRegion", TimeSpan.FromMinutes(5), () => _browseFilterService.GetFilters(context));
 
             var serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Catalog, filters);
-            serviceCriteria.ApplyRestrictionsForUser(User.Identity.Name, _securityService);
 
-            //Load ALL products 
             var searchResults = _browseService.SearchItems(scope, serviceCriteria, responseGroup);
             return searchResults;
         }

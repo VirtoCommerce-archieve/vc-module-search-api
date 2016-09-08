@@ -128,7 +128,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Services
             doc.Add(new DocumentField("createddate", item.CreatedDate, indexStoreNotAnalyzed));
             doc.Add(new DocumentField("lastmodifieddate", item.ModifiedDate ?? DateTime.MaxValue, indexStoreNotAnalyzed));
             doc.Add(new DocumentField("priority", item.Priority, indexStoreNotAnalyzed));
-            doc.Add(new DocumentField("vendor", item.Vendor, indexStoreNotAnalyzed));
+            doc.Add(new DocumentField("vendor", item.Vendor ?? "", indexStoreNotAnalyzed));
 
             // Add priority in virtual categories to search index
             foreach (var link in item.Links)
