@@ -12,6 +12,11 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
 {
     public class ProductSearch
     {
+        public ProductSearch()
+        {
+            Take = 20;
+        }
+
         public string Currency { get; set; }
 
         public string[] Terms { get; set; }
@@ -45,6 +50,10 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
             if (!string.IsNullOrEmpty(Outline))
             {
                 criteria.Outlines.Add(string.Format("{0}/{1}", catalog, Outline));
+            }
+            else
+            {
+                criteria.Outlines.Add(string.Format("{0}*", catalog));
             }
 
             // Add all filters
@@ -112,27 +121,6 @@ namespace VirtoCommerce.SearchApiModule.Web.Model
                 }
             }
             #endregion
-
-            /*
-            #region Facets
-
-            // apply facet filters
-            var facets = Facets.AsKeyValues();
-            foreach (var facet in facets)
-            {
-                var filter = filters.SingleOrDefault(
-                    x => x.Key.Equals(facet.Key, StringComparison.OrdinalIgnoreCase)
-                        && (!(x is PriceRangeFilter)
-                            || ((PriceRangeFilter)x).Currency.Equals(criteria.Currency, StringComparison.OrdinalIgnoreCase)));
-
-                var appliedFilter = BrowseFilterHelper.Convert(filter, facet.Values);
-                criteria.Apply(appliedFilter);
-            }
-
-            #endregion
-            */
-
-            // TODO: handle vendor, probably through filters
 
             #region Sorting
 
