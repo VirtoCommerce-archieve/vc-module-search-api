@@ -193,7 +193,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="VirtoCommerce.SearchModule.Data, Version=2.11.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\VirtoCommerce.SearchModule.Data.2.12.0-rc1\lib\net451\VirtoCommerce.SearchModule.Data.dll</HintPath>
+      <HintPath>..\packages\VirtoCommerce.SearchModule.Data.2.12.0-rc\lib\net451\VirtoCommerce.SearchModule.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="VirtoCommerce.StoreModule.Data, Version=2.11.0.0, Culture=neutral, processorArchitecture=MSIL">
