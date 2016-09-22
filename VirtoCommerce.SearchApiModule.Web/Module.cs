@@ -1,11 +1,9 @@
 ﻿using Microsoft.Practices.Unity;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.SearchApiModule.Web.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchApiModule.Web.Providers.Lucene;
 using VirtoCommerce.SearchApiModule.Web.Services;
 using VirtoCommerce.SearchModule.Data.Model;
-using VirtoCommerce.SearchModule.Data.Model.Indexing;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchModule.Data.Providers.Lucene;
 
@@ -27,8 +25,8 @@ namespace VirtoCommerce.SearchApiModule.Web
             base.Initialize();
 
             // register index builders
-            _container.RegisterType<ISearchIndexBuilder, CatalogItemIndexBuilder>("catalogitem-indexer");
-            _container.RegisterType<ISearchIndexBuilder, CategoryIndexBuilder>("category-indexer");
+            _container.RegisterType<SearchModule.Data.Model.Indexing.ISearchIndexBuilder, CatalogItemIndexBuilder>("catalogitem-indexer");
+            _container.RegisterType<SearchModule.Data.Model.Indexing.ISearchIndexBuilder, CategoryIndexBuilder>("category-indexer");
 
             _container.RegisterType<IItemBrowsingService, ItemBrowsingService>();
             _container.RegisterType<ICategoryBrowsingService, CategoryBrowsingService>();
@@ -38,17 +36,11 @@ namespace VirtoCommerce.SearchApiModule.Web
         public override void PostInitialize()
         {
             base.PostInitialize();
-            var connection = _container.Resolve<ISearchConnection>();
-            if (connection.Provider.EqualsInvariant(SearchProviders.Elasticsearch.ToString()))
-            {
-                _container.RegisterType<ICatalogIndexedSearchProvider, CatalogElasticSearchProvider>();
-            }
-            else
-            {
-                _container.RegisterType<ICatalogIndexedSearchProvider, CatalogLuceneSearchProvider>();
-            }         
+            var searchProviderManager = _container.Resolve<ISearchProviderManager>();
+            searchProviderManager.RegisterSearchProvider(SearchProviders.Elasticsearch.ToString(), connection => new ElasticSearchProvider(new CatalogElasticSearchQueryBuilder(), connection));
+            searchProviderManager.RegisterSearchProvider(SearchProviders.Lucene.ToString(), connection => new LuceneSearchProvider(new CatalogLuceneQueryBuilder(), connection));
         }
 
         #endregion
     }
-}
+    }

@@ -288,13 +288,13 @@ namespace VirtoCommerce.SearchModule.Tests
             Assert.True(searchResults.TotalCount == 6, string.Format("Expected 6, but found {0}", searchResults.TotalCount));
         }
 
-        private ItemBrowsingService GetItemBrowsingService(ICatalogIndexedSearchProvider provider)
+        private ItemBrowsingService GetItemBrowsingService(Data.Model.ISearchProvider provider)
         {
             var service = new ItemBrowsingService(GetItemService(), provider, new FileSystemBlobProvider("", "http://samplesite.com"));
             return service;
         }
 
-        private SearchIndexController GetSearchIndexController(ICatalogIndexedSearchProvider provider)
+        private SearchIndexController GetSearchIndexController(Data.Model.ISearchProvider provider)
         {
             var settings = new Moq.Mock<ISettingsManager>();
             return new SearchIndexController(settings.Object, provider,

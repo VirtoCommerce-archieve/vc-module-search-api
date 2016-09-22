@@ -2,7 +2,6 @@
 using System.IO;
 using VirtoCommerce.SearchApiModule.Web.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchApiModule.Web.Providers.Lucene;
-using VirtoCommerce.SearchApiModule.Web.Services;
 using VirtoCommerce.SearchModule.Data.Model;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchModule.Data.Providers.Lucene;
@@ -13,21 +12,24 @@ namespace VirtoCommerce.SearchModule.Tests
     {
         private string _LuceneStorageDir = Path.Combine(Path.GetTempPath(), "lucene");
 
-        protected ICatalogIndexedSearchProvider GetSearchProvider(string searchProvider, string scope)
+        protected Data.Model.ISearchProvider GetSearchProvider(string searchProvider, string scope)
         {
             if (searchProvider == "Lucene")
             {
+                var queryBuilder = new CatalogLuceneQueryBuilder();
+
                 var conn = new SearchConnection(_LuceneStorageDir, scope);
-                var provider = new CatalogLuceneSearchProvider(conn);
+                var provider = new LuceneSearchProvider(queryBuilder, conn);
 
                 return provider;
             }
 
             if (searchProvider == "Elastic")
             {
+                var queryBuilder = new CatalogElasticSearchQueryBuilder();
 
                 var conn = new SearchConnection("localhost:9200", scope);
-                var provider = new CatalogElasticSearchProvider(conn);
+                var provider = new ElasticSearchProvider(queryBuilder, conn);
                 provider.EnableTrace = true;
 
                 return provider;

@@ -176,12 +176,12 @@
       <HintPath>..\packages\VirtoCommerce.CatalogModule.Web.Core.2.14.1\lib\net451\VirtoCommerce.CatalogModule.Web.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="VirtoCommerce.Domain, Version=2.16.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\VirtoCommerce.Domain.2.17.0-rc27\lib\net451\VirtoCommerce.Domain.dll</HintPath>
+    <Reference Include="VirtoCommerce.Domain, Version=2.16.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\VirtoCommerce.Domain.2.16.1\lib\net451\VirtoCommerce.Domain.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="VirtoCommerce.Platform.Core, Version=2.11.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\VirtoCommerce.Platform.Core.2.12.0-rc3\lib\net451\VirtoCommerce.Platform.Core.dll</HintPath>
+      <HintPath>..\packages\VirtoCommerce.Platform.Core.2.11.5\lib\net451\VirtoCommerce.Platform.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="VirtoCommerce.Platform.Core.Web, Version=2.11.5.0, Culture=neutral, processorArchitecture=MSIL">
@@ -192,7 +192,7 @@
       <HintPath>..\packages\VirtoCommerce.Platform.Data.2.11.5\lib\net451\VirtoCommerce.Platform.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="VirtoCommerce.SearchModule.Data, Version=2.11.5.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="VirtoCommerce.SearchModule.Data, Version=2.11.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\VirtoCommerce.SearchModule.Data.2.12.0-rc\lib\net451\VirtoCommerce.SearchModule.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
@@ -202,6 +202,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Model\Filters\Filters.xml" />
     <Content Include="packages.config" />
     <Content Include="module.manifest" />
     <None Include="Web.Debug.config">
@@ -232,12 +233,11 @@
     <Compile Include="Model\ProductSearchResult.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Providers\ElasticSearch.Nest\CatalogElasticSearchProvider.cs" />
-    <Compile Include="Providers\Lucene\CatalogLuceneSearchProvider.cs" />
+    <Compile Include="Providers\ElasticSearch.Nest\CatalogElasticSearchQueryBuilder.cs" />
+    <Compile Include="Providers\Lucene\CatalogLuceneQueryBuilder.cs" />
     <Compile Include="Services\CatalogItemIndexBuilder.cs" />
     <Compile Include="Services\CategoryIndexBuilder.cs" />
     <Compile Include="Services\FilterService.cs" />
-    <Compile Include="Services\ICatalogIndexedSearchProvider.cs" />
     <Compile Include="Services\ICategoryBrowsingService.cs" />
     <Compile Include="Services\IItemBrowsingService.cs" />
     <Compile Include="Services\CategoryBrowsingService.cs" />
