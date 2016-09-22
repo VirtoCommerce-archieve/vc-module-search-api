@@ -17,12 +17,12 @@ namespace VirtoCommerce.SearchApiModule.Web.Services
     {
         private const int _partitionSizeCount = 100; // the maximum partition size, keep it smaller to prevent too big of the sql requests and too large messages in the queue
 
-        private readonly ISearchProvider _searchProvider;
+        private readonly ICatalogIndexedSearchProvider _searchProvider;
         private readonly ICatalogSearchService _catalogSearchService;
         private readonly IChangeLogService _changeLogService;
         private readonly ICategoryService _categoryService;
 
-        public CategoryIndexBuilder(ISearchProvider searchProvider, ICatalogSearchService catalogSearchService,
+        public CategoryIndexBuilder(ICatalogIndexedSearchProvider searchProvider, ICatalogSearchService catalogSearchService,
                                        ICategoryService categoryService, IChangeLogService changeLogService)
         {
             _searchProvider = searchProvider;

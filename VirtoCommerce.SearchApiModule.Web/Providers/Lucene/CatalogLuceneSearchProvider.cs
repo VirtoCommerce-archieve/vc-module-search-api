@@ -7,19 +7,27 @@ using u = Lucene.Net.Util;
 using VirtoCommerce.SearchModule.Data.Model.Search.Criterias;
 using VirtoCommerce.SearchModule.Data.Providers.Lucene;
 using VirtoCommerce.SearchApiModule.Web.Model;
+using VirtoCommerce.SearchModule.Data.Model.Search;
+using VirtoCommerce.SearchModule.Data.Model;
+using VirtoCommerce.SearchApiModule.Web.Services;
 
 namespace VirtoCommerce.SearchApiModule.Web.Providers.Lucene
 {
-    public class CatalogLuceneQueryBuilder : LuceneSearchQueryBuilder
+    public class CatalogLuceneSearchProvider : LuceneSearchProvider, ICatalogIndexedSearchProvider
     {
+        public CatalogLuceneSearchProvider(ISearchConnection connection)
+            :base(connection)
+        {
+        }
         /// <summary>
         ///     Builds the query.
         /// </summary>
         /// <param name="criteria">The criteria.</param>
         /// <returns></returns>
-        public override object BuildQuery<T>(string scope, ISearchCriteria criteria)
+        public override QueryBuilder BuildQuery(string scope, ISearchCriteria criteria)
         {
-            var builder = base.BuildQuery<T>(scope, criteria) as QueryBuilder;
+            var builder = base.BuildQuery(scope, criteria) as QueryBuilder;
+
             var query = builder.Query as BooleanQuery;
             var analyzer = new StandardAnalyzer(u.Version.LUCENE_30);
 

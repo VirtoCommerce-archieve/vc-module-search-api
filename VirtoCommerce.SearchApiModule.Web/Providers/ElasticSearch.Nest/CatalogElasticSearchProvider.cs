@@ -3,16 +3,23 @@ using System;
 using VirtoCommerce.SearchApiModule.Web.Model;
 using VirtoCommerce.SearchModule.Data.Model.Search.Criterias;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
+using VirtoCommerce.SearchModule.Data.Model;
+using VirtoCommerce.SearchApiModule.Web.Services;
 
 namespace VirtoCommerce.SearchApiModule.Web.Providers.ElasticSearch.Nest
 {
     [CLSCompliant(false)]
-    public class CatalogElasticSearchQueryBuilder : ElasticSearchQueryBuilder
+    public class CatalogElasticSearchProvider : ElasticSearchProvider, ICatalogIndexedSearchProvider
     {
+        public CatalogElasticSearchProvider(ISearchConnection connection)
+            :base(connection)
+        {
+
+        }
         #region ISearchQueryBuilder Members
-        public override object BuildQuery<T>(string scope, ISearchCriteria criteria)
+        public override SearchRequest BuildQuery<T>(string scope, ISearchCriteria criteria)
         {            
-            var builder = base.BuildQuery<T>(scope, criteria) as SearchRequest;
+            var builder = base.BuildQuery<T>(scope, criteria);
 
             #region CategorySearchCriteria
             if (criteria is CategorySearchCriteria)

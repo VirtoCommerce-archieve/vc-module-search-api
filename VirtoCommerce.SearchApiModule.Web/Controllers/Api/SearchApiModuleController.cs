@@ -17,7 +17,6 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
     [RoutePrefix("api/search")]
     public class SearchApiModuleController : ApiController
     {
-        private readonly ISearchProvider _searchProvider;
         private readonly ISearchConnection _searchConnection;
         private readonly IBrowseFilterService _browseFilterService;
         private readonly IItemBrowsingService _browseService;
@@ -25,12 +24,11 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
         private readonly ICacheManager<object> _cacheManager;
         private readonly IStoreService _storeService;
 
-        public SearchApiModuleController(ISearchProvider searchProvider, ISearchConnection searchConnection, 
+        public SearchApiModuleController(ICatalogIndexedSearchProvider searchProvider, ISearchConnection searchConnection, 
             IBrowseFilterService browseFilterService, IItemBrowsingService browseService,
             ICategoryBrowsingService categoryBrowseService, 
             IStoreService storeService, ICacheManager<object> cacheManager)
         {
-            _searchProvider = searchProvider;
             _searchConnection = searchConnection;
             _browseFilterService = browseFilterService;
             _browseService = browseService;

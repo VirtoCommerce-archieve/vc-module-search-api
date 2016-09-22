@@ -18,11 +18,10 @@ namespace VirtoCommerce.SearchApiModule.Web.Services
     public class ItemBrowsingService : IItemBrowsingService
     {
         private readonly IItemService _itemService;
-        private readonly ISearchProvider _searchProvider;
+        private readonly ICatalogIndexedSearchProvider _searchProvider;
         private readonly IBlobUrlResolver _blobUrlResolver;
 
-        public ItemBrowsingService(IItemService itemService,
-            ISearchProvider searchService, IBlobUrlResolver blobUrlResolver)
+        public ItemBrowsingService(IItemService itemService, ICatalogIndexedSearchProvider searchService, IBlobUrlResolver blobUrlResolver)
         {
             _searchProvider = searchService;
             _itemService = itemService;
