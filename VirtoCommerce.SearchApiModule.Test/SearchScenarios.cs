@@ -103,7 +103,7 @@ namespace VirtoCommerce.SearchModule.Tests
             var queryBuilder = new ElasticSearchQueryBuilder();
 
             var conn = new SearchConnection("localhost:9201", scope);
-            var bad_provider = new ElasticSearchProvider(queryBuilder, conn);
+            var bad_provider = new ElasticSearchProvider(new[] { queryBuilder }, conn);
             bad_provider.EnableTrace = true;
 
             Assert.Throws<ElasticSearchException>(() => bad_provider.RemoveAll(badscope, ""));

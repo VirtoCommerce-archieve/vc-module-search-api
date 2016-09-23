@@ -19,7 +19,7 @@ namespace VirtoCommerce.SearchModule.Tests
                 var queryBuilder = new CatalogLuceneQueryBuilder();
 
                 var conn = new SearchConnection(_LuceneStorageDir, scope);
-                var provider = new LuceneSearchProvider(queryBuilder, conn);
+                var provider = new LuceneSearchProvider(new[] { queryBuilder }, conn);
 
                 return provider;
             }
@@ -29,7 +29,7 @@ namespace VirtoCommerce.SearchModule.Tests
                 var queryBuilder = new CatalogElasticSearchQueryBuilder();
 
                 var conn = new SearchConnection("localhost:9200", scope);
-                var provider = new ElasticSearchProvider(queryBuilder, conn);
+                var provider = new ElasticSearchProvider(new[] { queryBuilder }, conn);
                 provider.EnableTrace = true;
 
                 return provider;

@@ -1,9 +1,11 @@
 ﻿using Microsoft.Practices.Unity;
+using System;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.SearchApiModule.Web.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchApiModule.Web.Providers.Lucene;
 using VirtoCommerce.SearchApiModule.Web.Services;
 using VirtoCommerce.SearchModule.Data.Model;
+using VirtoCommerce.SearchModule.Data.Model.Search;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchModule.Data.Providers.Lucene;
 
@@ -36,9 +38,16 @@ namespace VirtoCommerce.SearchApiModule.Web
         public override void PostInitialize()
         {
             base.PostInitialize();
-            var searchProviderManager = _container.Resolve<ISearchProviderManager>();
-            searchProviderManager.RegisterSearchProvider(SearchProviders.Elasticsearch.ToString(), connection => new ElasticSearchProvider(new CatalogElasticSearchQueryBuilder(), connection));
-            searchProviderManager.RegisterSearchProvider(SearchProviders.Lucene.ToString(), connection => new LuceneSearchProvider(new CatalogLuceneQueryBuilder(), connection));
+
+            var searchConnection = _container.Resolve<ISearchConnection>();
+            if (searchConnection.Provider.Equals(SearchProviders.Elasticsearch.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                _container.RegisterType<ISearchQueryBuilder, CatalogElasticSearchQueryBuilder>();
+            }
+            else if (searchConnection.Provider.Equals(SearchProviders.Lucene.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                _container.RegisterType<ISearchQueryBuilder, CatalogLuceneQueryBuilder>();
+            }
         }
 
         #endregion
