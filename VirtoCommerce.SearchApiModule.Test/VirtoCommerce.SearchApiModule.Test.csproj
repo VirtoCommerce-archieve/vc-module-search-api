@@ -172,8 +172,12 @@
       <HintPath>..\packages\VirtoCommerce.PricingModule.Data.2.13.0\lib\net451\VirtoCommerce.PricingModule.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="VirtoCommerce.SearchModule.Core, Version=2.11.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\VirtoCommerce.SearchModule.Core.2.12.0-rc\lib\net451\VirtoCommerce.SearchModule.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="VirtoCommerce.SearchModule.Data, Version=2.11.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\VirtoCommerce.SearchModule.Data.2.12.0-rc2\lib\net451\VirtoCommerce.SearchModule.Data.dll</HintPath>
+      <HintPath>..\packages\VirtoCommerce.SearchModule.Data.2.12.0-rc3\lib\net451\VirtoCommerce.SearchModule.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="VirtoCommerce.StoreModule.Data, Version=2.11.0.0, Culture=neutral, processorArchitecture=MSIL">

@@ -4,8 +4,10 @@ using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.SearchApiModule.Web.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchApiModule.Web.Providers.Lucene;
 using VirtoCommerce.SearchApiModule.Web.Services;
-using VirtoCommerce.SearchModule.Data.Model;
-using VirtoCommerce.SearchModule.Data.Model.Search;
+using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.SearchModule.Core.Model.Filters;
+using VirtoCommerce.SearchModule.Core.Model.Indexing;
+using VirtoCommerce.SearchModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchModule.Data.Providers.Lucene;
 
@@ -27,12 +29,12 @@ namespace VirtoCommerce.SearchApiModule.Web
             base.Initialize();
 
             // register index builders
-            _container.RegisterType<SearchModule.Data.Model.Indexing.ISearchIndexBuilder, CatalogItemIndexBuilder>("catalogitem-indexer");
-            _container.RegisterType<SearchModule.Data.Model.Indexing.ISearchIndexBuilder, CategoryIndexBuilder>("category-indexer");
+            _container.RegisterType<ISearchIndexBuilder, CatalogItemIndexBuilder>("catalogitem-indexer");
+            _container.RegisterType<ISearchIndexBuilder, CategoryIndexBuilder>("category-indexer");
 
             _container.RegisterType<IItemBrowsingService, ItemBrowsingService>();
             _container.RegisterType<ICategoryBrowsingService, CategoryBrowsingService>();
-            _container.RegisterType<SearchModule.Data.Model.Filters.IBrowseFilterService, FilterService>();
+            _container.RegisterType<IBrowseFilterService, FilterService>();
         }
 
         public override void PostInitialize()

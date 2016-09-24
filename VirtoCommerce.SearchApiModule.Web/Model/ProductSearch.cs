@@ -5,8 +5,8 @@ using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Web.Extensions;
 using VirtoCommerce.SearchApiModule.Web.Helpers;
-using VirtoCommerce.SearchModule.Data.Model.Filters;
-using VirtoCommerce.SearchModule.Data.Model.Search;
+using VirtoCommerce.SearchModule.Core.Model.Filters;
+using VirtoCommerce.SearchModule.Core.Model.Search;
 
 namespace VirtoCommerce.SearchApiModule.Web.Model
 {

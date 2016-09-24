@@ -6,10 +6,10 @@ using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Web.Model;
-using VirtoCommerce.SearchModule.Data.Model;
-using VirtoCommerce.SearchModule.Data.Model.Indexing;
-using VirtoCommerce.SearchModule.Data.Model.Search;
-using VirtoCommerce.SearchModule.Data.Model.Search.Criterias;
+using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.SearchModule.Core.Model.Indexing;
+using VirtoCommerce.SearchModule.Core.Model.Search;
+using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
 
 namespace VirtoCommerce.SearchApiModule.Web.Services
 {

@@ -9,8 +9,8 @@ using VirtoCommerce.Platform.Core.Web.Common;
 using VirtoCommerce.Platform.Data.Common;
 using VirtoCommerce.SearchApiModule.Web.Model;
 using VirtoCommerce.SearchApiModule.Web.Services;
-using VirtoCommerce.SearchModule.Data.Model;
-using VirtoCommerce.SearchModule.Data.Model.Filters;
+using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.SearchModule.Core.Model.Filters;
 
 namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
 {

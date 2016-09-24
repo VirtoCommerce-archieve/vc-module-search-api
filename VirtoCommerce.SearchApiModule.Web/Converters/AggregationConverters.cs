@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.SearchModule.Data.Model.Search;
+using VirtoCommerce.SearchModule.Core.Model.Search;
 
 namespace VirtoCommerce.SearchApiModule.Web.Converters
 {

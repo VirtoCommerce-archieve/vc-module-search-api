@@ -1,4 +1,4 @@
-﻿using VirtoCommerce.SearchModule.Data.Model.Search.Criterias;
+﻿using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.SearchApiModule.Web.Model;
 

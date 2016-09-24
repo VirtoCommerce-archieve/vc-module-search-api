@@ -1,7 +1,7 @@
 ﻿using Nest;
 using System;
 using VirtoCommerce.SearchApiModule.Web.Model;
-using VirtoCommerce.SearchModule.Data.Model.Search.Criterias;
+using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
 
 namespace VirtoCommerce.SearchApiModule.Web.Providers.ElasticSearch.Nest

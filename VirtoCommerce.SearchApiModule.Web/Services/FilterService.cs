@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 using VirtoCommerce.Domain.Store.Model;
 using VirtoCommerce.Domain.Store.Services;
 using VirtoCommerce.Platform.Core.DynamicProperties;
-using VirtoCommerce.SearchModule.Data.Model.Filters;
+using VirtoCommerce.SearchModule.Core.Model.Filters;
 
 namespace VirtoCommerce.SearchApiModule.Web.Services
 {

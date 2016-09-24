@@ -2,7 +2,7 @@
 using System.IO;
 using VirtoCommerce.SearchApiModule.Web.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchApiModule.Web.Providers.Lucene;
-using VirtoCommerce.SearchModule.Data.Model;
+using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchModule.Data.Providers.Lucene;
 
@@ -12,7 +12,7 @@ namespace VirtoCommerce.SearchModule.Tests
     {
         private string _LuceneStorageDir = Path.Combine(Path.GetTempPath(), "lucene");
 
-        protected Data.Model.ISearchProvider GetSearchProvider(string searchProvider, string scope)
+        protected ISearchProvider GetSearchProvider(string searchProvider, string scope)
         {
             if (searchProvider == "Lucene")
             {

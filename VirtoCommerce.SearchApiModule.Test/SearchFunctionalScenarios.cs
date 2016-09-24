@@ -19,9 +19,9 @@ using Xunit;
 using Xunit.Abstractions;
 using System.Linq;
 using System.Threading;
-using VirtoCommerce.SearchModule.Data.Model.Search.Criterias;
-using VirtoCommerce.SearchModule.Data.Model.Filters;
-using VirtoCommerce.SearchModule.Data.Model.Indexing;
+using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
+using VirtoCommerce.SearchModule.Core.Model.Filters;
+using VirtoCommerce.SearchModule.Core.Model.Indexing;
 using VirtoCommerce.Domain.Store.Services;
 using System.Collections.Generic;
 using VirtoCommerce.StoreModule.Data.Services;
@@ -38,6 +38,7 @@ using VirtoCommerce.Platform.Data.DynamicProperties;
 using VirtoCommerce.SearchApiModule.Web.Services;
 using VirtoCommerce.SearchApiModule.Web.Model;
 using VirtoCommerce.Platform.Data.Assets;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.SearchModule.Tests
 {
@@ -288,13 +289,13 @@ namespace VirtoCommerce.SearchModule.Tests
             Assert.True(searchResults.TotalCount == 6, string.Format("Expected 6, but found {0}", searchResults.TotalCount));
         }
 
-        private ItemBrowsingService GetItemBrowsingService(Data.Model.ISearchProvider provider)
+        private ItemBrowsingService GetItemBrowsingService(ISearchProvider provider)
         {
             var service = new ItemBrowsingService(GetItemService(), provider, new FileSystemBlobProvider("", "http://samplesite.com"));
             return service;
         }
 
-        private SearchIndexController GetSearchIndexController(Data.Model.ISearchProvider provider)
+        private SearchIndexController GetSearchIndexController(ISearchProvider provider)
         {
             var settings = new Moq.Mock<ISettingsManager>();
             return new SearchIndexController(settings.Object, provider,
@@ -323,7 +324,7 @@ namespace VirtoCommerce.SearchModule.Tests
             return new PricingServiceImpl(GetPricingRepository, GetItemService(), null, cacheManager.Object, null, null, null);
         }
 
-        private Data.Model.Filters.IBrowseFilterService GetBrowseFilterService()
+        private IBrowseFilterService GetBrowseFilterService()
         {
             return new FilterService(GetStoreService());
         }
