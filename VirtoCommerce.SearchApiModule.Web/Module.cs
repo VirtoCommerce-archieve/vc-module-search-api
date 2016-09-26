@@ -44,11 +44,11 @@ namespace VirtoCommerce.SearchApiModule.Web
             var searchConnection = _container.Resolve<ISearchConnection>();
             if (searchConnection.Provider.Equals(SearchProviders.Elasticsearch.ToString(), StringComparison.OrdinalIgnoreCase))
             {
-                _container.RegisterType<ISearchQueryBuilder, CatalogElasticSearchQueryBuilder>();
+                _container.RegisterType<ISearchQueryBuilder, CatalogElasticSearchQueryBuilder>("elastic-search");
             }
             else if (searchConnection.Provider.Equals(SearchProviders.Lucene.ToString(), StringComparison.OrdinalIgnoreCase))
             {
-                _container.RegisterType<ISearchQueryBuilder, CatalogLuceneQueryBuilder>();
+                _container.RegisterType<ISearchQueryBuilder, CatalogLuceneQueryBuilder>("lucene");
             }
         }
 
