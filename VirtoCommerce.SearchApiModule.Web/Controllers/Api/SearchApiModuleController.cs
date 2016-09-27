@@ -6,9 +6,8 @@ using System.Web.Http.Description;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Store.Services;
 using VirtoCommerce.Platform.Core.Web.Common;
-using VirtoCommerce.Platform.Data.Common;
-using VirtoCommerce.SearchApiModule.Web.Model;
-using VirtoCommerce.SearchApiModule.Web.Services;
+using VirtoCommerce.SearchApiModule.Data.Model;
+using VirtoCommerce.SearchApiModule.Data.Services;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Filters;
 
@@ -61,7 +60,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
 
         private CategorySearchResult SearchCategories(string scope, string storeId, CategorySearch criteria, CategoryResponseGroup responseGroup)
         {
-            var store = _cacheManager.Get("GetStore-" + storeId, "StoreModuleRegion", TimeSpan.FromMinutes(5), () => _storeService.GetById(storeId));
+            var store =  _storeService.GetById(storeId);
 
             if (store == null)
                 return null;
@@ -74,7 +73,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
 
         private ProductSearchResult SearchProducts(string scope, string storeId, ProductSearch criteria, ItemResponseGroup responseGroup)
         {
-            var store = _cacheManager.Get("GetStore-" + storeId, "StoreModuleRegion", TimeSpan.FromMinutes(5), () => _storeService.GetById(storeId));
+            var store =  _storeService.GetById(storeId);
 
             if (store == null)
                 return null;
@@ -84,7 +83,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
                 { "Store", store },
             };
 
-            var filters = _cacheManager.Get("GetFilters-" + store, "StoreModuleRegion", TimeSpan.FromMinutes(5), () => _browseFilterService.GetFilters(context));
+            var filters =  _browseFilterService.GetFilters(context);
 
             var serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Catalog, filters);
 

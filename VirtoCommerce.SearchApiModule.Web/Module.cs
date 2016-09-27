@@ -1,9 +1,9 @@
 ﻿using Microsoft.Practices.Unity;
 using System;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.SearchApiModule.Web.Providers.ElasticSearch.Nest;
-using VirtoCommerce.SearchApiModule.Web.Providers.Lucene;
-using VirtoCommerce.SearchApiModule.Web.Services;
+using VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest;
+using VirtoCommerce.SearchApiModule.Data.Providers.Lucene;
+using VirtoCommerce.SearchApiModule.Data.Services;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Filters;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;

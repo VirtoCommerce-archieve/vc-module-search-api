@@ -1,13 +1,14 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
-using VirtoCommerce.SearchApiModule.Web.Model;
+using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Filters;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
 using VirtoCommerce.SearchModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
 using Xunit;
+using VirtoCommerce.SearchApiModule.Data.Model;
 
 namespace VirtoCommerce.SearchModule.Tests
 {

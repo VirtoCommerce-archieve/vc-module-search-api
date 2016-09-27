@@ -18,7 +18,6 @@
         <owner>Virto Commerce</owner>
     </owners>
     <projectUrl>https://github.com/VirtoCommerce/vc-module-search-api</projectUrl>
-    <iconUrl>https://github.com/VirtoCommerce/vc-module-search-api/raw/master/VirtoCommerce.SearchModule.Web/Content/logo.png</iconUrl>
     <releaseNotes>First version.</releaseNotes>
     <copyright>Copyright © 2011-2016 Virto Commerce. All rights reserved</copyright>
     <tags>order system</tags>

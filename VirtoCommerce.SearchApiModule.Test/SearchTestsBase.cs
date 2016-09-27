@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using VirtoCommerce.SearchApiModule.Web.Providers.ElasticSearch.Nest;
-using VirtoCommerce.SearchApiModule.Web.Providers.Lucene;
+using VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest;
+using VirtoCommerce.SearchApiModule.Data.Providers.Lucene;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchModule.Data.Providers.Lucene;
