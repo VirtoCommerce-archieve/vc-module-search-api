@@ -49,7 +49,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
                 searchRetry++;
 
-                if (searchResults.Documents == null)
+                if (searchResults == null || searchResults.Documents == null)
                 {
                     continue;
                 }
@@ -96,7 +96,10 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 response.Categories = items.Select(x => x.ToWebModel(_blobUrlResolver)).ToArray();
             }
 
-            response.TotalCount = searchResults.TotalCount;
+            if (searchResults != null)
+            {
+                response.TotalCount = searchResults.TotalCount;
+            }
 
             return response;
         }
