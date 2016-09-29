@@ -39,6 +39,8 @@ using VirtoCommerce.SearchApiModule.Data.Services;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.Platform.Data.Assets;
 using VirtoCommerce.SearchModule.Core.Model;
+using Common.Logging;
+using System.Diagnostics;
 
 namespace VirtoCommerce.SearchModule.Tests
 {
@@ -320,8 +322,13 @@ namespace VirtoCommerce.SearchModule.Tests
 
         private IPricingService GetPricingService()
         {
-            var cacheManager = new Moq.Mock<ICacheManager<object>>();
-            return new PricingServiceImpl(GetPricingRepository, GetItemService(), null, cacheManager.Object, null, null, null);
+            var cacheManager = new Mock<ICacheManager<object>>();
+            var log = new Mock<ILog>();
+            log.Setup(l=>l.Error(It.IsAny<Exception>())).Callback((object ex) => {
+                Trace.Write(ex.ToString());
+            });
+
+            return new PricingServiceImpl(GetPricingRepository, GetItemService(), log.Object, cacheManager.Object, null, null, null);
         }
 
         private IBrowseFilterService GetBrowseFilterService()
