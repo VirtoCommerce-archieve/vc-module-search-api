@@ -133,12 +133,12 @@
       <HintPath>..\packages\VirtoCommerce.Platform.Core.2.12.0\lib\net451\VirtoCommerce.Platform.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="VirtoCommerce.SearchModule.Core, Version=2.12.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\VirtoCommerce.SearchModule.Core.2.12.2\lib\net451\VirtoCommerce.SearchModule.Core.dll</HintPath>
+    <Reference Include="VirtoCommerce.SearchModule.Core, Version=2.12.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\VirtoCommerce.SearchModule.Core.2.12.3\lib\net451\VirtoCommerce.SearchModule.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="VirtoCommerce.SearchModule.Data, Version=2.12.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\VirtoCommerce.SearchModule.Data.2.12.2\lib\net451\VirtoCommerce.SearchModule.Data.dll</HintPath>
+    <Reference Include="VirtoCommerce.SearchModule.Data, Version=2.12.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\VirtoCommerce.SearchModule.Data.2.12.3\lib\net451\VirtoCommerce.SearchModule.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
@@ -170,7 +170,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="VirtoCommerce.SearchApiModule.Data.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
