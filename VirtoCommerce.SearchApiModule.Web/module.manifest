@@ -1,26 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <module>
     <id>VirtoCommerce.SearchApi</id>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <platformVersion>2.12.0</platformVersion>
     <dependencies>
         <dependency id="VirtoCommerce.Core" version="2.17.0" />
         <dependency id="VirtoCommerce.Catalog" version="2.15.0" />
-        <dependency id="VirtoCommerce.Search" version="2.12.0" />      
+        <dependency id="VirtoCommerce.Search" version="2.12.3" />
     </dependencies>
 
     <title>Search API module</title>
     <description>Includes indexers and search criteria builders for major modules (catalog, order, customer)</description>
     <authors>
         <author>Alexander Siniouguine</author>
+        <author>Artem Dudarev</author>
     </authors>
     <owners>
         <owner>Virto Commerce</owner>
     </owners>
     <projectUrl>https://github.com/VirtoCommerce/vc-module-search-api</projectUrl>
+    <iconUrl>https://github.com/VirtoCommerce/vc-module-search-api/raw/master/VirtoCommerce.SearchApiModule.Web/Content/logo.png</iconUrl>
     <releaseNotes>First version.</releaseNotes>
     <copyright>Copyright © 2011-2016 Virto Commerce. All rights reserved</copyright>
-    <tags>order system</tags>
+    <tags>search</tags>
 
     <assemblyFile>VirtoCommerce.SearchApiModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.SearchApiModule.Web.Module, VirtoCommerce.SearchApiModule.Web</moduleType>
