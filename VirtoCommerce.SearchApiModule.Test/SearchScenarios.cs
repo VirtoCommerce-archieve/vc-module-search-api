@@ -1,16 +1,16 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Filters;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
 using VirtoCommerce.SearchModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
+using VirtoCommerce.SearchModule.Tests;
 using Xunit;
-using VirtoCommerce.SearchApiModule.Data.Model;
 
-namespace VirtoCommerce.SearchModule.Tests
+namespace VirtoCommerce.SearchApiModule.Test
 {
     [CLSCompliant(false)]
     [Collection("Search")]

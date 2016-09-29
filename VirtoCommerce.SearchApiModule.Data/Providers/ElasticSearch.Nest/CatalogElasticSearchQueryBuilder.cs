@@ -1,5 +1,4 @@
 ﻿using Nest;
-using System;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
@@ -8,60 +7,70 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest
 {
     public class CatalogElasticSearchQueryBuilder : ElasticSearchQueryBuilder
     {
-        #region ISearchQueryBuilder Members
-        public override object BuildQuery<T>(string scope, ISearchCriteria criteria)
-        {            
-            var builder = base.BuildQuery<T>(scope, criteria) as SearchRequest;
+        protected override QueryContainer GetQuery<T>(ISearchCriteria criteria)
+        {
+            var result = base.GetQuery<T>(criteria);
 
-            #region CategorySearchCriteria
-            if (criteria is CategorySearchCriteria)
-            {
-                var c = criteria as CategorySearchCriteria;
-                if (c.Outlines != null && c.Outlines.Count > 0)
-                {
-                    builder.Query &= CreateQuery("__outline", c.Outlines);
-                }
-            }
-            #endregion
+            result &= GetCategoryQuery<T>(criteria as CategorySearchCriteria);
+            result &= GetCatalogItemQuery<T>(criteria as CatalogItemSearchCriteria);
 
-            #region CatalogItemSearchCriteria
-            if (criteria is CatalogItemSearchCriteria)
-            {
-                var c = criteria as CatalogItemSearchCriteria;
-
-                builder.Query &= new DateRangeQuery() { Field = "startdate", LessThanOrEqualTo = c.StartDate };
-
-                if (c.StartDateFrom.HasValue)
-                {
-                    builder.Query &= new DateRangeQuery() { Field = "startdate", GreaterThan = c.StartDateFrom.Value };
-                }
-
-                if (c.EndDate.HasValue)
-                {
-                    builder.Query &= new DateRangeQuery() { Field = "enddate", GreaterThan = c.StartDateFrom.Value };
-                }
-
-                builder.Query &= new TermQuery() { Field = "__hidden", Value = false };
-
-                if (c.Outlines != null && c.Outlines.Count > 0)
-                {
-                    builder.Query &= CreateQuery("__outline", c.Outlines);
-                }
-
-                if (!string.IsNullOrEmpty(c.Catalog))
-                {
-                    builder.Query &= CreateQuery("catalog", c.Catalog);
-                }
-
-                if (c.ClassTypes != null && c.ClassTypes.Count > 0)
-                {
-                    builder.Query &= CreateQuery("__type", c.ClassTypes, false);
-                }
-            }
-            #endregion
-
-            return builder;
+            return result;
         }
-        #endregion
+
+        protected virtual QueryContainer GetCategoryQuery<T>(CategorySearchCriteria criteria)
+            where T : class
+        {
+            QueryContainer result = null;
+
+            if (criteria != null)
+            {
+                if (criteria.Outlines != null && criteria.Outlines.Count > 0)
+                {
+                    result = CreateQuery("__outline", criteria.Outlines);
+                }
+            }
+
+            return result;
+        }
+
+        protected virtual QueryContainer GetCatalogItemQuery<T>(CatalogItemSearchCriteria criteria)
+            where T : class
+        {
+            QueryContainer result = null;
+
+            if (criteria != null)
+            {
+                result &= new DateRangeQuery { Field = "startdate", LessThanOrEqualTo = criteria.StartDate };
+
+                if (criteria.StartDateFrom.HasValue)
+                {
+                    result &= new DateRangeQuery { Field = "startdate", GreaterThan = criteria.StartDateFrom.Value };
+                }
+
+                if (criteria.EndDate.HasValue)
+                {
+                    result &= new DateRangeQuery { Field = "enddate", GreaterThan = criteria.EndDate.Value };
+                }
+
+                result &= new TermQuery { Field = "__hidden", Value = false };
+
+                if (criteria.Outlines != null && criteria.Outlines.Count > 0)
+                {
+                    result &= CreateQuery("__outline", criteria.Outlines);
+                }
+
+                if (!string.IsNullOrEmpty(criteria.Catalog))
+                {
+                    result &= CreateQuery("catalog", criteria.Catalog);
+                }
+
+                if (criteria.ClassTypes != null && criteria.ClassTypes.Count > 0)
+                {
+                    result &= CreateQuery("__type", criteria.ClassTypes, false);
+                }
+            }
+
+            return result;
+        }
     }
 }
