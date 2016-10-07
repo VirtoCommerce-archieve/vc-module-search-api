@@ -309,7 +309,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             var partitions = new ConcurrentBag<Partition>();
 
             var result = _catalogSearchService.Search(new SearchCriteria { Take = 0, ResponseGroup = SearchResponseGroup.WithProducts });
-            var parts = result.ProductsTotalCount / _partitionSizeCount;
+            var parts = result.ProductsTotalCount / _partitionSizeCount + 1;
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 5 };
             Parallel.For(0, parts, parallelOptions, (index) =>
             {
