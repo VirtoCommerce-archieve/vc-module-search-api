@@ -19,7 +19,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 {
     public class CatalogItemIndexBuilder : ISearchIndexBuilder
     {
-        private const int _partitionSizeCount = 100; // the maximum partition size, keep it smaller to prevent too big of the sql requests and too large messages in the queue
+        private const int _partitionSizeCount = 500; // the maximum partition size, keep it smaller to prevent too big of the sql requests and too large messages in the queue
 
         private readonly ISearchProvider _searchProvider;
         private readonly ICatalogSearchService _catalogSearchService;
@@ -61,21 +61,24 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         {
             if (partition == null)
                 throw new ArgumentNullException("partition");
-
             var documents = new ConcurrentBag<IDocument>();
-
-            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 5 };
-
-            Parallel.ForEach(partition.Keys, parallelOptions, key =>
-            {
-                //Trace.TraceInformation(string.Format("Processing documents starting {0} of {1} - {2}%", partition.Start, partition.Total, (partition.Start * 100 / partition.Total)));
-                if (key != null)
+            //Trace.TraceInformation(string.Format("Processing documents starting {0} of {1} - {2}%", partition.Start, partition.Total, (partition.Start * 100 / partition.Total)));
+            if (!partition.Keys.IsNullOrEmpty())
+            {               
+                var items = _itemService.GetByIds(partition.Keys, ItemResponseGroup.ItemProperties | ItemResponseGroup.Variations | ItemResponseGroup.Outlines);
+            
+                var evalContext = new PriceEvaluationContext
+                {
+                    ProductIds = partition.Keys
+                };
+                var prices = _pricingService.EvaluateProductPrices(evalContext);
+                foreach (var item in items)
                 {
                     var doc = new ResultDocument();
-                    IndexItem(doc, key);
+                    IndexItem(doc, item, prices.Where(x => x.ProductId == item.Id).ToArray());
                     documents.Add(doc);
                 }
-            });
+            }
 
             return documents;
         }
@@ -107,12 +110,8 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         #endregion
 
-        protected virtual void IndexItem(ResultDocument doc, string productId)
+        protected virtual void IndexItem(ResultDocument doc, CatalogProduct item, Price[] prices)
         {
-            var item = _itemService.GetById(productId, ItemResponseGroup.ItemProperties | ItemResponseGroup.Variations | ItemResponseGroup.Outlines);
-            if (item == null)
-                return;
-
             var indexStoreNotAnalyzed = new[] { IndexStore.Yes, IndexType.NotAnalyzed };
             var indexStoreNotAnalyzedStringCollection = new[] { IndexStore.Yes, IndexType.NotAnalyzed, IndexDataType.StringCollection };
             var indexStoreAnalyzedStringCollection = new[] { IndexStore.Yes, IndexType.Analyzed, IndexDataType.StringCollection };
@@ -176,7 +175,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             }
 
             // Index item prices
-            IndexItemPrices(doc, item);
+            IndexItemPrices(doc, prices, item);
 
             //Index item reviews
             //IndexReviews(doc, item);
@@ -184,6 +183,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             // add to content
             doc.Add(new DocumentField("__content", item.Name, indexStoreAnalyzedStringCollection));
             doc.Add(new DocumentField("__content", item.Code, indexStoreAnalyzedStringCollection));
+
         }
 
         protected virtual string[] GetOutlineStrings(IEnumerable<Outline> outlines)
@@ -228,7 +228,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
             foreach (var propValue in item.PropertyValues.Where(x => x.Value != null))
             {
-                var propertyName = propValue.PropertyName.ToLower();
+                var propertyName = (propValue.PropertyName ?? "").ToLower();
                 var property = properties.FirstOrDefault(x => string.Equals(x.Name, propValue.PropertyName, StringComparison.InvariantCultureIgnoreCase) && x.ValueType == propValue.ValueType);
                 var contentField = string.Concat("__content", property != null && property.Multilanguage && !string.IsNullOrWhiteSpace(propValue.LanguageCode) ? "_" + propValue.LanguageCode.ToLower() : string.Empty);
 
@@ -266,7 +266,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         #region Price Lists Indexing
 
-        protected virtual void IndexItemPrices(ResultDocument doc, CatalogProduct item)
+        protected virtual void IndexItemPrices(ResultDocument doc, Price[] prices, CatalogProduct item)
         {
             /*
             var priceLists = _pricingService.GetPriceLists();
@@ -282,14 +282,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                     doc.Add(new DocumentField(string.Format("price_{0}_{1}_value", priceList.Currency, priceList.PricelistId), price.Sale == null ? price.List.ToString() : price.Sale.ToString(), new[] { IndexStore.YES, IndexType.NOT_ANALYZED }));
                 }
             }
-            */
-
-            var evalContext = new PriceEvaluationContext
-            {
-                ProductIds = new[] { item.Id }
-            };
-
-            var prices = _pricingService.EvaluateProductPrices(evalContext);
+            */          
 
             foreach (var price in prices)
             {
@@ -313,27 +306,24 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         private IEnumerable<Partition> GetPartitionsForAllProducts()
         {
-            var partitions = new List<Partition>();
+            var partitions = new ConcurrentBag<Partition>();
 
-            var criteria = new SearchCriteria
+            var result = _catalogSearchService.Search(new SearchCriteria { Take = 0, ResponseGroup = SearchResponseGroup.WithProducts });
+            var parts = result.ProductsTotalCount / _partitionSizeCount;
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 5 };
+            Parallel.For(0, parts, parallelOptions, (index) =>
             {
-                ResponseGroup = SearchResponseGroup.WithProducts,
-                Take = 0
-            };
-
-            var result = _catalogSearchService.Search(criteria);
-
-            for (var start = 0; start < result.ProductsTotalCount; start += _partitionSizeCount)
-            {
-                criteria.Skip = start;
-                criteria.Take = _partitionSizeCount;
-
+                var criteria = new SearchCriteria
+                {
+                    ResponseGroup = SearchResponseGroup.WithProducts,
+                    Skip = index * _partitionSizeCount,
+                    Take = _partitionSizeCount
+                };
                 // TODO: Need optimize search to return only product ids
                 result = _catalogSearchService.Search(criteria);
-
                 var productIds = result.Products.Select(p => p.Id).ToArray();
                 partitions.Add(new Partition(OperationType.Index, productIds));
-            }
+            });        
 
             return partitions;
         }

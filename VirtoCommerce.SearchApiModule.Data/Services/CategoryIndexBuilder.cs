@@ -55,21 +55,18 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             if (partition == null)
                 throw new ArgumentNullException("partition");
 
-            var documents = new ConcurrentBag<IDocument>();
-
-            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 5 };
-
-            Parallel.ForEach(partition.Keys, parallelOptions, key =>
+            var documents = new ConcurrentBag<IDocument>();        
+        
+            if (!partition.Keys.IsNullOrEmpty())
             {
-                //Trace.TraceInformation(string.Format("Processing documents starting {0} of {1} - {2}%", partition.Start, partition.Total, (partition.Start * 100 / partition.Total)));
-                if (key != null)
+                var categories = _categoryService.GetByIds(partition.Keys, CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithOutlines);
+                foreach (var category in categories)
                 {
                     var doc = new ResultDocument();
-                    IndexItem(doc, key);
+                    IndexItem(doc, category);
                     documents.Add(doc);
-                }
-            });
-
+                }           
+            }
             return documents;
         }
 
@@ -100,34 +97,30 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         #endregion
 
-        protected virtual void IndexItem(ResultDocument doc, string categoryId)
+        protected virtual void IndexItem(ResultDocument doc, Category category)
         {
-            var item = _categoryService.GetById(categoryId, CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithOutlines);
-            if (item == null)
-                return;
-
             var indexStoreNotAnalyzed = new[] { IndexStore.Yes, IndexType.NotAnalyzed };
             var indexStoreNotAnalyzedStringCollection = new[] { IndexStore.Yes, IndexType.NotAnalyzed, IndexDataType.StringCollection };
             var indexStoreAnalyzedStringCollection = new[] { IndexStore.Yes, IndexType.Analyzed, IndexDataType.StringCollection };
 
-            doc.Add(new DocumentField("__key", item.Id.ToLower(), indexStoreNotAnalyzed));
-            doc.Add(new DocumentField("__type", item.GetType().Name, indexStoreNotAnalyzed));
-            doc.Add(new DocumentField("__sort", item.Name, indexStoreNotAnalyzed));
-            doc.Add(new DocumentField("__hidden", (item.IsActive != true || item.Id != null).ToString().ToLower(), indexStoreNotAnalyzed));
-            doc.Add(new DocumentField("code", item.Code, indexStoreNotAnalyzed));
-            doc.Add(new DocumentField("name", item.Name, indexStoreNotAnalyzed));
-            doc.Add(new DocumentField("createddate", item.CreatedDate, indexStoreNotAnalyzed));
-            doc.Add(new DocumentField("lastmodifieddate", item.ModifiedDate ?? DateTime.MaxValue, indexStoreNotAnalyzed));
-            doc.Add(new DocumentField("priority", item.Priority, indexStoreNotAnalyzed));
+            doc.Add(new DocumentField("__key", category.Id.ToLower(), indexStoreNotAnalyzed));
+            doc.Add(new DocumentField("__type", category.GetType().Name, indexStoreNotAnalyzed));
+            doc.Add(new DocumentField("__sort", category.Name, indexStoreNotAnalyzed));
+            doc.Add(new DocumentField("__hidden", (category.IsActive != true || category.Id != null).ToString().ToLower(), indexStoreNotAnalyzed));
+            doc.Add(new DocumentField("code", category.Code, indexStoreNotAnalyzed));
+            doc.Add(new DocumentField("name", category.Name, indexStoreNotAnalyzed));
+            doc.Add(new DocumentField("createddate", category.CreatedDate, indexStoreNotAnalyzed));
+            doc.Add(new DocumentField("lastmodifieddate", category.ModifiedDate ?? DateTime.MaxValue, indexStoreNotAnalyzed));
+            doc.Add(new DocumentField("priority", category.Priority, indexStoreNotAnalyzed));
 
             // Add priority in virtual categories to search index
-            foreach (var link in item.Links)
+            foreach (var link in category.Links)
             {
                 doc.Add(new DocumentField(string.Format(CultureInfo.InvariantCulture, "priority_{0}_{1}", link.CatalogId, link.CategoryId), link.Priority, indexStoreNotAnalyzed));
             }
 
             // Add catalogs to search index
-            var catalogs = item.Outlines
+            var catalogs = category.Outlines
                 .Select(o => o.Items.First().Id)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToArray();
@@ -138,18 +131,18 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             }
 
             // Add outlines to search index
-            var outlineStrings = GetOutlineStrings(item.Outlines);
+            var outlineStrings = GetOutlineStrings(category.Outlines);
             foreach (var outline in outlineStrings)
             {
                 doc.Add(new DocumentField("__outline", outline.ToLower(), indexStoreNotAnalyzedStringCollection));
             }
 
             // Index custom properties
-            IndexItemCustomProperties(doc, item);
+            IndexItemCustomProperties(doc, category);
 
             // add to content
-            doc.Add(new DocumentField("__content", item.Name, indexStoreAnalyzedStringCollection));
-            doc.Add(new DocumentField("__content", item.Code, indexStoreAnalyzedStringCollection));
+            doc.Add(new DocumentField("__content", category.Name, indexStoreAnalyzedStringCollection));
+            doc.Add(new DocumentField("__content", category.Code, indexStoreAnalyzedStringCollection));
         }
 
         protected virtual string[] GetOutlineStrings(IEnumerable<Outline> outlines)
