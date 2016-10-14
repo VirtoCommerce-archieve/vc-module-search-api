@@ -21,13 +21,12 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
         private readonly IBrowseFilterService _browseFilterService;
         private readonly IItemBrowsingService _browseService;
         private readonly ICategoryBrowsingService _categoryBrowseService;
-        private readonly ICacheManager<object> _cacheManager;
         private readonly IStoreService _storeService;
 
         public SearchApiModuleController(ISearchProvider searchProvider, ISearchConnection searchConnection, 
             IBrowseFilterService browseFilterService, IItemBrowsingService browseService,
             ICategoryBrowsingService categoryBrowseService, 
-            IStoreService storeService, ICacheManager<object> cacheManager)
+            IStoreService storeService)
         {
             _searchProvider = searchProvider;
             _searchConnection = searchConnection;
@@ -35,26 +34,23 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
             _browseService = browseService;
             _storeService = storeService;
             _categoryBrowseService = categoryBrowseService;
-            _cacheManager = cacheManager;
         }
 
         [HttpPost]
         [Route("{storeId}/products")]
         [ResponseType(typeof(ProductSearchResult))]
-        [ClientCache(Duration = 30)]
         public IHttpActionResult SearchProducts(string storeId, ProductSearch criteria)
         {
-            var result = SearchProducts(_searchConnection.Scope, storeId, criteria, ItemResponseGroup.ItemLarge);
+            var result = SearchProducts(_searchConnection.Scope, storeId, criteria, criteria.ResponseGroup);
             return Ok(result);
         }
 
         [HttpPost]
         [Route("{storeId}/categories")]
         [ResponseType(typeof(CategorySearchResult))]
-        [ClientCache(Duration = 30)]
         public IHttpActionResult SearchCategories(string storeId, CategorySearch criteria)
         {
-            var result = SearchCategories(_searchConnection.Scope, storeId, criteria, CategoryResponseGroup.Full);
+            var result = SearchCategories(_searchConnection.Scope, storeId, criteria, criteria.ResponseGroup);
             return Ok(result);
         }
 

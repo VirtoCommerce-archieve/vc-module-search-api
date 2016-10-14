@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Data.Extensions;
 using VirtoCommerce.SearchApiModule.Data.Helpers;
@@ -12,6 +13,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
 {
     public class CategorySearch
     {
+        public  CategoryResponseGroup ResponseGroup { get; set; }
         /// <summary>
         /// CategoryId/CategoryId
         /// </summary>
