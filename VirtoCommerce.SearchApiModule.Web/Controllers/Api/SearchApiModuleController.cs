@@ -10,6 +10,7 @@ using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchApiModule.Data.Services;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Filters;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
 {
@@ -41,7 +42,8 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
         [ResponseType(typeof(ProductSearchResult))]
         public IHttpActionResult SearchProducts(string storeId, ProductSearch criteria)
         {
-            var result = SearchProducts(_searchConnection.Scope, storeId, criteria, criteria.ResponseGroup);
+            var responseGroup = EnumUtility.SafeParse<ItemResponseGroup>(criteria.ResponseGroup, ItemResponseGroup.ItemLarge & ~ItemResponseGroup.ItemProperties);
+            var result = SearchProducts(_searchConnection.Scope, storeId, criteria, responseGroup);
             return Ok(result);
         }
 
@@ -50,7 +52,8 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
         [ResponseType(typeof(CategorySearchResult))]
         public IHttpActionResult SearchCategories(string storeId, CategorySearch criteria)
         {
-            var result = SearchCategories(_searchConnection.Scope, storeId, criteria, criteria.ResponseGroup);
+            var responseGroup = EnumUtility.SafeParse<CategoryResponseGroup>(criteria.ResponseGroup, CategoryResponseGroup.Full & ~CategoryResponseGroup.WithProperties);
+            var result = SearchCategories(_searchConnection.Scope, storeId, criteria, responseGroup);
             return Ok(result);
         }
 

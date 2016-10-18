@@ -18,7 +18,10 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
             Take = 20;
         }
 
-        public ItemResponseGroup ResponseGroup { get; set; }
+        /// <summary>
+        /// ItemResponseGroup
+        /// </summary>
+        public string ResponseGroup { get; set; }
 
         public string Currency { get; set; }
 

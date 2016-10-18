@@ -13,7 +13,10 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
 {
     public class CategorySearch
     {
-        public  CategoryResponseGroup ResponseGroup { get; set; }
+        /// <summary>
+        /// CategoryResponseGroup
+        /// </summary>
+        public string ResponseGroup { get; set; }
         /// <summary>
         /// CategoryId/CategoryId
         /// </summary>
