@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Data.Extensions;
 using VirtoCommerce.SearchApiModule.Data.Helpers;
@@ -28,6 +27,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
         public string[] Terms { get; set; }
 
         public string SearchPhrase { get; set; }
+        public string Locale { get; set; }
 
         /// <summary>
         /// CategoryId1/CategoryId2, no catalog should be included in the outline
@@ -49,6 +49,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
             criteria.Currency = Currency;
             criteria.Pricelists = PriceLists;
             criteria.SearchPhrase = SearchPhrase;
+            criteria.Locale = Locale;
             criteria.StartingRecord = Skip;
             criteria.RecordsToRetrieve = Take;
 
@@ -68,7 +69,8 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
                 criteria.Add(filter);
             }
 
-            #region Apply Filters
+            #region Filters
+
             var terms = Terms.AsKeyValues();
             if (terms.Any())
             {
@@ -99,7 +101,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
                             }
                         }
                     }
-                    else if(filter != null) // predefined filter
+                    else if (filter != null) // predefined filter
                     {
                         var attributeFilter = filter as AttributeFilter;
                         if (attributeFilter != null && attributeFilter.Values == null)
@@ -118,14 +120,15 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
                     }
                     else // custom term
                     {
-                        if(!term.Key.StartsWith("_")) // ignore system terms, we can't filter by them
+                        if (!term.Key.StartsWith("_")) // ignore system terms, we can't filter by them
                         {
-                            var attr = new AttributeFilter { Key = term.Key, Values = BrowseFilterHelper.CreateAttributeFilterValues(term.Values)};
+                            var attr = new AttributeFilter { Key = term.Key, Values = BrowseFilterHelper.CreateAttributeFilterValues(term.Values) };
                             criteria.Apply(attr);
                         }
                     }
                 }
             }
+
             #endregion
 
             #region Sorting
@@ -186,7 +189,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
 
             #endregion
 
-            return criteria as T;
+            return criteria;
         }
     }
 }
