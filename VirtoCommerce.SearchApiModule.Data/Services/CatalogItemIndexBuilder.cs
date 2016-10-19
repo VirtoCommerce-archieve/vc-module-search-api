@@ -42,7 +42,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         /// The maximum items count per partition.
         /// Keep it smaller to prevent too large SQL requests and too large messages in the queue.
         /// </summary>
-        protected virtual int PartitionSize { get; } = 500;
+        protected virtual int PartitionSize { get { return 500; } }
 
         #region ISearchIndexBuilder Members
 
