@@ -11,7 +11,7 @@
         }
     });
 
-
+    blade.title = blade.currentEntity.documentType === 'catalog' ? 'searchAPI.blades.index-progress.title-catalog' : 'searchAPI.blades.index-progress.title-item';
     blade.subtitle = 'searchAPI.blades.index-progress.subtitle';
     blade.headIcon = 'fa-search';
     blade.isLoading = false;

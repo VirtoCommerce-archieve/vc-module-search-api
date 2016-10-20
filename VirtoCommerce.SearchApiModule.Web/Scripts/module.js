@@ -6,7 +6,7 @@ if (AppDependencies !== undefined) {
 }
 
 angular.module(moduleName, ['virtoCommerce.catalogModule'])
-	.run(['platformWebApp.widgetService', function (widgetService) {
+	.run(['platformWebApp.widgetService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.bladeNavigationService', function (widgetService, pushNotificationTemplateResolver, bladeNavigationService) {
 
 	    // register WIDGETS
 	    // integration: index in product details
@@ -21,4 +21,20 @@ angular.module(moduleName, ['virtoCommerce.catalogModule'])
 	        size: [2, 1],
 	        template: 'Modules/$(VirtoCommerce.SearchApi)/Scripts/widgets/integrations/catalog-index-widget.tpl.html'
 	    }, 'catalogDetail');
+
+	    // register notification template
+	    pushNotificationTemplateResolver.register({
+	        priority: 900,
+	        satisfy: function (notify, place) { return place == 'history' && notify.notifyType == 'SearchPushNotification'; },
+	        template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDefault.tpl.html',
+	        action: function (notify) {
+	            var blade = {
+	                id: 'indexProgress',
+	                currentEntity: notify,
+	                controller: 'virtoCommerce.searchAPIModule.indexProgressController',
+	                template: 'Modules/$(VirtoCommerce.SearchApi)/Scripts/blades/index-progress.tpl.html'
+	            };
+	            bladeNavigationService.showBlade(blade);
+	        }
+	    });
 	}]);

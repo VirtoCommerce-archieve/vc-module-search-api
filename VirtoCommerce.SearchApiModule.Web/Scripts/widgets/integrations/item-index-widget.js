@@ -3,8 +3,8 @@
     var blade = $scope.blade;
     $scope.loading = true;
 
-    // searchAPI.get({ id: blade.itemId }, function (data) {
-    _.each([{ id: blade.itemId, buildDate: new Date(), content:'function updateStatus() {    \n    if ($scope.index && blade.currentEntity) {        $scope.loading = false;        if (!$scope.index.id)' }], function (data) {
+    searchAPI.get({ documentType: 'item', documentId: blade.itemId }, function (data) {
+        // _.each([{ id: blade.itemId, buildDate: new Date(), content:'function updateStatus() {    \n    if ($scope.index && blade.currentEntity) {        $scope.loading = false;        if (!$scope.index.id)' }], function (data) {
         $scope.index = data;
         updateStatus();
     });

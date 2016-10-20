@@ -3,8 +3,8 @@
     var blade = $scope.blade;
     $scope.loading = true;
 
-    // searchAPI.getStatistics({ catalogId: blade.currentEntityId }, function (data) {
-    _.each([{ id: blade.currentEntityId, itemCount: 15, categoryCount: 7, itemCountCatalog: 315, categoryCountCatalog: 76 }], function (data) {
+    searchAPI.getStatistics({ documentType: 'catalog', documentId: blade.currentEntityId }, function (data) {
+    // _.each([{ itemCount: 15, categoryCount: 7, itemCountCatalog: 315, categoryCountCatalog: 76 }], function (data) {
         $scope.index = data;
         $scope.loading = false;
         if (!$scope.index.id) {
@@ -19,7 +19,7 @@
             isCatalog: true,
             currentEntityId: blade.currentEntityId,
             data: $scope.index,
-            parentRefresh : blade.parentRefresh,
+            parentRefresh: blade.parentRefresh,
             title: blade.currentEntity.name,
             subtitle: 'searchAPI.blades.index-detail.subtitle-catalog',
             controller: 'virtoCommerce.searchAPIModule.indexDetailController',

@@ -5,11 +5,14 @@
                 "title": "Search index",
                 "subtitle-catalog": "Search index for catalog",
                 "labels": {
+                    "no-index": "Index not found",
                     "build-date": "Last indexed",
                     "content": "Index content",
                     "catalog-statistics": "Search index statistics",
                     "item-count": "Item count",
-                    "category-count": "Category count"
+                    "itemCountCatalog": "Item count in catalog",
+                    "category-count": "Category count",
+                    "categoryCountCatalog": "Category count in catalog"
                 }
             },
             "index-progress": {
@@ -27,7 +30,7 @@
         "widgets": {
             "index": {
                 "index-ok": "Indexed at {{buildDate|date:'short'}}",
-                "index-old": "Outdated index was built at {{buildDate|date:'short'}}",
+                "index-old": "Outdated. Index was built at {{buildDate|date:'short'}}",
                 "no-index": "Search index missing"
             },
             "catalogIndex": {

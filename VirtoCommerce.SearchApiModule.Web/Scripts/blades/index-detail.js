@@ -19,28 +19,17 @@
             controller: 'virtoCommerce.searchAPIModule.indexProgressController',
             template: 'Modules/$(VirtoCommerce.SearchApi)/Scripts/blades/index-progress.tpl.html'
         };
-
-        if (blade.isCatalog) {
-            angular.extend(newBlade, {
-                title: 'searchAPI.blades.index-progress.title-catalog',
-            });
-        } else {
-            angular.extend(newBlade, {
-                title: 'searchAPI.blades.index-progress.title-item',
-            });
-        }
-
         bladeNavigationService.showBlade(newBlade, blade.parentBlade);
     }
 
     blade.headIcon = 'fa-search';
-    
+
     blade.toolbarCommands = [
         {
             name: blade.isCatalog ? "searchAPI.commands.index-missing" : "searchAPI.commands.index", icon: 'fa fa-recycle',
             executeMethod: function () {
-                // searchAPI.buildIndex({ id: blade.currentEntityId, updateOnly: true }, openProgressBlade);
-                openProgressBlade({ id: blade.currentEntityId });
+                searchAPI.buildIndex({ documentType: blade.isCatalog ? 'catalog' : 'item', id: blade.currentEntityId }, { updateOnly: true }, openProgressBlade);
+                // openProgressBlade({ documentType: blade.isCatalog ? 'catalog' : 'item', id: blade.currentEntityId });
             },
             canExecuteMethod: function () { return true; },
             permission: 'VirtoCommerce.Search:Index:Rebuild'
@@ -54,7 +43,7 @@
                     message: "searchAPI.dialogs.index-index.message",
                     callback: function (confirmed) {
                         if (confirmed) {
-                            searchAPI.buildIndex({ catalogId: blade.currentEntityId }, openProgressBlade);
+                            searchAPI.buildIndex({ documentType: 'catalog', id: blade.currentEntityId }, null, openProgressBlade);
                         }
                     }
                 });

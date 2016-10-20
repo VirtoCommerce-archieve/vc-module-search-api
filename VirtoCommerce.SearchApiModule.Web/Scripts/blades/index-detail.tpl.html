@@ -1,19 +1,23 @@
 ﻿<div class="blade-content __tree">
     <div class="blade-inner">
         <div class="inner-block">
-            <div class="form-group" ng-if="!blade.isCatalog">
-                <label class="form-label">{{ 'searchAPI.blades.index-detail.labels.build-date' | translate }}</label>
-                <div class="form-input __calendar">
-                    <input ng-model="blade.currentEntity.buildDate" datepicker-popup="short" disabled="disabled">
-                    <button type="button" class="btn" disabled="disabled">
-                        <i class="btn-ico fa fa-calendar"></i>
-                    </button>
+            <fieldset ng-if="!blade.isCatalog && blade.currentEntity.id">
+                <div class="form-group">
+                    <label class="form-label">{{ 'searchAPI.blades.index-detail.labels.build-date' | translate }}</label>
+                    <div class="form-input __calendar">
+                        <input ng-model="blade.currentEntity.buildDate" datepicker-popup="short" disabled="disabled">
+                        <button type="button" class="btn" disabled="disabled">
+                            <i class="btn-ico fa fa-calendar"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group" ng-if="!blade.isCatalog">
-                <label class="form-label">{{ 'searchAPI.blades.index-detail.labels.content' | translate }}</label>
-                <div class="log">{{blade.currentEntity.content}}</div>
-            </div>
+                <div class="form-group">
+                    <label class="form-label">{{ 'searchAPI.blades.index-detail.labels.content' | translate }}</label>
+                    <div class="log">{{blade.currentEntity.content}}</div>
+                </div>
+            </fieldset>
+
+            <div class="note" ng-if="!blade.isCatalog && !blade.currentEntity.id">{{ 'searchAPI.blades.index-detail.labels.no-index' | translate }}</div>
 
             <fieldset ng-if="blade.isCatalog">
                 <div class="sub-t">{{ 'searchAPI.blades.index-detail.labels.catalog-statistics' | translate }}</div>
@@ -24,9 +28,21 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label class="form-label">{{ 'searchAPI.blades.index-detail.labels.itemCountCatalog' | translate }}</label>
+                    <div class="form-input">
+                        <input ng-model="blade.currentEntity.itemCountCatalog" disabled="disabled">
+                    </div>
+                </div>
+                <div class="form-group">
                     <label class="form-label">{{ 'searchAPI.blades.index-detail.labels.category-count' | translate }}</label>
                     <div class="form-input">
                         <input ng-model="blade.currentEntity.categoryCount" disabled="disabled">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ 'searchAPI.blades.index-detail.labels.categoryCountCatalog' | translate }}</label>
+                    <div class="form-input">
+                        <input ng-model="blade.currentEntity.categoryCountCatalog" disabled="disabled">
                     </div>
                 </div>
             </fieldset>
