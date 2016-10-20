@@ -1,46 +1,46 @@
-﻿using CacheManager.Core;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
+using CacheManager.Core;
+using Common.Logging;
+using Moq;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Services;
 using VirtoCommerce.CoreModule.Data.Repositories;
 using VirtoCommerce.CoreModule.Data.Services;
 using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Domain.Commerce.Services;
+using VirtoCommerce.Domain.Payment.Model;
+using VirtoCommerce.Domain.Payment.Services;
 using VirtoCommerce.Domain.Pricing.Services;
+using VirtoCommerce.Domain.Shipping.Model;
+using VirtoCommerce.Domain.Shipping.Services;
+using VirtoCommerce.Domain.Store.Services;
+using VirtoCommerce.Domain.Tax.Model;
+using VirtoCommerce.Domain.Tax.Services;
 using VirtoCommerce.Platform.Core.ChangeLog;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Assets;
 using VirtoCommerce.Platform.Data.ChangeLog;
+using VirtoCommerce.Platform.Data.DynamicProperties;
 using VirtoCommerce.Platform.Data.Infrastructure.Interceptors;
 using VirtoCommerce.Platform.Data.Repositories;
 using VirtoCommerce.PricingModule.Data.Repositories;
 using VirtoCommerce.PricingModule.Data.Services;
-using VirtoCommerce.SearchModule.Data.Services;
-using Xunit;
-using Xunit.Abstractions;
-using System.Linq;
-using System.Threading;
-using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
+using VirtoCommerce.SearchApiModule.Data.Model;
+using VirtoCommerce.SearchApiModule.Data.Services;
+using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Filters;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
-using VirtoCommerce.Domain.Store.Services;
-using System.Collections.Generic;
-using VirtoCommerce.StoreModule.Data.Services;
+using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
+using VirtoCommerce.SearchModule.Data.Services;
 using VirtoCommerce.StoreModule.Data.Repositories;
-using VirtoCommerce.Domain.Shipping.Services;
-using VirtoCommerce.Domain.Shipping.Model;
-using VirtoCommerce.Domain.Payment.Services;
-using VirtoCommerce.Domain.Payment.Model;
-using VirtoCommerce.Domain.Tax.Services;
-using VirtoCommerce.Domain.Tax.Model;
-using VirtoCommerce.Platform.Core.DynamicProperties;
-using Moq;
-using VirtoCommerce.Platform.Data.DynamicProperties;
-using VirtoCommerce.SearchApiModule.Data.Services;
-using VirtoCommerce.SearchApiModule.Data.Model;
-using VirtoCommerce.Platform.Data.Assets;
-using VirtoCommerce.SearchModule.Core.Model;
-using Common.Logging;
-using System.Diagnostics;
+using VirtoCommerce.StoreModule.Data.Services;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace VirtoCommerce.SearchModule.Tests
 {
@@ -317,14 +317,15 @@ namespace VirtoCommerce.SearchModule.Tests
 
         private IOutlineService GetOutlineService()
         {
-            return new OutlineService(GetCatalogRepository);
+            return new OutlineService();
         }
 
         private IPricingService GetPricingService()
         {
             var cacheManager = new Mock<ICacheManager<object>>();
             var log = new Mock<ILog>();
-            log.Setup(l=>l.Error(It.IsAny<Exception>())).Callback((object ex) => {
+            log.Setup(l => l.Error(It.IsAny<Exception>())).Callback((object ex) =>
+            {
                 Trace.Write(ex.ToString());
             });
 
