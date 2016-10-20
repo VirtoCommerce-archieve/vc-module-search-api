@@ -312,7 +312,7 @@ namespace VirtoCommerce.SearchModule.Tests
 
         private ICatalogSearchService GetSearchService()
         {
-            return new CatalogSearchServiceImpl(GetCatalogRepository, GetItemService(), GetCatalogService(), GetCategoryService());
+            return new CatalogModule.Data.Services.CatalogSearchServiceImpl(GetCatalogRepository, GetItemService(), GetCatalogService(), GetCategoryService());
         }
 
         private IOutlineService GetOutlineService()
