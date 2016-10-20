@@ -1,0 +1,35 @@
+﻿<div class="blade-content __tree">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <div class="form-group" ng-if="!blade.isCatalog">
+                <label class="form-label">{{ 'searchAPI.blades.index-detail.labels.build-date' | translate }}</label>
+                <div class="form-input __calendar">
+                    <input ng-model="blade.currentEntity.buildDate" datepicker-popup="short" disabled="disabled">
+                    <button type="button" class="btn" disabled="disabled">
+                        <i class="btn-ico fa fa-calendar"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group" ng-if="!blade.isCatalog">
+                <label class="form-label">{{ 'searchAPI.blades.index-detail.labels.content' | translate }}</label>
+                <div class="log">{{blade.currentEntity.content}}</div>
+            </div>
+
+            <fieldset ng-if="blade.isCatalog">
+                <div class="sub-t">{{ 'searchAPI.blades.index-detail.labels.catalog-statistics' | translate }}</div>
+                <div class="form-group">
+                    <label class="form-label">{{ 'searchAPI.blades.index-detail.labels.item-count' | translate }}</label>
+                    <div class="form-input">
+                        <input ng-model="blade.currentEntity.itemCount" disabled="disabled">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ 'searchAPI.blades.index-detail.labels.category-count' | translate }}</label>
+                    <div class="form-input">
+                        <input ng-model="blade.currentEntity.categoryCount" disabled="disabled">
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,52 @@
+﻿{
+    "searchAPI": {
+        "blades": {
+            "index-detail": {
+                "title": "Search index",
+                "subtitle-catalog": "Search index for catalog",
+                "labels": {
+                    "build-date": "Last indexed",
+                    "content": "Index content",
+                    "catalog-statistics": "Search index statistics",
+                    "item-count": "Item count",
+                    "category-count": "Category count"
+                }
+            },
+            "index-progress": {
+                "title-catalog": "Catalog index update",
+                "title-item": "Product index update",
+                "subtitle": "Indexation progress",
+                "labels": {
+                    "start": "Start",
+                    "end": "End",
+                    "progress-messages": "Progress messages",
+                    "completed": "Index building process completed."
+                }
+            }
+        },
+        "widgets": {
+            "index": {
+                "index-ok": "Indexed at {{buildDate|date:'short'}}",
+                "index-old": "Outdated index was built at {{buildDate|date:'short'}}",
+                "no-index": "Search index missing"
+            },
+            "catalogIndex": {
+                "itemCount": "Indexed items",
+                "itemCountCatalog": "Items in catalog",
+                "categoryCount": "Indexed categories",
+                "categoryCountCatalog": "Categories in catalog"
+            }
+        },
+        "dialogs": {
+            "index-index": {
+                "title": "Rebuild Search Index",
+                "message": "Current search index will be deleted and built from scratch. Are you sure you want to rebuild the index?"
+            }
+        },
+        "commands": {
+            "index": "Re-index",
+            "index-missing": "Index missing",
+            "index-all": "Re-index catalog"
+        }
+    }
+}
