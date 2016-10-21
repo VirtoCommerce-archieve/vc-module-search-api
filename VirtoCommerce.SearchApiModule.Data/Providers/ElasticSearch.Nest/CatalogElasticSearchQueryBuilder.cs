@@ -13,6 +13,23 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest
 
             result &= GetCategoryQuery<T>(criteria as CategorySearchCriteria);
             result &= GetCatalogItemQuery<T>(criteria as CatalogItemSearchCriteria);
+            result &= GetSimpleQuery<T>(criteria as SimpleCatalogItemSearchCriteria);
+
+            return result;
+        }
+
+        protected virtual QueryContainer GetSimpleQuery<T>(SimpleCatalogItemSearchCriteria criteria)
+            where T : class
+        {
+            QueryContainer result = null;
+
+            if (criteria != null)
+            {
+                if (criteria.RawQuery != null && !string.IsNullOrEmpty(criteria.RawQuery))
+                {
+                    result = new QueryStringQuery { Query = criteria.RawQuery };
+                }
+            }
 
             return result;
         }

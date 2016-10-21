@@ -370,6 +370,31 @@ namespace VirtoCommerce.SearchApiModule.Test
             Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
         }
 
+        [Theory]
+        [InlineData("Lucene")]
+        [InlineData("Elastic")]
+        [Trait("Category", "CI")]
+        public void Can_find_using_simple_search(string providerType)
+        {
+            var scope = _DefaultScope;
+            var provider = GetSearchProvider(providerType, scope);
+            SearchHelper.CreateSampleIndex(provider, scope);
+
+            var criteria = new SimpleCatalogItemSearchCriteria
+            {
+                Catalog = "goods",
+                RecordsToRetrieve = 10,
+                StartingRecord = 0,
+                RawQuery = "color:blue"
+            };
+
+            var results = provider.Search<DocumentDictionary>(scope, criteria);
+
+            Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
+            var productName = results.Documents.ElementAt(0)["name"] as string; // black sox
+            Assert.True(productName == "blue shirt");
+        }
+
         private int GetFacetCount(ISearchResults<DocumentDictionary> results, string fieldName, string facetKey)
         {
             if (results.Facets == null || results.Facets.Length == 0)

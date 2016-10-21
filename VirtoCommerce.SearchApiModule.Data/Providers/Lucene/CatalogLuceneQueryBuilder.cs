@@ -1,6 +1,7 @@
 ﻿using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
+using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
@@ -72,17 +73,17 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
 
             #endregion
 
-            // add standard keyword search
+            #region SimpleCatalogItemSearchCriteria
 
-            //else if (criteria is OrderSearchCriteria)
-            //{
-            //	var c = criteria as OrderSearchCriteria;
+            if (criteria is SimpleCatalogItemSearchCriteria)
+            {
+                var c = criteria as SimpleCatalogItemSearchCriteria;
+                var parser = new QueryParser(u.Version.LUCENE_30, "__content", analyzer);
+                var parsedQuery = parser.Parse(c.RawQuery);
+                query.Add(parsedQuery, Occur.MUST);
+            }
 
-            //	if (!String.IsNullOrEmpty(c.CustomerId))
-            //	{
-            //		AddQuery("customerid", query, c.CustomerId);
-            //	}
-            //}
+            #endregion
 
             return builder;
         }

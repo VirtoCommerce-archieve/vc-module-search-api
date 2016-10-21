@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Linq;
 using VirtoCommerce.CatalogModule.Data.Repositories;
+using VirtoCommerce.CatalogModule.Web.Converters;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
+using VirtoCommerce.Platform.Core.Assets;
+using VirtoCommerce.SearchApiModule.Data.Model;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.SearchApiModule.Data.Services
 {
@@ -11,10 +16,23 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
     public class CatalogSearchServiceImpl : ICatalogSearchService
     {
         private readonly CatalogModule.Data.Services.CatalogSearchServiceImpl _catalogSearchServiceImpl_Catalog;
+        private readonly IItemBrowsingService _browseService;
+        private readonly ISearchConnection _searchConnection;
+        private readonly IBlobUrlResolver _blobUrlResolver;
 
-        public CatalogSearchServiceImpl(Func<ICatalogRepository> catalogRepositoryFactory, IItemService itemService, ICatalogService catalogService, ICategoryService categoryService)
+        public CatalogSearchServiceImpl(Func<ICatalogRepository> catalogRepositoryFactory, 
+            IItemService itemService, 
+            ICatalogService catalogService, 
+            ICategoryService categoryService,
+            IItemBrowsingService browseService,
+            ISearchConnection searchConnection,
+            IBlobUrlResolver blobUrlResolver
+            )
         {
             _catalogSearchServiceImpl_Catalog = new CatalogModule.Data.Services.CatalogSearchServiceImpl(catalogRepositoryFactory, itemService, catalogService, categoryService);
+            _browseService = browseService;
+            _searchConnection = searchConnection;
+            _blobUrlResolver = blobUrlResolver;
         }
 
         public SearchResult Search(SearchCriteria criteria)
@@ -29,18 +47,18 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             {
                 // use indexed search
                 retVal = new SearchResult();
-                // mock result:
-                var resultProduct = new CatalogProduct
-                {
-                    Id = "4ed55441810a47da88a483e5a1ee4e94",
-                    Images = new[] { new Image { Url = "http://localhost/admin/assets/catalog/1428511277000_1133098.jpg" } },
-                    Code = "_MOCK",
-                    Name = "_MOCK Phantom 3 Professional Quadcopter with 4K Camera and 3-Axis Gimbal",
-                    ProductType = "Physical"
-                };
 
-                retVal.Products.Add(resultProduct);
-                retVal.ProductsTotalCount = 148;
+                // TODO: create outline for category
+
+                var serviceCriteria = new SimpleCatalogItemSearchCriteria() { RawQuery = criteria.Keyword, Catalog = criteria.CatalogId };
+                var searchResults = _browseService.SearchItems(_searchConnection.Scope, serviceCriteria, ItemResponseGroup.ItemInfo);
+
+                if(searchResults.Products != null)
+                {
+                    retVal.Products = searchResults.Products.Select(x => x.ToModuleModel(_blobUrlResolver)).ToArray();
+                }
+
+                retVal.ProductsTotalCount = (int)searchResults.TotalCount;
             }
 
             return retVal;
