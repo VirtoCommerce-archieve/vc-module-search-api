@@ -49,8 +49,15 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 retVal = new SearchResult();
 
                 // TODO: create outline for category
+                // TODO: implement sorting
 
-                var serviceCriteria = new SimpleCatalogItemSearchCriteria() { RawQuery = criteria.Keyword, Catalog = criteria.CatalogId };
+                var serviceCriteria = new SimpleCatalogItemSearchCriteria() {
+                    RawQuery = criteria.Keyword,
+                    Catalog = criteria.CatalogId,
+                    StartingRecord = criteria.Skip,
+                    RecordsToRetrieve = criteria.Take
+                };
+
                 var searchResults = _browseService.SearchItems(_searchConnection.Scope, serviceCriteria, ItemResponseGroup.ItemInfo);
 
                 if(searchResults.Products != null)
