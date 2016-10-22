@@ -63,7 +63,10 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
                     AddQuery("__outline", query, c.Outlines);
                 }
 
-                query.Add(new TermQuery(new Term("__hidden", "false")), Occur.MUST);
+                if (!c.WithHidden)
+                {
+                    query.Add(new TermQuery(new Term("__hidden", "false")), Occur.MUST);
+                }
 
                 if (!string.IsNullOrEmpty(c.Catalog))
                 {

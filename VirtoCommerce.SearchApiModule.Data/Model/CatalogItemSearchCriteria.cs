@@ -121,5 +121,22 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
             get { return _endDate; }
             set { ChangeState(); _endDate = value; }
         }
+
+        private bool _withHidden = false;
+
+        /// <summary>
+        /// Specifies if we search hidden products.
+        /// </summary>
+        public virtual bool WithHidden
+        {
+            get
+            {
+                return _withHidden;
+            }
+            set
+            {
+                _withHidden = value;
+            }
+        }
     }
 }

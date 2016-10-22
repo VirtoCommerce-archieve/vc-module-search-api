@@ -298,7 +298,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         {
             var partitions = new ConcurrentBag<Partition>();
 
-            var result = _catalogSearchService.Search(new SearchCriteria { Take = 0, ResponseGroup = SearchResponseGroup.WithProducts });
+            var result = _catalogSearchService.Search(new SearchCriteria { Take = 0, ResponseGroup = SearchResponseGroup.WithProducts, WithHidden = true });
             var parts = result.ProductsTotalCount / PartitionSize + 1;
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 5 };
 
@@ -309,6 +309,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                     Skip = index * PartitionSize,
                     Take = PartitionSize,
                     ResponseGroup = SearchResponseGroup.WithProducts,
+                    WithHidden = true
                 };
 
                 // TODO: Need optimize search to return only product ids

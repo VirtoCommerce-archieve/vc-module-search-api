@@ -55,10 +55,11 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                     RawQuery = criteria.Keyword,
                     Catalog = criteria.CatalogId,
                     StartingRecord = criteria.Skip,
-                    RecordsToRetrieve = criteria.Take
+                    RecordsToRetrieve = criteria.Take,
+                    WithHidden = true
                 };
 
-                var searchResults = _browseService.SearchItems(_searchConnection.Scope, serviceCriteria, ItemResponseGroup.ItemInfo);
+                var searchResults = _browseService.SearchItems(_searchConnection.Scope, serviceCriteria, ItemResponseGroup.ItemInfo | ItemResponseGroup.Outlines);
 
                 if(searchResults.Products != null)
                 {
