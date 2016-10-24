@@ -1,12 +1,11 @@
-﻿using System;
-using Lucene.Net.Analysis.Standard;
+﻿using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
-using u = Lucene.Net.Util;
+using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
 using VirtoCommerce.SearchModule.Data.Providers.Lucene;
-using VirtoCommerce.SearchApiModule.Data.Model;
+using u = Lucene.Net.Util;
 
 namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
 {
@@ -15,6 +14,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
         /// <summary>
         ///     Builds the query.
         /// </summary>
+        /// <param name="scope"></param>
         /// <param name="criteria">The criteria.</param>
         /// <returns></returns>
         public override object BuildQuery<T>(string scope, ISearchCriteria criteria)
@@ -23,10 +23,8 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
             var query = builder.Query as BooleanQuery;
             var analyzer = new StandardAnalyzer(u.Version.LUCENE_30);
 
-            var fuzzyMinSimilarity = 0.7f;
-            var isFuzzySearch = false;
-
             #region CategorySearchCriteria
+
             if (criteria is CategorySearchCriteria)
             {
                 var c = criteria as CategorySearchCriteria;
@@ -35,9 +33,11 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
                     AddQuery("__outline", query, c.Outlines);
                 }
             }
+
             #endregion
 
             #region CatalogItemSearchCriteria
+
             if (criteria is CatalogItemSearchCriteria)
             {
                 var c = criteria as CatalogItemSearchCriteria;
@@ -64,14 +64,12 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
 
                 query.Add(new TermQuery(new Term("__hidden", "false")), Occur.MUST);
 
-                if (!String.IsNullOrEmpty(c.Catalog))
+                if (!string.IsNullOrEmpty(c.Catalog))
                 {
                     AddQuery("catalog", query, c.Catalog);
                 }
-
-                fuzzyMinSimilarity = c.FuzzyMinSimilarity;
-                isFuzzySearch = c.IsFuzzySearch;
             }
+
             #endregion
 
             // add standard keyword search
@@ -88,6 +86,5 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
 
             return builder;
         }
-
     }
 }
