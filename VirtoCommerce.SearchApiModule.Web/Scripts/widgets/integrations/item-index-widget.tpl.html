@@ -1,6 +1,6 @@
 ﻿<div class="gridster-cnt" ng-click="openBlade()">
     <div class="cnt-inner">
         <div class="list-count" ng-if="loading">...</div>
-        <div class="list-t" ng-if="!loading" translate="{{index.id ? (index.buildDate<blade.currentEntity.modifiedDate ? 'searchAPI.widgets.index.index-old' : 'searchAPI.widgets.index.index-ok') : 'searchAPI.widgets.index.no-index' }}" translate-values="{{index}}"></div>
+        <div class="list-t" ng-if="!loading" translate="{{index.id ? (index.buildDate<blade.currentEntity.modifiedDate ? 'searchAPI.widgets.index.index-old' : 'searchAPI.widgets.index.index-ok') : 'searchAPI.widgets.index.no-index' }}" translate-compile></div>
     </div>
 </div>

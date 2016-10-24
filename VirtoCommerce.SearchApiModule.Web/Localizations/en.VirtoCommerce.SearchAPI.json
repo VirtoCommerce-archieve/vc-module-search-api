@@ -29,15 +29,13 @@
         },
         "widgets": {
             "index": {
-                "index-ok": "Indexed at {{buildDate|date:'short'}}",
-                "index-old": "Outdated. Index was built at {{buildDate|date:'short'}}",
+                "index-ok": "Indexed <span am-time-ago='index.buildDate'></span>",
+                "index-old": "Outdated. Index was built <span am-time-ago='index.buildDate'>",
                 "no-index": "Search index missing"
             },
             "catalogIndex": {
-                "itemCount": "Indexed items",
-                "itemCountCatalog": "Items in catalog",
-                "categoryCount": "Indexed categories",
-                "categoryCountCatalog": "Categories in catalog"
+                "itemCount": "Item count (index / catalog)",
+                "categoryCount": "Categories count (index / catalog)"
             }
         },
         "dialogs": {
