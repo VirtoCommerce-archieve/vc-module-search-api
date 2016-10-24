@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Web.Converters;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
@@ -94,7 +96,12 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
             if (items != null)
             {
-                response.Products = items.Select(x => x.ToWebModel(_blobUrlResolver)).ToArray();
+                var productDtos= new ConcurrentBag<CatalogModule.Web.Model.Product>();
+                Parallel.ForEach(items, (x) =>
+                {
+                    productDtos.Add(x.ToWebModel(_blobUrlResolver));
+                });
+                response.Products = productDtos.OrderBy(i => itemsOrderedList.IndexOf(i.Id)).ToArray();
             }
 
             if (searchResults != null)
