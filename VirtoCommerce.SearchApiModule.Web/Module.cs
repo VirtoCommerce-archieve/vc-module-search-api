@@ -28,8 +28,8 @@ namespace VirtoCommerce.SearchApiModule.Web
             base.Initialize();
 
             // register index builders
-            _container.RegisterType<ISearchIndexBuilder, CatalogItemIndexBuilder>("catalogitem-indexer");
             _container.RegisterType<ISearchIndexBuilder, CategoryIndexBuilder>("category-indexer");
+            _container.RegisterType<ISearchIndexBuilder, CatalogItemIndexBuilder>("catalogitem-indexer");
 
             _container.RegisterType<IItemBrowsingService, ItemBrowsingService>();
             _container.RegisterType<ICategoryBrowsingService, CategoryBrowsingService>();
