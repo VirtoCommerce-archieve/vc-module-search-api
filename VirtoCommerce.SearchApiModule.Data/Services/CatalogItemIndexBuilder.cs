@@ -288,7 +288,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             foreach (var price in prices)
             {
                 doc.Add(new DocumentField(string.Format(CultureInfo.InvariantCulture, "price_{0}_{1}", price.Currency, price.PricelistId).ToLower(), price.EffectiveValue, new[] { IndexStore.No, IndexType.NotAnalyzed }));
-                doc.Add(new DocumentField(string.Format(CultureInfo.InvariantCulture, "price_{0}_{1}_value", price.Currency, price.PricelistId).ToLower(), (price.EffectiveValue).ToString(CultureInfo.InvariantCulture), new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
+                //doc.Add(new DocumentField(string.Format(CultureInfo.InvariantCulture, "price_{0}_{1}_value", price.Currency, price.PricelistId).ToLower(), (price.EffectiveValue).ToString(CultureInfo.InvariantCulture), new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
             }
         }
 
