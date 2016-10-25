@@ -18,7 +18,7 @@ angular.module(moduleName, ['virtoCommerce.catalogModule'])
 	    // integration: index in catalog details
 	    widgetService.registerWidget({
 	        controller: 'virtoCommerce.searchAPIModule.catalogIndexWidgetController',
-	        size: [2, 1],
+	        size: [3, 1],
 	        template: 'Modules/$(VirtoCommerce.SearchApi)/Scripts/widgets/integrations/catalog-index-widget.tpl.html'
 	    }, 'catalogDetail');
 
