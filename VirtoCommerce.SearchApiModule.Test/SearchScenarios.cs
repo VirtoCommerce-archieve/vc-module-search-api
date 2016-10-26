@@ -394,8 +394,20 @@ namespace VirtoCommerce.SearchApiModule.Test
             var productName = results.Documents.ElementAt(0)["name"] as string; // black sox
             Assert.True(productName == "blue shirt");
 
-            if (providerType != "Lucene")
+            if (providerType == "Elastic")
             {
+
+                criteria = new SimpleCatalogItemSearchCriteria
+                {
+                    Catalog = "goods",
+                    RecordsToRetrieve = 10,
+                    StartingRecord = 0,
+                    RawQuery = @"price_usd\*:[100 TO 199]"
+                };
+
+                results = provider.Search<DocumentDictionary>(scope, criteria);
+                Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
+
                 criteria = new SimpleCatalogItemSearchCriteria
                 {
                     Catalog = "goods",
@@ -406,6 +418,17 @@ namespace VirtoCommerce.SearchApiModule.Test
 
                 results = provider.Search<DocumentDictionary>(scope, criteria);
                 Assert.True(results.DocCount > 0, string.Format("Returns {0} instead of >0", results.DocCount));
+
+                criteria = new SimpleCatalogItemSearchCriteria
+                {
+                    Catalog = "goods",
+                    RecordsToRetrieve = 10,
+                    StartingRecord = 0,
+                    RawQuery = @"is:visible is:red3"
+                };
+
+                results = provider.Search<DocumentDictionary>(scope, criteria);
+                Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
             }
         }
 

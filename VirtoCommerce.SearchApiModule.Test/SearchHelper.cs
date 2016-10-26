@@ -42,8 +42,10 @@ namespace VirtoCommerce.SearchModule.Tests
             doc.Add(new DocumentField("__key", key, new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
             doc.Add(new DocumentField("__type", "product", new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
             doc.Add(new DocumentField("__sort", "1", new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
-            doc.Add(new DocumentField("__hidden", "false", new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
-            doc.Add(new DocumentField("code", "prd12321", new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
+            doc.Add(new DocumentField("status", "visible", new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
+            doc.Add(new DocumentField("is", "visible", new[] { IndexStore.No, IndexType.NotAnalyzed }));
+            doc.Add(new DocumentField("is", key, new[] { IndexStore.No, IndexType.NotAnalyzed }));
+            doc.Add(new DocumentField("code", key, new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
             doc.Add(new DocumentField("name", name, new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
             doc.Add(new DocumentField("startdate", DateTime.UtcNow.AddDays(-1), new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
             doc.Add(new DocumentField("enddate", DateTime.MaxValue, new[] { IndexStore.Yes, IndexType.NotAnalyzed }));

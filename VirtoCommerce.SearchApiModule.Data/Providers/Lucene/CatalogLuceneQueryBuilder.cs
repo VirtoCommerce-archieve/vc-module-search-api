@@ -65,7 +65,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
 
                 if (!c.WithHidden)
                 {
-                    query.Add(new TermQuery(new Term("__hidden", "false")), Occur.MUST);
+                    query.Add(new TermQuery(new Term("status", "visible")), Occur.MUST);
                 }
 
                 if (!string.IsNullOrEmpty(c.Catalog))

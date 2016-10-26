@@ -27,7 +27,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest
             {
                 if (criteria.RawQuery != null && !string.IsNullOrEmpty(criteria.RawQuery))
                 {
-                    result = new QueryStringQuery { Query = criteria.RawQuery, Lenient = true };
+                    result = new QueryStringQuery { Query = criteria.RawQuery, Lenient = true, DefaultOperator = Operator.And };
                 }
             }
 
@@ -70,7 +70,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest
                 }
 
                 if (!criteria.WithHidden)
-                    result &= new TermQuery { Field = "__hidden", Value = false };
+                    result &= new TermQuery { Field = "status", Value = "visible" };
 
                 if (criteria.Outlines != null && criteria.Outlines.Count > 0)
                 {
