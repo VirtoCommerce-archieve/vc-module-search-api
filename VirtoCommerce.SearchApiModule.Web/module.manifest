@@ -14,7 +14,6 @@
     <authors>
         <author>Alexander Siniouguine</author>
         <author>Artem Dudarev</author>
-        <author>Egidijus Mažeika</author>
     </authors>
     <owners>
         <owner>Virto Commerce</owner>
@@ -27,8 +26,4 @@
 
     <assemblyFile>VirtoCommerce.SearchApiModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.SearchApiModule.Web.Module, VirtoCommerce.SearchApiModule.Web</moduleType>
-
-    <scripts>
-        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
-    </scripts>
 </module>

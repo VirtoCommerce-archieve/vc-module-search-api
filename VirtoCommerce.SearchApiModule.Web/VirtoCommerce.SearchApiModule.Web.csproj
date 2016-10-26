@@ -203,17 +203,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\logo.png" />
-    <Content Include="Scripts\blades\index-progress.js" />
-    <Content Include="Scripts\blades\index-detail.js" />
-    <Content Include="Scripts\blades\index-progress.tpl.html" />
-    <Content Include="Scripts\blades\index-detail.tpl.html" />
-    <Content Include="Scripts\resources\searchAPIResources.js" />
-    <Content Include="Scripts\module.js" />
-    <Content Include="Scripts\widgets\integrations\catalog-index-widget.js" />
-    <Content Include="Scripts\widgets\integrations\item-index-widget.js" />
-    <Content Include="Scripts\widgets\integrations\catalog-index-widget.tpl.html" />
-    <Content Include="Scripts\widgets\integrations\item-index-widget.tpl.html" />
-    <Content Include="Localizations\en.VirtoCommerce.SearchAPI.json" />
     <None Include="module.ignore" />
     <None Include="packages.config">
       <SubType>Designer</SubType>

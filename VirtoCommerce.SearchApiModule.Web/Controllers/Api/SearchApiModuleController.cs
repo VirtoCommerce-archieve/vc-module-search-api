@@ -66,67 +66,67 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
             return Ok(result);
         }
 
-        /// <summary>
-        /// Get search index for specified document type and document id.
-        /// </summary>
-        /// <param name="documentType"></param>
-        /// <param name="documentId"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("index/{documentType}/{documentId}")]
-        [ResponseType(typeof(IndexStatistics))]
-        // [CheckPermission(Permission = SearchPredefinedPermissions.Read)]
-        public IHttpActionResult GetIndex(string documentType, string documentId)
-        {
-            var result = new IndexDocument
-            {
-                Id = documentId,
-                BuildDate = DateTime.UtcNow.AddMinutes(-1),
-                Content = "function updateStatus() {    \n    if ($scope.index && blade.currentEntity) {        $scope.loading = false;        if (!$scope.index.id)"
-            };
-            if (new Random().Next(3) == 2)
-                result = new IndexDocument(); // index not found
+        ///// <summary>
+        ///// Get search index for specified document type and document id.
+        ///// </summary>
+        ///// <param name="documentType"></param>
+        ///// <param name="documentId"></param>
+        ///// <returns></returns>
+        //[HttpGet]
+        //[Route("index/{documentType}/{documentId}")]
+        //[ResponseType(typeof(IndexStatistics))]
+        //// [CheckPermission(Permission = SearchPredefinedPermissions.Read)]
+        //public IHttpActionResult GetIndex(string documentType, string documentId)
+        //{
+        //    var result = new IndexDocument
+        //    {
+        //        Id = documentId,
+        //        BuildDate = DateTime.UtcNow.AddMinutes(-1),
+        //        Content = "function updateStatus() {    \n    if ($scope.index && blade.currentEntity) {        $scope.loading = false;        if (!$scope.index.id)"
+        //    };
+        //    if (new Random().Next(3) == 2)
+        //        result = new IndexDocument(); // index not found
 
-            return Ok(result);
-        }
+        //    return Ok(result);
+        //}
 
-        /// <summary>
-        /// Get search index statistics for specified document type and document id.
-        /// </summary>
-        /// <param name="documentType"></param>
-        /// <param name="documentId"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("index/statistics/{documentType}/{documentId}")]
-        [ResponseType(typeof(IndexStatistics))]
-        // [CheckPermission(Permission = SearchPredefinedPermissions.Read)]
-        public IHttpActionResult GetStatistics(string documentType, string documentId)
-        {
-            var result = new IndexStatistics
-            {
-                ItemCount = 94,
-                ItemCountCatalog = 156,
-                CategoryCount = 24
-            };
-            return Ok(result);
-        }
+        ///// <summary>
+        ///// Get search index statistics for specified document type and document id.
+        ///// </summary>
+        ///// <param name="documentType"></param>
+        ///// <param name="documentId"></param>
+        ///// <returns></returns>
+        //[HttpGet]
+        //[Route("index/statistics/{documentType}/{documentId}")]
+        //[ResponseType(typeof(IndexStatistics))]
+        //// [CheckPermission(Permission = SearchPredefinedPermissions.Read)]
+        //public IHttpActionResult GetStatistics(string documentType, string documentId)
+        //{
+        //    var result = new IndexStatistics
+        //    {
+        //        ItemCount = 94,
+        //        ItemCountCatalog = 156,
+        //        CategoryCount = 24
+        //    };
+        //    return Ok(result);
+        //}
 
-        /// <summary>
-        /// Rebuild the index for specified document type and document id.
-        /// </summary>
-        /// <param name="documentType"></param>
-        /// <param name="documentId"></param>
-        /// <param name="UpdateOnly">Rebuild only missing documents</param>
-        /// <returns></returns>
-        [HttpPut]
-        [Route("~/api/searchAPI/index/rebuild/{documentType}/{documentId}")]
-        [ResponseType(typeof(SearchPushNotification))]
-        [CheckPermission(Permission = SearchPredefinedPermissions.RebuildIndex)]
-        public IHttpActionResult Rebuild(string documentType = "", string documentId = "", bool UpdateOnly = false)
-        {
-            var result = ScheduleRebuildJob(documentType, documentId, UpdateOnly);
-            return Ok(result);
-        }
+        ///// <summary>
+        ///// Rebuild the index for specified document type and document id.
+        ///// </summary>
+        ///// <param name="documentType"></param>
+        ///// <param name="documentId"></param>
+        ///// <param name="UpdateOnly">Rebuild only missing documents</param>
+        ///// <returns></returns>
+        //[HttpPut]
+        //[Route("~/api/searchAPI/index/rebuild/{documentType}/{documentId}")]
+        //[ResponseType(typeof(SearchPushNotification))]
+        //[CheckPermission(Permission = SearchPredefinedPermissions.RebuildIndex)]
+        //public IHttpActionResult Rebuild(string documentType = "", string documentId = "", bool UpdateOnly = false)
+        //{
+        //    var result = ScheduleRebuildJob(documentType, documentId, UpdateOnly);
+        //    return Ok(result);
+        //}
 
 
         private SearchPushNotification ScheduleRebuildJob(string documentType, string documentId, bool updateOnly)
