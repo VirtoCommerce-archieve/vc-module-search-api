@@ -386,7 +386,7 @@ namespace VirtoCommerce.SearchApiModule.Test
                 Catalog = "goods",
                 RecordsToRetrieve = 10,
                 StartingRecord = 0,
-                RawQuery = "color:blue"
+                RawQuery = "color:bLue"
             };
 
             var results = provider.Search<DocumentDictionary>(scope, criteria);

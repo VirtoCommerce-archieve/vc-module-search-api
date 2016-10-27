@@ -292,7 +292,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                         doc.Add(new DocumentField(propertyName, propValue.Value.ToString().ToLowerInvariant(), new[] { IndexStore.Yes, IndexType.Analyzed }));
                         break;
                     case PropertyValueType.ShortText: // do not tokenize small values as they will be used for lookups and filters
-                        doc.Add(new DocumentField(propertyName, propValue.Value.ToString().ToLowerInvariant(), new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
+                        doc.Add(new DocumentField(propertyName, propValue.Value.ToString(), new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
                         break;
                 }
             }
