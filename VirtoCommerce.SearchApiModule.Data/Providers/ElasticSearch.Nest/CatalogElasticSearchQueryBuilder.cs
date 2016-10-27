@@ -27,7 +27,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest
             {
                 if (criteria.RawQuery != null && !string.IsNullOrEmpty(criteria.RawQuery))
                 {
-                    result = new QueryStringQuery { Query = criteria.RawQuery, Lenient = true, DefaultOperator = Operator.And };
+                    result = new QueryStringQuery { Query = criteria.RawQuery, Lenient = true, DefaultOperator = Operator.And, Analyzer = "standard" };
                 }
             }
 

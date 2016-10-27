@@ -44,6 +44,8 @@ namespace VirtoCommerce.SearchModule.Tests
             doc.Add(new DocumentField("__sort", "1", new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
             doc.Add(new DocumentField("status", "visible", new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
             doc.Add(new DocumentField("is", "visible", new[] { IndexStore.No, IndexType.NotAnalyzed }));
+            doc.Add(new DocumentField("is", "priced", new[] { IndexStore.No, IndexType.NotAnalyzed }));
+            doc.Add(new DocumentField("is", color, new[] { IndexStore.No, IndexType.NotAnalyzed }));
             doc.Add(new DocumentField("is", key, new[] { IndexStore.No, IndexType.NotAnalyzed }));
             doc.Add(new DocumentField("code", key, new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
             doc.Add(new DocumentField("name", name, new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
@@ -53,7 +55,7 @@ namespace VirtoCommerce.SearchModule.Tests
             foreach (var price in prices)
             {
                 doc.Add(new DocumentField(price.PriceList, price.Amount, new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
-                doc.Add(new DocumentField(string.Format("{0}_value", price.PriceList), price.Amount.ToString(), new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
+                doc.Add(new DocumentField("price_usd", price.Amount, new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
             }
             
             doc.Add(new DocumentField("color", color, new[] { IndexStore.Yes, IndexType.NotAnalyzed }));

@@ -82,6 +82,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
             {
                 var c = criteria as SimpleCatalogItemSearchCriteria;
                 var parser = new QueryParser(u.Version.LUCENE_30, "__content", analyzer);
+                parser.DefaultOperator = QueryParser.Operator.AND;
                 var parsedQuery = parser.Parse(c.RawQuery);
                 query.Add(parsedQuery, Occur.MUST);
             }

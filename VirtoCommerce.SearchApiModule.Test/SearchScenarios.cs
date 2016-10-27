@@ -402,36 +402,35 @@ namespace VirtoCommerce.SearchApiModule.Test
                     Catalog = "goods",
                     RecordsToRetrieve = 10,
                     StartingRecord = 0,
-                    RawQuery = @"price_usd\*:[100 TO 199]"
-                };
-
-                results = provider.Search<DocumentDictionary>(scope, criteria);
-                Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
-
-                criteria = new SimpleCatalogItemSearchCriteria
-                {
-                    Catalog = "goods",
-                    RecordsToRetrieve = 10,
-                    StartingRecord = 0,
-                    RawQuery = @"_exists_:price\*"
-                };
-
-                results = provider.Search<DocumentDictionary>(scope, criteria);
-                Assert.True(results.DocCount > 0, string.Format("Returns {0} instead of >0", results.DocCount));
-
-                criteria = new SimpleCatalogItemSearchCriteria
-                {
-                    Catalog = "goods",
-                    RecordsToRetrieve = 10,
-                    StartingRecord = 0,
-                    RawQuery = @"is:visible is:red3"
+                    RawQuery = @"price_usd:[100 TO 199]"
                 };
 
                 results = provider.Search<DocumentDictionary>(scope, criteria);
                 Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
             }
-        }
 
+            criteria = new SimpleCatalogItemSearchCriteria
+            {
+                Catalog = "goods",
+                RecordsToRetrieve = 10,
+                StartingRecord = 0,
+                RawQuery = @"is:priced"
+            };
+
+            results = provider.Search<DocumentDictionary>(scope, criteria);
+            Assert.True(results.DocCount > 0, string.Format("Returns {0} instead of >0", results.DocCount));
+
+            criteria = new SimpleCatalogItemSearchCriteria
+            {
+                Catalog = "goods",
+                RecordsToRetrieve = 10,
+                StartingRecord = 0,
+                RawQuery = @"is:visible is:red3"
+            };
+
+            results = provider.Search<DocumentDictionary>(scope, criteria);
+            Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
+        }
 
         private int GetFacetCount(ISearchResults<DocumentDictionary> results, string fieldName, string facetKey)
         {
