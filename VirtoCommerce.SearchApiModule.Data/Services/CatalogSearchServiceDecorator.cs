@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.CatalogModule.Data.Repositories;
-using VirtoCommerce.CatalogModule.Web.Converters;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Platform.Core.Assets;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
@@ -17,43 +16,29 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
     /// <summary>
     /// Another implementation for ICatalogSearchService. Combines indexed and DB search providers.
     /// </summary>
-    public class CatalogSearchServiceImpl : ICatalogSearchService
+    public class CatalogSearchServiceDecorator : ICatalogSearchService
     {
-        private readonly CatalogModule.Data.Services.CatalogSearchServiceImpl _catalogSearchServiceImpl_Catalog;
-        private readonly IItemBrowsingService _browseService;
+        private readonly ISettingsManager _settingsManager;
+        private readonly ICatalogSearchService _catalogSearchService;
         private readonly ISearchConnection _searchConnection;
-        private readonly IBlobUrlResolver _blobUrlResolver;
         private readonly ISearchProvider _searchProvider;
         private readonly IItemService _itemService;
 
-        public CatalogSearchServiceImpl(Func<ICatalogRepository> catalogRepositoryFactory, 
-            IItemService itemService, 
-            ICatalogService catalogService, 
-            ICategoryService categoryService,
-            IItemBrowsingService browseService,
-            ISearchConnection searchConnection,
-            IBlobUrlResolver blobUrlResolver,
-            ISearchProvider searchService
-            )
+        public CatalogSearchServiceDecorator(ICatalogSearchService catalogSearchService, ISearchConnection searchConnection, 
+                                             ISearchProvider searchService, IItemService itemService, ISettingsManager settingsManager)
         {
-            _catalogSearchServiceImpl_Catalog = new CatalogModule.Data.Services.CatalogSearchServiceImpl(catalogRepositoryFactory, itemService, catalogService, categoryService);
-            _browseService = browseService;
+            _catalogSearchService = catalogSearchService;
             _searchConnection = searchConnection;
-            _blobUrlResolver = blobUrlResolver;
             _searchProvider = searchService;
             _itemService = itemService;
+            _settingsManager = settingsManager;
         }
 
         public SearchResult Search(SearchCriteria criteria)
         {
             SearchResult retVal;
-            if (string.IsNullOrEmpty(criteria.Keyword))
-            {
-                // use original impl. from catalog module
-                retVal = _catalogSearchServiceImpl_Catalog.Search(criteria);
-            }
-            else
-            {
+            if (!string.IsNullOrEmpty(criteria.Keyword) && _settingsManager.GetValue("VirtoCommerce.SearchApi.UseCatalogIndexedSearchInManager", true))
+            {              
                 // use indexed search
                 retVal = new SearchResult();
 
@@ -69,6 +54,11 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 };
 
                 SearchItems(_searchConnection.Scope, retVal, serviceCriteria, ItemResponseGroup.ItemInfo | ItemResponseGroup.Outlines);
+            }
+            else
+            {
+                // use original impl. from catalog module
+                retVal = _catalogSearchService.Search(criteria);
             }
 
             return retVal;

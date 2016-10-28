@@ -339,14 +339,13 @@ namespace VirtoCommerce.SearchModule.Tests
 
         private IStoreService GetStoreService()
         {
-            var cacheManager = new Moq.Mock<ICacheManager<object>>();
             var shippingService = Moq.Mock.Of<IShippingMethodsService>(s => s.GetAllShippingMethods() == new ShippingMethod[] { });
             var paymentService = Moq.Mock.Of<IPaymentMethodsService>(s => s.GetAllPaymentMethods() == new PaymentMethod[] { });
             var taxService = Moq.Mock.Of<ITaxService>(s => s.GetAllTaxProviders() == new TaxProvider[] { });
             var settings = Moq.Mock.Of<ISettingsManager>(s => s.GetModuleSettings("VirtoCommerce.Store") == new SettingEntry[] { });
             var dpService = GetDynamicPropertyService();
 
-            return new StoreServiceImpl(GetStoreRepository, GetCommerceService(), settings, dpService, shippingService, paymentService, taxService, cacheManager.Object);
+            return new StoreServiceImpl(GetStoreRepository, GetCommerceService(), settings, dpService, shippingService, paymentService, taxService, GetCacheManager());
         }
 
         private IDynamicPropertyService GetDynamicPropertyService()
@@ -357,22 +356,22 @@ namespace VirtoCommerce.SearchModule.Tests
 
         private IPropertyService GetPropertyService()
         {
-            return new PropertyServiceImpl(GetCatalogRepository);
+            return new PropertyServiceImpl(GetCatalogRepository, GetCacheManager());
         }
 
         private ICategoryService GetCategoryService()
         {
-            return new CategoryServiceImpl(GetCatalogRepository, GetCommerceService(), GetOutlineService());
+            return new CategoryServiceImpl(GetCatalogRepository, GetCommerceService(), GetOutlineService(), GetCacheManager());
         }
 
         private ICatalogService GetCatalogService()
         {
-            return new CatalogServiceImpl(GetCatalogRepository, GetCommerceService());
+            return new CatalogServiceImpl(GetCatalogRepository, GetCommerceService(), GetCacheManager());
         }
 
         private IItemService GetItemService()
         {
-            return new ItemServiceImpl(GetCatalogRepository, GetCommerceService(), GetOutlineService());
+            return new ItemServiceImpl(GetCatalogRepository, GetCommerceService(), GetOutlineService(), GetCacheManager());
         }
 
         private IChangeLogService GetChangeLogService()
@@ -402,6 +401,11 @@ namespace VirtoCommerce.SearchModule.Tests
         {
             var result = new CatalogRepositoryImpl("VirtoCommerce", new EntityPrimaryKeyGeneratorInterceptor(), new AuditableInterceptor(null));
             return result;
+        }
+
+        private ICacheManager<object> GetCacheManager()
+        {
+            return new Moq.Mock<ICacheManager<object>>().Object;
         }
 
         private static IСommerceRepository GetCommerceRepository()

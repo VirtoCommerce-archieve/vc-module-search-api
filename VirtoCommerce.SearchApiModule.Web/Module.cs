@@ -9,6 +9,7 @@ using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Filters;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
 using VirtoCommerce.SearchModule.Core.Model.Search;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.SearchApiModule.Web
 {
@@ -35,14 +36,6 @@ namespace VirtoCommerce.SearchApiModule.Web
             _container.RegisterType<ICategoryBrowsingService, CategoryBrowsingService>();
             _container.RegisterType<IBrowseFilterService, FilterService>();
 
-            // ICatalogSearchService override
-            _container.RegisterType<ICatalogSearchService, CatalogSearchServiceImpl>();
-        }
-
-        public override void PostInitialize()
-        {
-            base.PostInitialize();
-
             var searchConnection = _container.Resolve<ISearchConnection>();
             if (searchConnection.Provider.Equals(SearchProviders.Elasticsearch.ToString(), StringComparison.OrdinalIgnoreCase))
             {
@@ -52,8 +45,12 @@ namespace VirtoCommerce.SearchApiModule.Web
             {
                 _container.RegisterType<ISearchQueryBuilder, CatalogLuceneQueryBuilder>("lucene");
             }
-        }
 
+            var searchServiceDecorator = _container.Resolve<CatalogSearchServiceDecorator>();
+            //replace original ICatalogSearchService to decorator
+            _container.RegisterInstance<ICatalogSearchService>(searchServiceDecorator);
+        }
+     
         #endregion
     }
-    }
+}

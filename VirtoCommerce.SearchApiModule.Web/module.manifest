@@ -31,6 +31,19 @@
     <scripts>
         <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
     </scripts>
+
+    <settings>
+        <group name="Search|General">
+            <setting>
+                <name>VirtoCommerce.SearchApi.UseCatalogIndexedSearchInManager</name>
+                <valueType>boolean</valueType>
+                <defaultValue>true</defaultValue>
+                <title>Use indexed search for catalog</title>
+                <description>Enable or disable indexed search for catalog module with advanced syntax</description>
+            </setting>          
+        </group>
+    </settings>
+    
     <permissions>
         <group name="Search">         
             <permission id="VirtoCommerce.Search:FilterProperties:Read" name="Read store filter properties" />
