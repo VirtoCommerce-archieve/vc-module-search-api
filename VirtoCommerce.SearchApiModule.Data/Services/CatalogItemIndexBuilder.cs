@@ -140,8 +140,12 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             doc.Add(new DocumentField("__key", item.Id.ToLower(), indexStoreNotAnalyzed));
             doc.Add(new DocumentField("__type", item.GetType().Name, indexStoreNotAnalyzed));
             doc.Add(new DocumentField("__sort", item.Name, indexStoreNotAnalyzed));
-            doc.Add(new DocumentField("__hidden", (item.IsActive != true || item.MainProductId != null).ToString().ToLower(), indexStoreNotAnalyzed));
+            IndexIsProperty(doc, "product");
+            var statusField = (item.IsActive != true || item.MainProductId != null) ? "hidden" : "visible";
+            IndexIsProperty(doc, statusField);
+            doc.Add(new DocumentField("status", statusField, indexStoreNotAnalyzed));
             doc.Add(new DocumentField("code", item.Code, indexStoreNotAnalyzed));
+            IndexIsProperty(doc, item.Code);
             doc.Add(new DocumentField("name", item.Name, indexStoreNotAnalyzed));
             doc.Add(new DocumentField("startdate", item.StartDate, indexStoreNotAnalyzed));
             doc.Add(new DocumentField("enddate", item.EndDate.HasValue ? item.EndDate : DateTime.MaxValue, indexStoreNotAnalyzed));
@@ -182,12 +186,14 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             {
                 if (item.Variations.Any(c => c.ProductType == "Physical"))
                 {
-                    doc.Add(new DocumentField("producttype", "Physical", new[] { IndexStore.Yes, IndexType.NotAnalyzed, IndexDataType.StringCollection }));
+                    doc.Add(new DocumentField("type", "physical", new[] { IndexStore.Yes, IndexType.NotAnalyzed, IndexDataType.StringCollection }));
+                    IndexIsProperty(doc, "physical");
                 }
 
                 if (item.Variations.Any(c => c.ProductType == "Digital"))
                 {
-                    doc.Add(new DocumentField("producttype", "Digital", new[] { IndexStore.Yes, IndexType.NotAnalyzed, IndexDataType.StringCollection }));
+                    doc.Add(new DocumentField("type", "digital", new[] { IndexStore.Yes, IndexType.NotAnalyzed, IndexDataType.StringCollection }));
+                    IndexIsProperty(doc, "digital");
                 }
 
                 foreach (var variation in item.Variations)
@@ -204,6 +210,17 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
             return true;
         }
+
+        /// <summary>
+        /// is:hidden, property can be used to provide user friendly way of searching products
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="value"></param>
+        protected virtual void IndexIsProperty(ResultDocument doc, string value)
+        {
+            var indexNoStoreNotAnalyzed = new[] { IndexStore.No, IndexType.NotAnalyzed };
+            doc.Add(new DocumentField("is", value, indexNoStoreNotAnalyzed));
+       }
 
         protected virtual string[] GetOutlineStrings(IEnumerable<Outline> outlines)
         {
@@ -289,7 +306,19 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             foreach (var price in prices)
             {
                 doc.Add(new DocumentField(string.Format(CultureInfo.InvariantCulture, "price_{0}_{1}", price.Currency, price.PricelistId).ToLower(), price.EffectiveValue, new[] { IndexStore.No, IndexType.NotAnalyzed }));
-                doc.Add(new DocumentField(string.Format(CultureInfo.InvariantCulture, "price_{0}_{1}_value", price.Currency, price.PricelistId).ToLower(), (price.EffectiveValue).ToString(CultureInfo.InvariantCulture), new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
+
+                // now save additional pricing fields for convinient user searches, store price with currency and without one
+                doc.Add(new DocumentField(string.Format(CultureInfo.InvariantCulture, "price_{0}", price.Currency), price.EffectiveValue, new[] { IndexStore.No, IndexType.NotAnalyzed }));
+                doc.Add(new DocumentField("price", price.EffectiveValue, new[] { IndexStore.No, IndexType.NotAnalyzed }));
+            }
+
+            if (prices.Length == 0) // mark product without prices defined
+            {
+                IndexIsProperty(doc, "unpriced");
+            }
+            else
+            {
+                IndexIsProperty(doc, "priced");
             }
         }
 
@@ -299,7 +328,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         {
             var partitions = new ConcurrentBag<Partition>();
 
-            var result = _catalogSearchService.Search(new SearchCriteria { Take = 0, ResponseGroup = SearchResponseGroup.WithProducts });
+            var result = _catalogSearchService.Search(new SearchCriteria { Take = 0, ResponseGroup = SearchResponseGroup.WithProducts, WithHidden = true });
             var parts = result.ProductsTotalCount / PartitionSize + 1;
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 5 };
 
@@ -310,6 +339,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                     Skip = index * PartitionSize,
                     Take = PartitionSize,
                     ResponseGroup = SearchResponseGroup.WithProducts,
+                    WithHidden = true
                 };
 
                 // TODO: Need optimize search to return only product ids

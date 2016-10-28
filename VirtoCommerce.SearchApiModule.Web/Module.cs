@@ -1,5 +1,6 @@
 ﻿using Microsoft.Practices.Unity;
 using System;
+using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchApiModule.Data.Providers.Lucene;
@@ -8,8 +9,6 @@ using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Filters;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
 using VirtoCommerce.SearchModule.Core.Model.Search;
-using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
-using VirtoCommerce.SearchModule.Data.Providers.Lucene;
 
 namespace VirtoCommerce.SearchApiModule.Web
 {
@@ -35,6 +34,9 @@ namespace VirtoCommerce.SearchApiModule.Web
             _container.RegisterType<IItemBrowsingService, ItemBrowsingService>();
             _container.RegisterType<ICategoryBrowsingService, CategoryBrowsingService>();
             _container.RegisterType<IBrowseFilterService, FilterService>();
+
+            // ICatalogSearchService override
+            _container.RegisterType<ICatalogSearchService, CatalogSearchServiceImpl>();
         }
 
         public override void PostInitialize()

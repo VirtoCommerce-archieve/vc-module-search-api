@@ -13,6 +13,23 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest
 
             result &= GetCategoryQuery<T>(criteria as CategorySearchCriteria);
             result &= GetCatalogItemQuery<T>(criteria as CatalogItemSearchCriteria);
+            result &= GetSimpleQuery<T>(criteria as SimpleCatalogItemSearchCriteria);
+
+            return result;
+        }
+
+        protected virtual QueryContainer GetSimpleQuery<T>(SimpleCatalogItemSearchCriteria criteria)
+            where T : class
+        {
+            QueryContainer result = null;
+
+            if (criteria != null)
+            {
+                if (criteria.RawQuery != null && !string.IsNullOrEmpty(criteria.RawQuery))
+                {
+                    result = new QueryStringQuery { Query = criteria.RawQuery, Lenient = true, DefaultOperator = Operator.And, Analyzer = "standard" };
+                }
+            }
 
             return result;
         }
@@ -52,7 +69,8 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest
                     result &= new DateRangeQuery { Field = "enddate", GreaterThan = criteria.EndDate.Value };
                 }
 
-                result &= new TermQuery { Field = "__hidden", Value = false };
+                if (!criteria.WithHidden)
+                    result &= new TermQuery { Field = "status", Value = "visible" };
 
                 if (criteria.Outlines != null && criteria.Outlines.Count > 0)
                 {

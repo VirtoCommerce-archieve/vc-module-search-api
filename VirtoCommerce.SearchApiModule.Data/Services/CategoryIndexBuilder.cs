@@ -106,8 +106,12 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             doc.Add(new DocumentField("__key", category.Id.ToLower(), indexStoreNotAnalyzed));
             doc.Add(new DocumentField("__type", category.GetType().Name, indexStoreNotAnalyzed));
             doc.Add(new DocumentField("__sort", category.Name, indexStoreNotAnalyzed));
-            doc.Add(new DocumentField("__hidden", (category.IsActive != true || category.Id != null).ToString().ToLower(), indexStoreNotAnalyzed));
+            IndexIsProperty(doc, "category");
+            var statusField = (category.IsActive != true || category.Id != null) ? "hidden" : "visible";
+            IndexIsProperty(doc, statusField);
+            doc.Add(new DocumentField("status", statusField, indexStoreNotAnalyzed));
             doc.Add(new DocumentField("code", category.Code, indexStoreNotAnalyzed));
+            IndexIsProperty(doc, category.Code);
             doc.Add(new DocumentField("name", category.Name, indexStoreNotAnalyzed));
             doc.Add(new DocumentField("createddate", category.CreatedDate, indexStoreNotAnalyzed));
             doc.Add(new DocumentField("lastmodifieddate", category.ModifiedDate ?? DateTime.MaxValue, indexStoreNotAnalyzed));
@@ -144,6 +148,17 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             // add to content
             doc.Add(new DocumentField("__content", category.Name, indexStoreAnalyzedStringCollection));
             doc.Add(new DocumentField("__content", category.Code, indexStoreAnalyzedStringCollection));
+        }
+
+        /// <summary>
+        /// is:hidden, property can be used to provide user friendly way of searching products
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="value"></param>
+        protected virtual void IndexIsProperty(ResultDocument doc, string value)
+        {
+            var indexNoStoreNotAnalyzed = new[] { IndexStore.No, IndexType.NotAnalyzed };
+            doc.Add(new DocumentField("is", value, indexNoStoreNotAnalyzed));
         }
 
         protected virtual string[] GetOutlineStrings(IEnumerable<Outline> outlines)

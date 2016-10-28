@@ -9,6 +9,7 @@ using VirtoCommerce.SearchModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchModule.Tests;
 using Xunit;
+using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
 
 namespace VirtoCommerce.SearchApiModule.Test
 {
@@ -367,6 +368,67 @@ namespace VirtoCommerce.SearchApiModule.Test
             var priceCount = GetFacetCount(results, "Price", "100_to_700");
             Assert.True(priceCount == 1, string.Format("Returns {0} facets of 100_to_700 instead of 1", priceCount));
 
+            Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
+        }
+
+        [Theory]
+        [InlineData("Lucene")]
+        [InlineData("Elastic")]
+        [Trait("Category", "CI")]
+        public void Can_find_using_simple_search(string providerType)
+        {
+            var scope = _DefaultScope;
+            var provider = GetSearchProvider(providerType, scope);
+            SearchHelper.CreateSampleIndex(provider, scope);
+
+            var criteria = new SimpleCatalogItemSearchCriteria
+            {
+                Catalog = "goods",
+                RecordsToRetrieve = 10,
+                StartingRecord = 0,
+                RawQuery = "color:bLue"
+            };
+
+            var results = provider.Search<DocumentDictionary>(scope, criteria);
+            Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
+            var productName = results.Documents.ElementAt(0)["name"] as string; // black sox
+            Assert.True(productName == "blue shirt");
+
+            if (providerType == "Elastic")
+            {
+
+                criteria = new SimpleCatalogItemSearchCriteria
+                {
+                    Catalog = "goods",
+                    RecordsToRetrieve = 10,
+                    StartingRecord = 0,
+                    RawQuery = @"price_usd:[100 TO 199]"
+                };
+
+                results = provider.Search<DocumentDictionary>(scope, criteria);
+                Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
+            }
+
+            criteria = new SimpleCatalogItemSearchCriteria
+            {
+                Catalog = "goods",
+                RecordsToRetrieve = 10,
+                StartingRecord = 0,
+                RawQuery = @"is:priced"
+            };
+
+            results = provider.Search<DocumentDictionary>(scope, criteria);
+            Assert.True(results.DocCount > 0, string.Format("Returns {0} instead of >0", results.DocCount));
+
+            criteria = new SimpleCatalogItemSearchCriteria
+            {
+                Catalog = "goods",
+                RecordsToRetrieve = 10,
+                StartingRecord = 0,
+                RawQuery = @"is:visible is:red3"
+            };
+
+            results = provider.Search<DocumentDictionary>(scope, criteria);
             Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
         }
 
