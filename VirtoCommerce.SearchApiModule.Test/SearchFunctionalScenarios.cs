@@ -65,7 +65,8 @@ namespace VirtoCommerce.SearchModule.Tests
 
             provider.RemoveAll(scope, "");
             var controller = GetSearchIndexController(provider);
-            controller.Process(scope, "category", true);
+            controller.RemoveIndex(scope, "category");
+            controller.BuildIndex(scope, "category", x => { return; });
 
             // sleep for index to be commited
             Thread.Sleep(5000);
@@ -92,7 +93,8 @@ namespace VirtoCommerce.SearchModule.Tests
 
             provider.RemoveAll(scope, "");
             var controller = GetSearchIndexController(provider);
-            controller.Process(scope, CatalogItemSearchCriteria.DocType, true);
+            controller.RemoveIndex(scope, CatalogItemSearchCriteria.DocType);
+            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { return; });
 
             // sleep for index to be commited
             Thread.Sleep(5000);
@@ -129,7 +131,9 @@ namespace VirtoCommerce.SearchModule.Tests
 
             provider.RemoveAll(scope, "");
             var controller = GetSearchIndexController(provider);
-            controller.Process(scope, CatalogItemSearchCriteria.DocType, true);
+            controller.RemoveIndex(scope, CatalogItemSearchCriteria.DocType);
+            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { return; });
+
 
             // sleep for index to be commited
             Thread.Sleep(5000);
@@ -204,7 +208,8 @@ namespace VirtoCommerce.SearchModule.Tests
 
             provider.RemoveAll(scope, "");
             var controller = GetSearchIndexController(provider);
-            controller.Process(scope, CatalogItemSearchCriteria.DocType, true);
+            controller.RemoveIndex(scope, CatalogItemSearchCriteria.DocType);
+            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { return; });
 
             // sleep for index to be commited
             Thread.Sleep(5000);
