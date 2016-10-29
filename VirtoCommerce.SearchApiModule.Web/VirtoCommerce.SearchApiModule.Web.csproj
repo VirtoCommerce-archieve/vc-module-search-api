@@ -209,6 +209,7 @@
     <Content Include="Scripts\search.js" />
     <Content Include="Scripts\widgets\storePropertiesWidget.js" />
     <Content Include="Scripts\widgets\storePropertiesWidget.tpl.html" />
+    <None Include="Localizations\en.VirtoCommerceSearchApi.json" />
     <None Include="module.ignore" />
     <None Include="packages.config">
       <SubType>Designer</SubType>

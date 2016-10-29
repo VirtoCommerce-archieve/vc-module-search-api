@@ -1,0 +1,17 @@
+﻿{
+    "searchApi": {
+        "filter-labels": {
+            "filter-priceless": "Without price",
+            "filter-withPrice": "Has price defined",
+            "filter-priceRange": "Price between",
+            "filter-lowStock": "Low on stock",
+            "filter-notActive": "Not active",
+            "filter-new": "<strong>Add new filter</strong>",
+            "unnamed-filter": "Unnamed filter",
+            "inactive": "Inactive",
+            "picture": "Pic",
+            "name": "Name",
+            "sku": "SKU"
+        }
+    }
+}
