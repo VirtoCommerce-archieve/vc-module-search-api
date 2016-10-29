@@ -205,6 +205,7 @@
     <Content Include="Content\logo.png" />
     <Content Include="Scripts\blades\store-properties.js" />
     <Content Include="Scripts\blades\store-properties.tpl.html" />
+    <Content Include="Scripts\dialogs\reindex-dialog.tpl.html" />
     <Content Include="Scripts\resources\searchAPI.js" />
     <Content Include="Scripts\search.js" />
     <Content Include="Scripts\widgets\storePropertiesWidget.js" />
