@@ -1,13 +1,16 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using VirtoCommerce.CatalogModule.Web.Converters;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Domain.Pricing.Model;
 using VirtoCommerce.Domain.Pricing.Services;
+using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Data.Model;
@@ -23,19 +26,22 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         private readonly IPricingService _pricingService;
         private readonly IItemService _itemService;
         private readonly IChangeLogService _changeLogService;
+        private readonly IBlobUrlResolver _blobUrlResolver;
 
         public CatalogItemIndexBuilder(
             ISearchProvider searchProvider,
             ICatalogSearchService catalogSearchService,
             IItemService itemService,
             IPricingService pricingService,
-            IChangeLogService changeLogService)
+            IChangeLogService changeLogService,
+            IBlobUrlResolver blobUrlResolver)
         {
             _searchProvider = searchProvider;
             _catalogSearchService = catalogSearchService;
             _itemService = itemService;
             _pricingService = pricingService;
             _changeLogService = changeLogService;
+            _blobUrlResolver = blobUrlResolver;
         }
 
         /// <summary>
@@ -140,6 +146,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             doc.Add(new DocumentField("__key", item.Id.ToLower(), indexStoreNotAnalyzed));
             doc.Add(new DocumentField("__type", item.GetType().Name, indexStoreNotAnalyzed));
             doc.Add(new DocumentField("__sort", item.Name, indexStoreNotAnalyzed));
+
             IndexIsProperty(doc, "product");
             var statusField = (item.IsActive != true || item.MainProductId != null) ? "hidden" : "visible";
             IndexIsProperty(doc, statusField);
@@ -207,6 +214,9 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             // add to content
             doc.Add(new DocumentField("__content", item.Name, indexStoreAnalyzedStringCollection));
             doc.Add(new DocumentField("__content", item.Code, indexStoreAnalyzedStringCollection));
+
+            // index full web serialized object
+            doc.Add(new DocumentField("__object", item.ToWebModel(_blobUrlResolver), new[] { IndexStore.Yes, IndexType.Analyzed }));
 
             return true;
         }

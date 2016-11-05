@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using Newtonsoft.Json;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,6 +33,36 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         }
 
         public virtual ProductSearchResult SearchItems(string scope, ISearchCriteria criteria, ItemResponseGroup responseGroup)
+        {
+            var response = new ProductSearchResult();
+            var searchResults = _searchProvider.Search<DocumentDictionary>(scope, criteria);
+
+            if (searchResults != null && searchResults.Documents != null)
+            {
+                var uniqueKeys = searchResults.Documents.Select(x => x.Id.ToString()).ToList();
+                var productDtos = new ConcurrentBag<CatalogModule.Web.Model.Product>();
+                Parallel.ForEach(searchResults.Documents, (x) =>
+                {
+                    var jsonProduct = x["__object"].ToString();
+                    var product = JsonConvert.DeserializeObject(jsonProduct, typeof(CatalogModule.Web.Model.Product)) as CatalogModule.Web.Model.Product;
+                    productDtos.Add(product);
+                });
+                response.Products = productDtos.OrderBy(i => uniqueKeys.IndexOf(i.Id)).ToArray();
+            }
+
+            if (searchResults != null)
+                response.TotalCount = searchResults.TotalCount;
+
+            // TODO need better way to find applied filter values
+            var appliedFilters = criteria.CurrentFilters.SelectMany(x => x.GetValues()).Select(x => x.Id).ToArray();
+            if (searchResults.Facets != null)
+            {
+                response.Aggregations = searchResults.Facets.Select(g => g.ToModuleModel(appliedFilters)).ToArray();
+            }
+            return response;
+        }
+
+        protected virtual ProductSearchResult SearchItemsWithDb(string scope, ISearchCriteria criteria, ItemResponseGroup responseGroup)
         {
             var items = new List<CatalogProduct>();
             var itemsOrderedList = new List<string>();

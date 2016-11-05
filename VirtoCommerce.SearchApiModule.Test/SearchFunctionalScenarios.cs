@@ -41,6 +41,7 @@ using VirtoCommerce.StoreModule.Data.Repositories;
 using VirtoCommerce.StoreModule.Data.Services;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.Xunit.Performance;
 
 namespace VirtoCommerce.SearchModule.Tests
 {
@@ -296,6 +297,58 @@ namespace VirtoCommerce.SearchModule.Tests
             Assert.True(searchResults.TotalCount == 6, string.Format("Expected 6, but found {0}", searchResults.TotalCount));
         }
 
+        #region Performance Tests
+        [Benchmark(InnerIterationCount = 10)]
+        [InlineData("Lucene")]
+        [InlineData("Elastic")]
+        [Trait("Category", "performance")]
+        public void Can_perf_web_search_products(string providerType)
+        {
+            var scope = "test";
+            var storeName = "electronics";
+            var provider = GetSearchProvider(providerType, scope);
+
+            provider.RemoveAll(scope, "");
+            var controller = GetSearchIndexController(provider);
+            controller.RemoveIndex(scope, CatalogItemSearchCriteria.DocType);
+            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { return; });
+
+            // sleep for index to be commited
+            Thread.Sleep(5000);
+
+            var storeRepo = GetStoreRepository();
+            var storeObject = storeRepo.Stores.SingleOrDefault(x => x.Name.Equals(storeName, StringComparison.OrdinalIgnoreCase));
+            var store = GetStoreService().GetById(storeObject.Id);
+
+            // get catalog id by name
+            var catalogRepo = GetCatalogRepository();
+            var catalog = catalogRepo.Catalogs.SingleOrDefault(x => x.Name.Equals("electronics", StringComparison.OrdinalIgnoreCase));
+
+            // find all prodducts in the category
+            var criteria = new ProductSearch()
+            {
+                Currency = "USD"                
+            };
+
+
+            var context = new Dictionary<string, object>
+            {
+                { "Store", store },
+            };
+
+            var filterService = GetBrowseFilterService();
+            var filters = filterService.GetFilters(context);
+            var serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Catalog, filters);
+            var ibs = GetItemBrowsingService(provider);
+
+            Benchmark.Iterate(() => {
+                var searchResults = ibs.SearchItems(scope, serviceCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
+            });
+        }
+        #endregion
+
+        #region Private Helper Methods
+
         private ItemBrowsingService GetItemBrowsingService(ISearchProvider provider)
         {
             var service = new ItemBrowsingService(GetItemService(), provider, new FileSystemBlobProvider("", "http://samplesite.com"));
@@ -306,7 +359,7 @@ namespace VirtoCommerce.SearchModule.Tests
         {
             var settings = new Moq.Mock<ISettingsManager>();
             return new SearchIndexController(settings.Object, provider,
-                new CatalogItemIndexBuilder(provider, GetSearchService(), GetItemService(), GetPricingService(), GetChangeLogService()),
+                new CatalogItemIndexBuilder(provider, GetSearchService(), GetItemService(), GetPricingService(), GetChangeLogService(), new FileSystemBlobProvider("", "http://samplesite.com")),
                 new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetChangeLogService()));
         }
 
@@ -418,5 +471,6 @@ namespace VirtoCommerce.SearchModule.Tests
             var result = new CommerceRepositoryImpl("VirtoCommerce", new EntityPrimaryKeyGeneratorInterceptor(), new AuditableInterceptor(null));
             return result;
         }
+        #endregion
     }
 }
