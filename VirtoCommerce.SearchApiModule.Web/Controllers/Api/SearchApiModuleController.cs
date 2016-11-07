@@ -13,7 +13,6 @@ using VirtoCommerce.Domain.Store.Model;
 using VirtoCommerce.Domain.Store.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
-using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchApiModule.Data.Services;
@@ -34,26 +33,22 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
         private readonly IItemBrowsingService _browseService;
         private readonly ICategoryBrowsingService _categoryBrowseService;
         private readonly IStoreService _storeService;
-        private readonly IPushNotificationManager _pushNotifier;
         private readonly IPropertyService _propertyService;
-        private readonly ICatalogSearchService _catalogSearchService;
         private readonly IPermissionScopeService _permissionScopeService;
         private readonly ISecurityService _securityService;
 
         public SearchApiModuleController(ISearchConnection searchConnection,
             IBrowseFilterService browseFilterService, IItemBrowsingService browseService,
             ICategoryBrowsingService categoryBrowseService, IStoreService storeService,
-            IPushNotificationManager pushNotifier, IPropertyService propertyService, 
-            ICatalogSearchService catalogSearchService, IPermissionScopeService permissionScopeService, ISecurityService securityService)
+            IPropertyService propertyService, 
+            IPermissionScopeService permissionScopeService, ISecurityService securityService)
         {
             _searchConnection = searchConnection;
             _browseFilterService = browseFilterService;
             _browseService = browseService;
             _storeService = storeService;
             _categoryBrowseService = categoryBrowseService;
-            _pushNotifier = pushNotifier;
             _propertyService = propertyService;
-            _catalogSearchService = catalogSearchService;
             _permissionScopeService = permissionScopeService;
             _securityService = securityService;
         }

@@ -4,7 +4,7 @@ if (AppDependencies != undefined) {
     AppDependencies.push(moduleName);
 }
 
-angular.module(moduleName, ['ngSanitize', 'virtoCommerce.catalogModule'])
+angular.module(moduleName, ['ngSanitize', 'virtoCommerce.catalogModule', 'virtoCommerce.searchModule'])
 .run(
   ['platformWebApp.widgetService', 'virtoCommerce.catalogModule.predefinedSearchFilters', 'platformWebApp.toolbarService', 'virtoCommerce.searchModule.search', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', function (widgetService, predefinedSearchFilters, toolbarService, searchAPI, dialogService, bladeNavigationService) {
       // filter properties in STORE details
