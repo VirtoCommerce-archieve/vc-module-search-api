@@ -223,22 +223,11 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             {
                 using (var memStream = new MemoryStream())
                 {
-                    var serializer = new JsonSerializer
-                    {
-                        DefaultValueHandling = DefaultValueHandling.Ignore,
-                        NullValueHandling = NullValueHandling.Ignore,
-                        Formatting = Formatting.None,
-                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                        TypeNameHandling = TypeNameHandling.None,
-                    };
                     var itemDto = item.ToWebModel(_blobUrlResolver);
                     //Do not store variations in index
-                    itemDto.Variations = null;
-                    itemDto.SerializeJson(memStream, serializer);
-                    memStream.Seek(0, SeekOrigin.Begin);
-                    var value = memStream.ReadToString();
+                    //itemDto.Variations = null;
                     // index full web serialized object
-                    doc.Add(new DocumentField("__object", value, new[] { IndexStore.Yes, IndexType.Analyzed }));
+                    doc.Add(new DocumentField("__object", itemDto, new[] { IndexStore.Yes, IndexType.Analyzed }));
                 }
             }
 
