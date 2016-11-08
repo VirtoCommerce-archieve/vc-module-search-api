@@ -157,7 +157,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             doc.Add(new DocumentField("__content", category.Name, indexStoreAnalyzedStringCollection));
             doc.Add(new DocumentField("__content", category.Code, indexStoreAnalyzedStringCollection));
 
-            if (false) //if (_settingsManager.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", true))
+            if (_settingsManager.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", true))
             {
                 var itemDto = category.ToWebModel(_blobUrlResolver);
 

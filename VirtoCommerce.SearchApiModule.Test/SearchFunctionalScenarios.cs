@@ -227,7 +227,8 @@ namespace VirtoCommerce.SearchModule.Tests
             // find all prodducts in the category
             var criteria = new ProductSearch()
             {
-                Currency = "USD"//,
+                Currency = "USD",
+                Outline = "*" // find all products
                 //Terms = new[] { "price:200-600" }
             };
 
@@ -260,6 +261,7 @@ namespace VirtoCommerce.SearchModule.Tests
             criteria = new ProductSearch()
             {
                 Currency = "USD",
+                Outline = "*", // find all products
                 Sort = new[] { "name" }
             };
 
@@ -272,6 +274,7 @@ namespace VirtoCommerce.SearchModule.Tests
             criteria = new ProductSearch()
             {
                 Currency = "USD",
+                Outline = "*", // find all products
                 Sort = new[] { "name-desc" }
             };
 
