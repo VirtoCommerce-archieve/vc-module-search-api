@@ -16,6 +16,8 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
+using System.IO;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.SearchApiModule.Data.Services
 {
@@ -27,6 +29,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         private readonly IItemService _itemService;
         private readonly IChangeLogService _changeLogService;
         private readonly IBlobUrlResolver _blobUrlResolver;
+        private readonly ISettingsManager _settingsManager;
 
         public CatalogItemIndexBuilder(
             ISearchProvider searchProvider,
@@ -34,7 +37,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             IItemService itemService,
             IPricingService pricingService,
             IChangeLogService changeLogService,
-            IBlobUrlResolver blobUrlResolver)
+            IBlobUrlResolver blobUrlResolver, ISettingsManager settingsManager)
         {
             _searchProvider = searchProvider;
             _catalogSearchService = catalogSearchService;
@@ -42,6 +45,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             _pricingService = pricingService;
             _changeLogService = changeLogService;
             _blobUrlResolver = blobUrlResolver;
+            _settingsManager = settingsManager;
         }
 
         /// <summary>
@@ -128,7 +132,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         protected virtual IList<CatalogProduct> GetItems(string[] itemIds)
         {
-            return _itemService.GetByIds(itemIds, ItemResponseGroup.ItemProperties | ItemResponseGroup.Variations | ItemResponseGroup.Outlines);
+            return _itemService.GetByIds(itemIds, ItemResponseGroup.ItemProperties | ItemResponseGroup.Variations | ItemResponseGroup.ItemEditorialReviews | ItemResponseGroup.Outlines);
         }
 
         protected virtual IList<Price> GetItemPrices(string[] itemIds)
@@ -215,8 +219,28 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             doc.Add(new DocumentField("__content", item.Name, indexStoreAnalyzedStringCollection));
             doc.Add(new DocumentField("__content", item.Code, indexStoreAnalyzedStringCollection));
 
-            // index full web serialized object
-            doc.Add(new DocumentField("__object", item.ToWebModel(_blobUrlResolver), new[] { IndexStore.Yes, IndexType.Analyzed }));
+            if (_settingsManager.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", false))
+            {
+                using (var memStream = new MemoryStream())
+                {
+                    var serializer = new JsonSerializer
+                    {
+                        DefaultValueHandling = DefaultValueHandling.Ignore,
+                        NullValueHandling = NullValueHandling.Ignore,
+                        Formatting = Formatting.None,
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                        TypeNameHandling = TypeNameHandling.None,
+                    };
+                    var itemDto = item.ToWebModel(_blobUrlResolver);
+                    //Do not store variations in index
+                    itemDto.Variations = null;
+                    itemDto.SerializeJson(memStream, serializer);
+                    memStream.Seek(0, SeekOrigin.Begin);
+                    var value = memStream.ReadToString();
+                    // index full web serialized object
+                    doc.Add(new DocumentField("__object", value, new[] { IndexStore.Yes, IndexType.Analyzed }));
+                }
+            }
 
             return true;
         }

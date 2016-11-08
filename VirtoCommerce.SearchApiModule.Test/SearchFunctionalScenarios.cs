@@ -351,7 +351,8 @@ namespace VirtoCommerce.SearchModule.Tests
 
         private ItemBrowsingService GetItemBrowsingService(ISearchProvider provider)
         {
-            var service = new ItemBrowsingService(GetItemService(), provider, new FileSystemBlobProvider("", "http://samplesite.com"));
+            var settings = new Moq.Mock<ISettingsManager>();
+            var service = new ItemBrowsingService(GetItemService(), provider, new FileSystemBlobProvider("", "http://samplesite.com"), settings.Object);
             return service;
         }
 
@@ -359,7 +360,7 @@ namespace VirtoCommerce.SearchModule.Tests
         {
             var settings = new Moq.Mock<ISettingsManager>();
             return new SearchIndexController(settings.Object, provider,
-                new CatalogItemIndexBuilder(provider, GetSearchService(), GetItemService(), GetPricingService(), GetChangeLogService(), new FileSystemBlobProvider("", "http://samplesite.com")),
+                new CatalogItemIndexBuilder(provider, GetSearchService(), GetItemService(), GetPricingService(), GetChangeLogService(), new FileSystemBlobProvider("", "http://samplesite.com"), settings.Object),
                 new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetChangeLogService()));
         }
 

@@ -15,6 +15,7 @@ using VirtoCommerce.SearchModule.Core.Model.Indexing;
 using VirtoCommerce.SearchModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
 using VirtoCommerce.SearchModule.Data.Services;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.SearchApiModule.Data.Services
 {
@@ -23,13 +24,15 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         private readonly IItemService _itemService;
         private readonly ISearchProvider _searchProvider;
         private readonly IBlobUrlResolver _blobUrlResolver;
+        private readonly  ISettingsManager _settingsManager;
 
         public ItemBrowsingService(IItemService itemService,
-            ISearchProvider searchService, IBlobUrlResolver blobUrlResolver)
+            ISearchProvider searchService, IBlobUrlResolver blobUrlResolver, ISettingsManager settingsManager)
         {
             _searchProvider = searchService;
             _itemService = itemService;
             _blobUrlResolver = blobUrlResolver;
+            _settingsManager = settingsManager;
         }
 
         public virtual ProductSearchResult SearchItems(string scope, ISearchCriteria criteria, ItemResponseGroup responseGroup)
@@ -38,102 +41,58 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             var searchResults = _searchProvider.Search<DocumentDictionary>(scope, criteria);
 
             if (searchResults != null && searchResults.Documents != null)
-            {
-                var uniqueKeys = searchResults.Documents.Select(x => x.Id.ToString()).ToList();
+            {               
                 var productDtos = new ConcurrentBag<CatalogModule.Web.Model.Product>();
-                Parallel.ForEach(searchResults.Documents, (x) =>
+                var taskList = new List<Task>();
+
+                var documents = searchResults.Documents;             
+                if (_settingsManager.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", false))
                 {
-                    var jsonProduct = x["__object"].ToString();
-                    var product = JsonConvert.DeserializeObject(jsonProduct, typeof(CatalogModule.Web.Model.Product)) as CatalogModule.Web.Model.Product;
-                    productDtos.Add(product);
-                });
-                response.Products = productDtos.OrderBy(i => uniqueKeys.IndexOf(i.Id)).ToArray();
-            }
-
-            if (searchResults != null)
-                response.TotalCount = searchResults.TotalCount;
-
-            // TODO need better way to find applied filter values
-            var appliedFilters = criteria.CurrentFilters.SelectMany(x => x.GetValues()).Select(x => x.Id).ToArray();
-            if (searchResults.Facets != null)
-            {
-                response.Aggregations = searchResults.Facets.Select(g => g.ToModuleModel(appliedFilters)).ToArray();
-            }
-            return response;
-        }
-
-        protected virtual ProductSearchResult SearchItemsWithDb(string scope, ISearchCriteria criteria, ItemResponseGroup responseGroup)
-        {
-            var items = new List<CatalogProduct>();
-            var itemsOrderedList = new List<string>();
-
-            var foundItemCount = 0;
-            var dbItemCount = 0;
-            var searchRetry = 0;
-
-            //var myCriteria = criteria.Clone();
-            var myCriteria = criteria;
-
-            ISearchResults<DocumentDictionary> searchResults = null;
-
-            do
-            {
-                // Search using criteria, it will only return IDs of the items
-                searchResults = _searchProvider.Search<DocumentDictionary>(scope, criteria);
-
-                searchRetry++;
-
-                if (searchResults == null || searchResults.Documents == null)
-                {
-                    continue;
+                    var fullIndexedDocuments = documents.Where(x => x.ContainsKey("__object") && !string.IsNullOrEmpty(x["__object"].ToString()));
+                    documents = documents.Except(fullIndexedDocuments);
+                    var deserializeProductsTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
+                    {                       
+                        Parallel.ForEach(fullIndexedDocuments, new ParallelOptions { MaxDegreeOfParallelism = 5 }, (x) =>
+                        {
+                            var jsonProduct = x["__object"].ToString();
+                            var product = JsonConvert.DeserializeObject(jsonProduct, typeof(CatalogModule.Web.Model.Product)) as CatalogModule.Web.Model.Product;
+                            productDtos.Add(product);
+                        });
+                    });
+                    taskList.Add(deserializeProductsTask);
                 }
 
-                //Get only new found itemIds
-                var uniqueKeys = searchResults.Documents.Select(x=>x.Id.ToString()).Except(itemsOrderedList).ToArray();
-                foundItemCount = uniqueKeys.Length;
-
-                if (!searchResults.Documents.Any())
+                if (documents.Any())
                 {
-                    continue;
+                    var loadProductsTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
+                    {
+                        string catalog = null;
+                        if (criteria is CatalogItemSearchCriteria)
+                        {
+                            catalog = (criteria as CatalogItemSearchCriteria).Catalog;
+                        }
+                        var productIds = documents.Select(x => x.Id.ToString()).Distinct().ToArray();
+                        if (productIds.Any())
+                        {
+                        // Now load items from repository
+                        var products = _itemService.GetByIds(productIds, responseGroup, catalog);
+                            Parallel.ForEach(products, (x) =>
+                            {
+                                productDtos.Add(x.ToWebModel(_blobUrlResolver));
+                            });
+                        }
+                    }
+                    );
+                    taskList.Add(loadProductsTask);
                 }
 
-                itemsOrderedList.AddRange(uniqueKeys);
+                Task.WaitAll(taskList.ToArray());
 
-                // if we can determine catalog, pass it to the service
-                string catalog = null;
-                if (criteria is CatalogItemSearchCriteria)
-                {
-                    catalog = (criteria as CatalogItemSearchCriteria).Catalog;
-                }
-
-                // Now load items from repository
-                var currentItems = _itemService.GetByIds(uniqueKeys.ToArray(), responseGroup, catalog);
-
-                var orderedList = currentItems.OrderBy(i => itemsOrderedList.IndexOf(i.Id));
-                items.AddRange(orderedList);
-                dbItemCount = currentItems.Length;
-
-                //If some items where removed and search is out of sync try getting extra items
-                if (foundItemCount > dbItemCount)
-                {
-                    //Retrieve more items to fill missing gap
-                    myCriteria.RecordsToRetrieve += (foundItemCount - dbItemCount);
-                }
+                //Preserver original sorting order
+                var orderedIds = searchResults.Documents.Select(x => x.Id.ToString()).ToList();
+                response.Products = productDtos.OrderBy(i => orderedIds.IndexOf(i.Id)).ToArray();
             }
-            while (foundItemCount > dbItemCount && searchResults!=null && searchResults.Documents.Any() && searchRetry <= 3 &&
-                (myCriteria.RecordsToRetrieve + myCriteria.StartingRecord) < searchResults.TotalCount);
-
-            var response = new ProductSearchResult();
-
-            if (items != null)
-            {
-                var productDtos= new ConcurrentBag<CatalogModule.Web.Model.Product>();
-                Parallel.ForEach(items, (x) =>
-                {
-                    productDtos.Add(x.ToWebModel(_blobUrlResolver));
-                });
-                response.Products = productDtos.OrderBy(i => itemsOrderedList.IndexOf(i.Id)).ToArray();
-            }
+          
 
             if (searchResults != null)
                 response.TotalCount = searchResults.TotalCount;

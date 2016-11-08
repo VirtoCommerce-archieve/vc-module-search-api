@@ -5,8 +5,10 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Web.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.Description;
 using System.Xml.Serialization;
+using Newtonsoft.Json;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Domain.Store.Model;
@@ -60,7 +62,17 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
         {
             var responseGroup = EnumUtility.SafeParse<ItemResponseGroup>(criteria.ResponseGroup, ItemResponseGroup.ItemLarge & ~ItemResponseGroup.ItemProperties);
             var result = SearchProducts(_searchConnection.Scope, storeId, criteria, responseGroup);
-            return Ok(result);
+
+            //Special setting for resulting JSON minification
+            var jsonSettings =  new JsonSerializerSettings
+            {
+                DefaultValueHandling = DefaultValueHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.None,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                TypeNameHandling = TypeNameHandling.None
+            };
+            return Json(result, jsonSettings);
         }
 
         [HttpPost]

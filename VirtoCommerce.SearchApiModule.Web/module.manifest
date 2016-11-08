@@ -40,7 +40,14 @@
                 <defaultValue>true</defaultValue>
                 <title>Use indexed search for catalog</title>
                 <description>Enable or disable indexed search for catalog module with advanced syntax</description>
-            </setting>          
+            </setting>
+            <setting>
+                <name>VirtoCommerce.SearchApi.UseFullObjectIndexStoring</name>
+                <valueType>boolean</valueType>
+                <defaultValue>false</defaultValue>
+                <title>Use stored catalog objects in index</title>
+                <description>Storing in the index whole catalog objects and use their for search result</description>
+            </setting>
         </group>
     </settings>
     
