@@ -4,10 +4,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using VirtoCommerce.CatalogModule.Web.Converters;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
+using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
 
@@ -21,14 +24,19 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         private readonly ICatalogSearchService _catalogSearchService;
         private readonly IChangeLogService _changeLogService;
         private readonly ICategoryService _categoryService;
+        private readonly IBlobUrlResolver _blobUrlResolver;
+        private readonly ISettingsManager _settingsManager;
 
         public CategoryIndexBuilder(ISearchProvider searchProvider, ICatalogSearchService catalogSearchService,
-                                       ICategoryService categoryService, IChangeLogService changeLogService)
+                                       ICategoryService categoryService, IChangeLogService changeLogService,
+                                       IBlobUrlResolver blobUrlResolver, ISettingsManager settingsManager)
         {
             _searchProvider = searchProvider;
             _categoryService = categoryService;
             _catalogSearchService = catalogSearchService;
             _changeLogService = changeLogService;
+            _blobUrlResolver = blobUrlResolver;
+            _settingsManager = settingsManager;
         }
 
         #region ISearchIndexBuilder Members
@@ -148,6 +156,22 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             // add to content
             doc.Add(new DocumentField("__content", category.Name, indexStoreAnalyzedStringCollection));
             doc.Add(new DocumentField("__content", category.Code, indexStoreAnalyzedStringCollection));
+
+            if (false) //if (_settingsManager.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", true))
+            {
+                var itemDto = category.ToWebModel(_blobUrlResolver);
+
+                // HACK: remove circular dependencies caused by property object
+                if (itemDto.Properties != null)
+                {
+                    foreach (var prop in itemDto.Properties)
+                    {
+                        prop.Category = null;
+                    }
+                }
+
+                doc.Add(new DocumentField("__object", itemDto, new[] { IndexStore.Yes, IndexType.Analyzed }));
+            }
         }
 
         /// <summary>
@@ -171,10 +195,10 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         protected virtual IEnumerable<string> ExpandOutline(Outline outline)
         {
-            // Outline structure: catalog/category1/.../categoryN/product
+            // Outline structure: catalog/category1/.../categoryN
 
             var items = outline.Items
-                .Take(outline.Items.Count - 1) // Exclude last item, which is product ID
+                .Take(outline.Items.Count - 1) // Exclude last item, which is category ID
                 .Select(i => i.Id)
                 .ToList();
 
@@ -182,7 +206,6 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
             var result = new List<string>
             {
-                catalogId,
                 string.Join("/", items)
             };
 

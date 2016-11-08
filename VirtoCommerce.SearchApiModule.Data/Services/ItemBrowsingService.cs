@@ -46,7 +46,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 var taskList = new List<Task>();
 
                 var documents = searchResults.Documents;             
-                if (_settingsManager.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", false))
+                if (_settingsManager.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", true))
                 {
                     var fullIndexedDocuments = documents.Where(x => x.ContainsKey("__object") && !string.IsNullOrEmpty(x["__object"].ToString()));
                     documents = documents.Except(fullIndexedDocuments);

@@ -219,16 +219,13 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             doc.Add(new DocumentField("__content", item.Name, indexStoreAnalyzedStringCollection));
             doc.Add(new DocumentField("__content", item.Code, indexStoreAnalyzedStringCollection));
 
-            if (_settingsManager.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", false))
+            if (_settingsManager.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", true))
             {
-                using (var memStream = new MemoryStream())
-                {
-                    var itemDto = item.ToWebModel(_blobUrlResolver);
-                    //Do not store variations in index
-                    //itemDto.Variations = null;
-                    // index full web serialized object
-                    doc.Add(new DocumentField("__object", itemDto, new[] { IndexStore.Yes, IndexType.Analyzed }));
-                }
+                var itemDto = item.ToWebModel(_blobUrlResolver);
+                //Do not store variations in index
+                //itemDto.Variations = null;
+                // index full web serialized object
+                doc.Add(new DocumentField("__object", itemDto, new[] { IndexStore.Yes, IndexType.Analyzed }));
             }
 
             return true;
@@ -266,7 +263,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
             var result = new List<string>
             {
-                catalogId,
+                //catalogId,
                 string.Join("/", items)
             };
 

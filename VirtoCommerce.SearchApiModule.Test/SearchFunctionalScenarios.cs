@@ -68,6 +68,7 @@ namespace VirtoCommerce.SearchModule.Tests
             var controller = GetSearchIndexController(provider);
             controller.RemoveIndex(scope, "category");
             controller.BuildIndex(scope, "category", x => { return; });
+            //controller.BuildIndex(scope, "category", x => { return; }, new[] { "0d4ad9bab9184d69a6e586effdf9c2ea" });
 
             // sleep for index to be commited
             Thread.Sleep(5000);
@@ -77,8 +78,8 @@ namespace VirtoCommerce.SearchModule.Tests
             {
             };
 
-            categoryCriteria.Outlines.Add("4974648a41df4e6ea67ef2ad76d7bbd4/45d3fc9a913d4610a5c7d0470558*");
-
+            categoryCriteria.Outlines.Add("4974648a41df4e6ea67ef2ad76d7bbd4");
+            //categoryCriteria.Outlines.Add("4974648a41df4e6ea67ef2ad76d7bbd4/45d3fc9a913d4610a5c7d0470558*");
 
             var response = provider.Search<DocumentDictionary>(scope, categoryCriteria);
             Assert.True(response.TotalCount > 0, string.Format("Didn't find any categories using {0} search", providerType));
@@ -361,7 +362,7 @@ namespace VirtoCommerce.SearchModule.Tests
             var settings = new Moq.Mock<ISettingsManager>();
             return new SearchIndexController(settings.Object, provider,
                 new CatalogItemIndexBuilder(provider, GetSearchService(), GetItemService(), GetPricingService(), GetChangeLogService(), new FileSystemBlobProvider("", "http://samplesite.com"), settings.Object),
-                new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetChangeLogService()));
+                new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetChangeLogService(), new FileSystemBlobProvider("", "http://samplesite.com"), settings.Object));
         }
 
         private ICommerceService GetCommerceService()

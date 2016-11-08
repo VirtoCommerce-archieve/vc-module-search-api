@@ -60,7 +60,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
             }
             else
             {
-                criteria.Outlines.Add(string.Format("{0}*", catalog));
+                criteria.Outlines.Add(string.Format("{0}", catalog));
             }
 
             // Add all filters

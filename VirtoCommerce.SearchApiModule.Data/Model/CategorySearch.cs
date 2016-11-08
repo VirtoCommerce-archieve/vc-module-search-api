@@ -39,7 +39,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
             }
             else
             {
-                criteria.Outlines.Add(string.Format("{0}", catalog)); // everything in catalog
+                criteria.Outlines.Add(string.Format("{0}", catalog)); // top categories in catalog
             }
 
             #region Sorting
