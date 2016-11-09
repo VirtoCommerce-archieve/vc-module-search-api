@@ -231,7 +231,7 @@ namespace VirtoCommerce.SearchApiModule.Test
                 SearchPhrase = "",
                 IsFuzzySearch = true,
                 Catalog = "goods",
-                RecordsToRetrieve = 10,
+                RecordsToRetrieve = 0,
                 StartingRecord = 0,
                 Currency = "USD",
                 Pricelists = new[] { "default" }
@@ -267,7 +267,7 @@ namespace VirtoCommerce.SearchApiModule.Test
 
             var results = provider.Search<DocumentDictionary>(scope, criteria);
 
-            Assert.True(results.DocCount == 6, string.Format("Returns {0} instead of 6", results.DocCount));
+            Assert.True(results.DocCount == 0, string.Format("Returns {0} instead of 0", results.DocCount));
 
             var redCount = GetFacetCount(results, "Color", "red");
             Assert.True(redCount == 3, string.Format("Returns {0} facets of red instead of 3", redCount));
@@ -289,6 +289,33 @@ namespace VirtoCommerce.SearchApiModule.Test
 
             var sizeCount2 = GetFacetCount(results, "size", "5_to_10");
             Assert.True(sizeCount2 == 1, string.Format("Returns {0} facets of 5_to_10 size instead of 1", sizeCount2)); // only 1 result because upper bound is not included
+        }
+
+        [Theory]
+        [InlineData("Lucene")]
+        [InlineData("Elastic")]
+        [Trait("Category", "CI")]
+        public void Can_get_item_outlines(string providerType)
+        {
+            var scope = _DefaultScope;
+            var provider = GetSearchProvider(providerType, scope);
+
+            SearchHelper.CreateSampleIndex(provider, scope);
+
+            var criteria = new CatalogItemSearchCriteria
+            {
+                SearchPhrase = "",
+                IsFuzzySearch = true,
+                Catalog = "goods",
+                RecordsToRetrieve = 6,
+                StartingRecord = 0,
+                Currency = "USD",
+                Pricelists = new[] { "default" }
+            };
+
+            var results = provider.Search<DocumentDictionary>(scope, criteria);
+
+            Assert.True(results.DocCount == 6, string.Format("Returns {0} instead of 6", results.DocCount));
 
             int outlineCount = 0;
             var outlineObject = results.Documents.ElementAt(0)["__outline"]; // can be JArray or object[] depending on provider used
