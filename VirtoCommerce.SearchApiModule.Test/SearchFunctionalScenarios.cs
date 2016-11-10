@@ -339,7 +339,7 @@ namespace VirtoCommerce.SearchModule.Tests
 
         private IBrowseFilterService GetBrowseFilterService()
         {
-            return new FilterService(GetStoreService());
+            return new BrowseFilterService();
         }
 
         private IStoreService GetStoreService()

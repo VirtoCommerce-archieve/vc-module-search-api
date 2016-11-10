@@ -2,29 +2,17 @@
 using System.IO;
 using System.Xml.Serialization;
 using VirtoCommerce.Domain.Store.Model;
-using VirtoCommerce.Domain.Store.Services;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.SearchModule.Core.Model.Filters;
 
 namespace VirtoCommerce.SearchApiModule.Data.Services
 {
-    public class FilterService : IBrowseFilterService
+    public class BrowseFilterService : IBrowseFilterService
     {
-        private readonly IStoreService _storeService;
-        private ISearchFilter[] _filters;
+        private static readonly XmlSerializer _serializer = new XmlSerializer(typeof(FilteredBrowsing));
 
-        public FilterService(IStoreService storeService)
+        public virtual ISearchFilter[] GetFilters(IDictionary<string, object> context)
         {
-            _storeService = storeService;
-        }
-
-        public ISearchFilter[] GetFilters(IDictionary<string, object> context)
-        {
-            if (_filters != null)
-            {
-                return _filters;
-            }
-
             var filters = new List<ISearchFilter>();
 
             var store = GetObjectValue(context, "Store") as Store;
@@ -50,29 +38,23 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 }
             }
 
-            _filters = filters.ToArray();
-            return _filters;
+            return filters.ToArray();
         }
 
 
-        private static object GetObjectValue(IDictionary<string, object> context, string key)
+        protected virtual object GetObjectValue(IDictionary<string, object> context, string key)
         {
             object result = null;
 
             if (context.ContainsKey(key))
             {
-                var value = context[key];
-
-                if (value != null)
-                {
-                    result = value;
-                }
+                result = context[key];
             }
 
             return result;
         }
 
-        private static FilteredBrowsing GetFilteredBrowsing(IHasDynamicProperties store)
+        protected virtual FilteredBrowsing GetFilteredBrowsing(Store store)
         {
             FilteredBrowsing result = null;
 
@@ -81,8 +63,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             if (!string.IsNullOrEmpty(filterSettingValue))
             {
                 var reader = new StringReader(filterSettingValue);
-                var serializer = new XmlSerializer(typeof(FilteredBrowsing));
-                result = serializer.Deserialize(reader) as FilteredBrowsing;
+                result = _serializer.Deserialize(reader) as FilteredBrowsing;
             }
 
             return result;
