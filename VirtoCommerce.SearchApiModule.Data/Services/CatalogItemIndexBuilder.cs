@@ -132,7 +132,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         protected virtual IList<CatalogProduct> GetItems(string[] itemIds)
         {
-            return _itemService.GetByIds(itemIds, ItemResponseGroup.ItemProperties | ItemResponseGroup.Variations | ItemResponseGroup.Outlines);
+            return _itemService.GetByIds(itemIds, ItemResponseGroup.ItemProperties | ItemResponseGroup.Variations | ItemResponseGroup.Outlines | ItemResponseGroup.Seo);
         }
 
         protected virtual IList<Price> GetItemPrices(string[] itemIds)
