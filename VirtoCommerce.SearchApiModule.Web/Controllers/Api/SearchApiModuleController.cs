@@ -61,18 +61,8 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
         public IHttpActionResult SearchProducts(string storeId, ProductSearch criteria)
         {
             var responseGroup = EnumUtility.SafeParse<ItemResponseGroup>(criteria.ResponseGroup, ItemResponseGroup.ItemLarge & ~ItemResponseGroup.ItemProperties);
-            var result = SearchProducts(_searchConnection.Scope, storeId, criteria, responseGroup);
-
-            //Special setting for resulting JSON minification
-            var jsonSettings =  new JsonSerializerSettings
-            {
-                DefaultValueHandling = DefaultValueHandling.Ignore,
-                NullValueHandling = NullValueHandling.Ignore,
-                Formatting = Formatting.None,
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                TypeNameHandling = TypeNameHandling.None
-            };
-            return Json(result, jsonSettings);
+            var result = SearchProducts(_searchConnection.Scope, storeId, criteria, responseGroup);       
+            return Ok(result);
         }
 
         [HttpPost]

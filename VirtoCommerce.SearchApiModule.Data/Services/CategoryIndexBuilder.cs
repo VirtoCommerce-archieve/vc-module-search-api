@@ -159,17 +159,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
             if (_settingsManager.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", true))
             {
-                var itemDto = category.ToWebModel(_blobUrlResolver);
-
-                // HACK: remove circular dependencies caused by property object
-                if (itemDto.Properties != null)
-                {
-                    foreach (var prop in itemDto.Properties)
-                    {
-                        prop.Category = null;
-                    }
-                }
-
+                var itemDto = category.ToWebModel(_blobUrlResolver);            
                 doc.Add(new DocumentField("__object", itemDto, new[] { IndexStore.Yes, IndexType.Analyzed }));
             }
         }
