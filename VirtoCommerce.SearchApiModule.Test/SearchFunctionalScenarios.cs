@@ -355,22 +355,30 @@ namespace VirtoCommerce.SearchModule.Tests
 
         private ItemBrowsingService GetItemBrowsingService(ISearchProvider provider)
         {
-            var settings = new Moq.Mock<ISettingsManager>();
-            var service = new ItemBrowsingService(GetItemService(), provider, new FileSystemBlobProvider("", "http://samplesite.com"), settings.Object);
+            var settings = GetSettingsManager();
+            var service = new ItemBrowsingService(GetItemService(), provider, new FileSystemBlobProvider("", "http://samplesite.com"), settings);
             return service;
         }
 
         private SearchIndexController GetSearchIndexController(ISearchProvider provider)
         {
-            var settings = new Moq.Mock<ISettingsManager>();
-            return new SearchIndexController(settings.Object, provider,
-                new CatalogItemIndexBuilder(provider, GetSearchService(), GetItemService(), GetPricingService(), GetChangeLogService(), new FileSystemBlobProvider("", "http://samplesite.com"), settings.Object),
-                new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetChangeLogService(), new FileSystemBlobProvider("", "http://samplesite.com"), settings.Object));
+            var settings = GetSettingsManager();
+            return new SearchIndexController(settings, provider,
+                new CatalogItemIndexBuilder(provider, GetSearchService(), GetItemService(), GetPricingService(), GetChangeLogService(), new FileSystemBlobProvider("", "http://samplesite.com"), settings),
+                new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetChangeLogService(), new FileSystemBlobProvider("", "http://samplesite.com"), settings));
         }
 
         private ICommerceService GetCommerceService()
         {
             return new CommerceServiceImpl(GetCommerceRepository);
+        }
+
+        private ISettingsManager GetSettingsManager()
+        {
+            var mock = new Mock<ISettingsManager>();
+            mock.Setup(s => s.GetModuleSettings("VirtoCommerce.Store")).Returns(new SettingEntry[] { });
+            mock.Setup(s => s.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", true)).Returns(true);
+            return mock.Object;
         }
 
         private ICatalogSearchService GetSearchService()
@@ -402,10 +410,10 @@ namespace VirtoCommerce.SearchModule.Tests
 
         private IStoreService GetStoreService()
         {
+            var settings = GetSettingsManager();
             var shippingService = Moq.Mock.Of<IShippingMethodsService>(s => s.GetAllShippingMethods() == new ShippingMethod[] { });
             var paymentService = Moq.Mock.Of<IPaymentMethodsService>(s => s.GetAllPaymentMethods() == new PaymentMethod[] { });
             var taxService = Moq.Mock.Of<ITaxService>(s => s.GetAllTaxProviders() == new TaxProvider[] { });
-            var settings = Moq.Mock.Of<ISettingsManager>(s => s.GetModuleSettings("VirtoCommerce.Store") == new SettingEntry[] { });
             var dpService = GetDynamicPropertyService();
 
             return new StoreServiceImpl(GetStoreRepository, GetCommerceService(), settings, dpService, shippingService, paymentService, taxService, GetCacheManager());
