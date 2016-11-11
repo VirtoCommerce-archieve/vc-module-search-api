@@ -174,7 +174,7 @@
     <Compile Include="Services\CategoryBrowsingService.cs" />
     <Compile Include="Services\CategoryIndexBuilder.cs" />
     <Compile Include="Services\ContentIndexBuilder.cs" />
-    <Compile Include="Services\FilterService.cs" />
+    <Compile Include="Services\BrowseFilterService.cs" />
     <Compile Include="Services\ICategoryBrowsingService.cs" />
     <Compile Include="Services\IItemBrowsingService.cs" />
     <Compile Include="Services\ItemBrowsingService.cs" />

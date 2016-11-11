@@ -63,11 +63,11 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             if (partition == null)
                 throw new ArgumentNullException("partition");
 
-            var documents = new ConcurrentBag<IDocument>();        
-        
+            var documents = new ConcurrentBag<IDocument>();
+
             if (!partition.Keys.IsNullOrEmpty())
             {
-                var categories = _categoryService.GetByIds(partition.Keys, CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithOutlines);
+                var categories = _categoryService.GetByIds(partition.Keys, CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithOutlines | CategoryResponseGroup.WithImages | CategoryResponseGroup.WithSeo);
                 foreach (var category in categories)
                 {
                     var doc = new ResultDocument();
