@@ -22,7 +22,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         {
             get
             {
-                throw new NotImplementedException();
+                return "page";
             }
         }
 
@@ -43,13 +43,12 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
             var documents = new ConcurrentBag<IDocument>();
 
-            /*
             if (!partition.Keys.IsNullOrEmpty())
             {
-                var items = GetItems(partition.Keys);
-                var prices = GetItemPrices(partition.Keys);
+                //var files = GetFiles(partition.Keys);
 
-                foreach (var item in items)
+                /*
+                foreach (var file in files)
                 {
                     var doc = new ResultDocument();
                     var itemPrices = prices.Where(x => x.ProductId == item.Id).ToArray();
@@ -60,23 +59,19 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                         documents.Add(doc);
                     }
                 }
+                */
             }
-            */
 
             return documents;
         }
 
         public IEnumerable<Partition> GetPartitions(bool rebuild, DateTime startDate, DateTime endDate)
         {
-            /*
             var partitions = rebuild || startDate == DateTime.MinValue
                 ? GetPartitionsForAll()
                 : GetPartitionsForModified(startDate, endDate);
 
             return partitions;
-            */
-
-            return null;
         }
 
         public void PublishDocuments(string scope, IDocument[] documents)
@@ -103,5 +98,52 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             }
             _searchProvider.Commit(scope);
         }
+
+        #region Private functions
+        private IEnumerable<Partition> GetPartitionsForAll()
+        {
+            var partitions = new List<Partition>();
+
+            var result = _storageProvider.Search("Pages", string.Empty);
+            var files = result.Items.Select(x => x.RelativeUrl).ToArray();
+            partitions.Add(new Partition(OperationType.Index, files));
+            return partitions;
+        }
+
+        private IEnumerable<Partition> GetPartitionsForModified(DateTime startDate, DateTime endDate)
+        {
+            return GetPartitionsForAll();
+        }
+
+        /*
+        private IEnumerable<Partition> GetPartitionsForModified(DateTime startDate, DateTime endDate)
+        {
+            var partitions = new List<Partition>();
+
+            var categoryChanges = GetCategoryChanges(startDate, endDate);
+            var deletedCategoryIds = categoryChanges.Where(c => c.OperationType == EntryState.Deleted).Select(c => c.ObjectId).ToList();
+            var modifiedCategoryIds = categoryChanges.Where(c => c.OperationType != EntryState.Deleted).Select(c => c.ObjectId).ToList();
+
+            partitions.AddRange(CreatePartitions(OperationType.Remove, deletedCategoryIds));
+            partitions.AddRange(CreatePartitions(OperationType.Index, modifiedCategoryIds));
+
+            return partitions;
+        }
+        */
+
+            /*
+        protected virtual IList<CatalogProduct> GetFiles(string[] fileRealtiveUrls)
+        {
+            return _itemService.GetByIds(itemIds, ItemResponseGroup.ItemProperties | ItemResponseGroup.Variations | ItemResponseGroup.ItemEditorialReviews | ItemResponseGroup.Outlines);
+        }
+        */
+
+        private class ContentFile
+        {
+            public string RelativeUrl;
+            public string Content;
+        }
+
+        #endregion
     }
 }
