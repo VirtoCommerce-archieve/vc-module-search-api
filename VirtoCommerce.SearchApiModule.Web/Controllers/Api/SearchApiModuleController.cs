@@ -60,7 +60,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
         [ResponseType(typeof(ProductSearchResult))]
         public IHttpActionResult SearchProducts(string storeId, ProductSearch criteria)
         {
-            var responseGroup = EnumUtility.SafeParse<ItemResponseGroup>(criteria.ResponseGroup, ItemResponseGroup.ItemLarge & ~ItemResponseGroup.ItemProperties);
+            var responseGroup = EnumUtility.SafeParse(criteria.ResponseGroup, ItemResponseGroup.ItemLarge & ~ItemResponseGroup.ItemProperties);
             var result = SearchProducts(_searchConnection.Scope, storeId, criteria, responseGroup);       
             return Ok(result);
         }
@@ -70,7 +70,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
         [ResponseType(typeof(CategorySearchResult))]
         public IHttpActionResult SearchCategories(string storeId, CategorySearch criteria)
         {
-            var responseGroup = EnumUtility.SafeParse<CategoryResponseGroup>(criteria.ResponseGroup, CategoryResponseGroup.Full & ~CategoryResponseGroup.WithProperties);
+            var responseGroup = EnumUtility.SafeParse(criteria.ResponseGroup, CategoryResponseGroup.Full & ~CategoryResponseGroup.WithProperties);
             var result = SearchCategories(_searchConnection.Scope, storeId, criteria, responseGroup);
             return Ok(result);
         }
@@ -162,6 +162,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
             return StatusCode(HttpStatusCode.NoContent);
         }
 
+        #region Helper Methods
         protected void CheckCurrentUserHasPermissionForObjects(string permission, params object[] objects)
         {
             //Scope bound security check
@@ -358,5 +359,6 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
             var searchResults = _browseService.SearchItems(scope, serviceCriteria, responseGroup);
             return searchResults;
         }
+        #endregion
     }
 }
