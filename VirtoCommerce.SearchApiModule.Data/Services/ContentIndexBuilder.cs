@@ -2,8 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
@@ -28,7 +26,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         public ContentIndexBuilder(
             IBlobStorageProvider storageProvider,
-            ISearchProvider searchProvider, 
+            ISearchProvider searchProvider,
             ISettingsManager settingsManager)
         {
             _searchProvider = searchProvider;
@@ -47,19 +45,17 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             {
                 //var files = GetFiles(partition.Keys);
 
-                /*
-                foreach (var file in files)
-                {
-                    var doc = new ResultDocument();
-                    var itemPrices = prices.Where(x => x.ProductId == item.Id).ToArray();
-                    var index = IndexItem(doc, item, itemPrices);
+                //foreach (var file in files)
+                //{
+                //    var doc = new ResultDocument();
+                //    var itemPrices = prices.Where(x => x.ProductId == item.Id).ToArray();
+                //    var index = IndexItem(doc, item, itemPrices);
 
-                    if (index)
-                    {
-                        documents.Add(doc);
-                    }
-                }
-                */
+                //    if (index)
+                //    {
+                //        documents.Add(doc);
+                //    }
+                //}
             }
 
             return documents;
@@ -99,7 +95,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             _searchProvider.Commit(scope);
         }
 
-        #region Private functions
+
         private IEnumerable<Partition> GetPartitionsForAll()
         {
             var partitions = new List<Partition>();
@@ -115,35 +111,23 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             return GetPartitionsForAll();
         }
 
-        /*
-        private IEnumerable<Partition> GetPartitionsForModified(DateTime startDate, DateTime endDate)
-        {
-            var partitions = new List<Partition>();
+        //private IEnumerable<Partition> GetPartitionsForModified(DateTime startDate, DateTime endDate)
+        //{
+        //    var partitions = new List<Partition>();
 
-            var categoryChanges = GetCategoryChanges(startDate, endDate);
-            var deletedCategoryIds = categoryChanges.Where(c => c.OperationType == EntryState.Deleted).Select(c => c.ObjectId).ToList();
-            var modifiedCategoryIds = categoryChanges.Where(c => c.OperationType != EntryState.Deleted).Select(c => c.ObjectId).ToList();
+        //    var categoryChanges = GetCategoryChanges(startDate, endDate);
+        //    var deletedCategoryIds = categoryChanges.Where(c => c.OperationType == EntryState.Deleted).Select(c => c.ObjectId).ToList();
+        //    var modifiedCategoryIds = categoryChanges.Where(c => c.OperationType != EntryState.Deleted).Select(c => c.ObjectId).ToList();
 
-            partitions.AddRange(CreatePartitions(OperationType.Remove, deletedCategoryIds));
-            partitions.AddRange(CreatePartitions(OperationType.Index, modifiedCategoryIds));
+        //    partitions.AddRange(CreatePartitions(OperationType.Remove, deletedCategoryIds));
+        //    partitions.AddRange(CreatePartitions(OperationType.Index, modifiedCategoryIds));
 
-            return partitions;
-        }
-        */
+        //    return partitions;
+        //}
 
-            /*
-        protected virtual IList<CatalogProduct> GetFiles(string[] fileRealtiveUrls)
-        {
-            return _itemService.GetByIds(itemIds, ItemResponseGroup.ItemProperties | ItemResponseGroup.Variations | ItemResponseGroup.ItemEditorialReviews | ItemResponseGroup.Outlines);
-        }
-        */
-
-        private class ContentFile
-        {
-            public string RelativeUrl;
-            public string Content;
-        }
-
-        #endregion
+        //protected virtual IList<CatalogProduct> GetFiles(string[] fileRealtiveUrls)
+        //{
+        //    return _itemService.GetByIds(itemIds, ItemResponseGroup.ItemProperties | ItemResponseGroup.Variations | ItemResponseGroup.ItemEditorialReviews | ItemResponseGroup.Outlines);
+        //}
     }
 }
