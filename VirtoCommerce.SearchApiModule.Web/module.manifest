@@ -2,12 +2,12 @@
 <module>
     <id>VirtoCommerce.SearchApi</id>
     <version>1.2.1</version>
-    <platformVersion>2.12.0</platformVersion>
+    <platformVersion>2.12.2</platformVersion>
     <dependencies>
         <dependency id="VirtoCommerce.Core" version="2.17.0" />
         <dependency id="VirtoCommerce.Store" version="2.12.0" />
         <dependency id="VirtoCommerce.Catalog" version="2.15.8" />
-        <dependency id="VirtoCommerce.Search" version="2.13.0" />
+        <dependency id="VirtoCommerce.Search" version="2.13.2" />
     </dependencies>
 
     <title>Search API module</title>
