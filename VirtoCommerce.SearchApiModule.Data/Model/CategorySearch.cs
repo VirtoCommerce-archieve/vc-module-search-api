@@ -35,7 +35,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
             // add outline
             if (!string.IsNullOrEmpty(Outline))
             {
-                criteria.Outlines.Add(string.Format("{0}/{1}", catalog, Outline));
+                criteria.Outlines.Add(string.Format("{0}{1}", catalog, Outline));
             }
             else
             {
