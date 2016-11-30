@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Web.Http;
 using Microsoft.Practices.Unity;
 using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchApiModule.Data.Providers.Lucene;
 using VirtoCommerce.SearchApiModule.Data.Services;
+using VirtoCommerce.SearchApiModule.Web.JsonConverters;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Filters;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
@@ -46,6 +48,14 @@ namespace VirtoCommerce.SearchApiModule.Web
             // Replace original ICatalogSearchService with decorator
             var searchServiceDecorator = _container.Resolve<CatalogSearchServiceDecorator>();
             _container.RegisterInstance<ICatalogSearchService>(searchServiceDecorator);
+        }
+
+        public override void PostInitialize()
+        {
+            base.PostInitialize();
+
+            var httpConfiguration = _container.Resolve<HttpConfiguration>();
+            httpConfiguration.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new ProductSearchJsonConverter());
         }
     }
 }

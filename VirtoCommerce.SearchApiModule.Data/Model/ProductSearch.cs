@@ -42,9 +42,10 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
 
         public int Take { get; set; }
 
-        public virtual T AsCriteria<T>(string catalog, ISearchFilter[] filters) where T : CatalogItemSearchCriteria, new()
+        public virtual T AsCriteria<T>(string catalog, ISearchFilter[] filters)
+            where T : CatalogItemSearchCriteria, new()
         {
-            var criteria = new T();
+            var criteria = AbstractTypeFactory<T>.TryCreateInstance();
 
             criteria.Currency = Currency;
             criteria.Pricelists = PriceLists;
@@ -56,11 +57,11 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
             // add outline
             if (!string.IsNullOrEmpty(Outline))
             {
-                criteria.Outlines.Add(string.Format("{0}/{1}", catalog, Outline));
+                criteria.Outlines.Add(string.Join("/", catalog, Outline));
             }
             else
             {
-                criteria.Outlines.Add(string.Format("{0}", catalog));
+                criteria.Outlines.Add(catalog ?? string.Empty);
             }
 
             // Add all filters
@@ -140,7 +141,6 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
 
             if (!sorts.IsNullOrEmpty())
             {
-
                 foreach (var sortInfo in sorts)
                 {
                     var fieldName = sortInfo.SortColumn.ToLowerInvariant();

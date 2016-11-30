@@ -227,6 +227,7 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Controllers\Api\SearchApiModuleController.cs" />
+    <Compile Include="JsonConverters\ProductSearchJsonConverter.cs" />
     <Compile Include="Model\FilterProperty.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
