@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using CacheManager.Core;
 using Common.Logging;
+using Microsoft.Xunit.Performance;
 using Moq;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Services;
@@ -41,7 +42,6 @@ using VirtoCommerce.StoreModule.Data.Repositories;
 using VirtoCommerce.StoreModule.Data.Services;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.Xunit.Performance;
 
 namespace VirtoCommerce.SearchModule.Tests
 {
@@ -240,7 +240,7 @@ namespace VirtoCommerce.SearchModule.Tests
 
             var filterService = GetBrowseFilterService();
             var filters = filterService.GetFilters(context);
-            var serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Catalog, filters);
+            var serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Id, store.Catalog, filters);
             var ibs = GetItemBrowsingService(provider);
 
             //Load ALL products 
@@ -265,7 +265,7 @@ namespace VirtoCommerce.SearchModule.Tests
                 Sort = new[] { "name" }
             };
 
-            serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Catalog, filters);
+            serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Id, store.Catalog, filters);
             searchResults = ibs.SearchItems(scope, serviceCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
 
             var productName = searchResults.Products[0].Name;
@@ -278,7 +278,7 @@ namespace VirtoCommerce.SearchModule.Tests
                 Sort = new[] { "name-desc" }
             };
 
-            serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Catalog, filters);
+            serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Id, store.Catalog, filters);
             searchResults = ibs.SearchItems(scope, serviceCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
 
             productName = searchResults.Products[0].Name;
@@ -295,7 +295,7 @@ namespace VirtoCommerce.SearchModule.Tests
                 Sort = new[] { "name" }
             };
 
-            serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Catalog, filters);
+            serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Id, store.Catalog, filters);
             searchResults = ibs.SearchItems(scope, serviceCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
 
             Assert.True(searchResults.TotalCount == 6, string.Format("Expected 6, but found {0}", searchResults.TotalCount));
@@ -331,7 +331,7 @@ namespace VirtoCommerce.SearchModule.Tests
             // find all prodducts in the category
             var criteria = new ProductSearch()
             {
-                Currency = "USD"                
+                Currency = "USD"
             };
 
 
@@ -342,10 +342,11 @@ namespace VirtoCommerce.SearchModule.Tests
 
             var filterService = GetBrowseFilterService();
             var filters = filterService.GetFilters(context);
-            var serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Catalog, filters);
+            var serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Id, store.Catalog, filters);
             var ibs = GetItemBrowsingService(provider);
 
-            Benchmark.Iterate(() => {
+            Benchmark.Iterate(() =>
+            {
                 var searchResults = ibs.SearchItems(scope, serviceCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
             });
         }
