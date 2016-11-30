@@ -50,9 +50,9 @@
             </setting>
         </group>
     </settings>
-    
+
     <permissions>
-        <group name="Search">         
+        <group name="Search">
             <permission id="VirtoCommerce.Search:FilterProperties:Read" name="Read store filter properties" />
             <permission id="VirtoCommerce.Search:FilterProperties:Update" name="Update store filter properties" />
         </group>
