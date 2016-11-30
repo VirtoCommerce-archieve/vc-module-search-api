@@ -16,6 +16,8 @@ Lucene.Net.Contrib.SpellChecker.dll
 Lucene.Net.Contrib.SpellChecker.xml
 Nest.dll
 Nest.xml
+System.Web.Http.WebHost.dll
+System.Web.Http.WebHost.xml
 VirtoCommerce.CatalogModule.Web.Core.dll
 VirtoCommerce.Domain.dll
 VirtoCommerce.SearchModule.Core.dll
