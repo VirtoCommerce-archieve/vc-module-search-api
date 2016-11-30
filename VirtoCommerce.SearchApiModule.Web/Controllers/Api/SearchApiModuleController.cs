@@ -5,10 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Web.Http;
-using System.Web.Http.Controllers;
 using System.Web.Http.Description;
 using System.Xml.Serialization;
-using Newtonsoft.Json;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Domain.Store.Model;
@@ -42,7 +40,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
         public SearchApiModuleController(ISearchConnection searchConnection,
             IBrowseFilterService browseFilterService, IItemBrowsingService browseService,
             ICategoryBrowsingService categoryBrowseService, IStoreService storeService,
-            IPropertyService propertyService, 
+            IPropertyService propertyService,
             IPermissionScopeService permissionScopeService, ISecurityService securityService)
         {
             _searchConnection = searchConnection;
@@ -61,7 +59,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
         public IHttpActionResult SearchProducts(string storeId, ProductSearch criteria)
         {
             var responseGroup = EnumUtility.SafeParse(criteria.ResponseGroup, ItemResponseGroup.ItemLarge & ~ItemResponseGroup.ItemProperties);
-            var result = SearchProducts(_searchConnection.Scope, storeId, criteria, responseGroup);       
+            var result = SearchProducts(_searchConnection.Scope, storeId, criteria, responseGroup);
             return Ok(result);
         }
 
@@ -162,7 +160,9 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
             return StatusCode(HttpStatusCode.NoContent);
         }
 
+
         #region Helper Methods
+
         protected void CheckCurrentUserHasPermissionForObjects(string permission, params object[] objects)
         {
             //Scope bound security check
@@ -354,11 +354,12 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
 
             var filters = _browseFilterService.GetFilters(context);
 
-            var serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Catalog, filters);
+            var serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(storeId, store.Catalog, filters);
 
             var searchResults = _browseService.SearchItems(scope, serviceCriteria, responseGroup);
             return searchResults;
         }
+
         #endregion
     }
 }

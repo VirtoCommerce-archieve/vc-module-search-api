@@ -42,7 +42,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
 
         public int Take { get; set; }
 
-        public virtual T AsCriteria<T>(string catalog, ISearchFilter[] filters)
+        public virtual T AsCriteria<T>(string storeId, string catalog, ISearchFilter[] filters)
             where T : CatalogItemSearchCriteria, new()
         {
             var criteria = AbstractTypeFactory<T>.TryCreateInstance();
