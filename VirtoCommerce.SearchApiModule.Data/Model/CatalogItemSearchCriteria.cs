@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Text;
 using VirtoCommerce.SearchModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
 
@@ -47,6 +47,8 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
             get { return _catalog; }
             set { ChangeState(); _catalog = value; }
         }
+
+        public IList<string> ProductIds { get; set; }
 
         private string[] _responseGroups;
         /// <summary>
@@ -122,21 +124,9 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
             set { ChangeState(); _endDate = value; }
         }
 
-        private bool _withHidden = false;
-
         /// <summary>
         /// Specifies if we search hidden products.
         /// </summary>
-        public virtual bool WithHidden
-        {
-            get
-            {
-                return _withHidden;
-            }
-            set
-            {
-                _withHidden = value;
-            }
-        }
+        public virtual bool WithHidden { get; set; }
     }
 }

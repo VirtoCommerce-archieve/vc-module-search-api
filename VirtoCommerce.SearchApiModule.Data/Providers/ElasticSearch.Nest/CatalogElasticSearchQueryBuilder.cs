@@ -1,4 +1,5 @@
-﻿using Nest;
+﻿using System.Linq;
+using Nest;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
@@ -58,6 +59,11 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest
             if (criteria != null)
             {
                 result &= new DateRangeQuery { Field = "startdate", LessThanOrEqualTo = criteria.StartDate };
+
+                if (criteria.ProductIds != null)
+                {
+                    result &= new IdsQuery { Values = criteria.ProductIds.Select(id => new Id(id)) };
+                }
 
                 if (criteria.StartDateFrom.HasValue)
                 {

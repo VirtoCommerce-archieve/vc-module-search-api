@@ -17,6 +17,8 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
             Take = 20;
         }
 
+        public IList<string> ProductIds { get; set; }
+
         /// <summary>
         /// ItemResponseGroup
         /// </summary>
@@ -47,6 +49,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
         {
             var criteria = AbstractTypeFactory<T>.TryCreateInstance();
 
+            criteria.ProductIds = ProductIds;
             criteria.Currency = Currency;
             criteria.Pricelists = PriceLists;
             criteria.SearchPhrase = SearchPhrase;

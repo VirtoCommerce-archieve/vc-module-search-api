@@ -1,4 +1,6 @@
-﻿using Lucene.Net.Analysis.Standard;
+﻿using System.Collections.Specialized;
+using System.Linq;
+using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
@@ -42,9 +44,19 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
             if (criteria is CatalogItemSearchCriteria)
             {
                 var c = criteria as CatalogItemSearchCriteria;
+
                 var datesFilterStart = new TermRangeQuery(
                     "startdate", c.StartDateFrom.HasValue ? DateTools.DateToString(c.StartDateFrom.Value, DateTools.Resolution.SECOND) : null, DateTools.DateToString(c.StartDate, DateTools.Resolution.SECOND), false, true);
                 query.Add(datesFilterStart, Occur.MUST);
+
+                if (c.ProductIds != null && c.ProductIds.Count > 0)
+                {
+                    // TODO: add support for generic string collections
+                    var productIds = new StringCollection();
+                    productIds.AddRange(c.ProductIds.ToArray());
+
+                    AddQuery("__key", query, productIds);
+                }
 
                 if (c.EndDate.HasValue)
                 {

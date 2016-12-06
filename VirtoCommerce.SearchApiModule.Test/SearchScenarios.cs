@@ -9,7 +9,6 @@ using VirtoCommerce.SearchModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchModule.Tests;
 using Xunit;
-using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
 
 namespace VirtoCommerce.SearchApiModule.Test
 {
@@ -132,6 +131,32 @@ namespace VirtoCommerce.SearchApiModule.Test
             var scope = _DefaultScope;
             var provider = GetSearchProvider(providerType, scope);
             SearchHelper.CreateSampleIndex(provider, scope);
+        }
+
+        [Theory]
+        [InlineData("Lucene")]
+        [InlineData("Elastic")]
+        [Trait("Category", "CI")]
+        public void Can_find_items_by_id(string providerType)
+        {
+            var scope = _DefaultScope;
+            var provider = GetSearchProvider(providerType, scope);
+            SearchHelper.CreateSampleIndex(provider, scope);
+
+            var criteria = new CatalogItemSearchCriteria
+            {
+                Catalog = "goods",
+                ProductIds = new[] { "red3", "another" },
+                RecordsToRetrieve = 10,
+                StartingRecord = 0,
+                Pricelists = new string[] { },
+            };
+
+            var results = provider.Search<DocumentDictionary>(scope, criteria);
+
+            Assert.True(results.DocCount == 2, $"Returns {results.DocCount} documents instead of 2");
+            Assert.True(results.Documents.Any(d => (string)d.Id == "red3"), "Cannot find 'red3'");
+            Assert.True(results.Documents.Any(d => (string)d.Id == "another"), "Cannot find 'another'");
         }
 
         [Theory]
