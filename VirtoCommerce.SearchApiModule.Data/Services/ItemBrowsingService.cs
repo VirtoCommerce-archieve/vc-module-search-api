@@ -133,7 +133,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 product.Reviews = null;
             }
 
-            if (!responseGroup.HasFlag(ItemResponseGroup.ItemProperties))
+            if (!responseGroup.HasFlag(ItemResponseGroup.ItemInfo))
             {
                 product.Properties = null;
             }
