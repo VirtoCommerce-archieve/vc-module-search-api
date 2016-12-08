@@ -417,7 +417,7 @@ namespace VirtoCommerce.SearchModule.Tests
             var taxService = Moq.Mock.Of<ITaxService>(s => s.GetAllTaxProviders() == new TaxProvider[] { });
             var dpService = GetDynamicPropertyService();
 
-            return new StoreServiceImpl(GetStoreRepository, GetCommerceService(), settings, dpService, shippingService, paymentService, taxService, GetCacheManager());
+            return new StoreServiceImpl(GetStoreRepository, GetCommerceService(), settings, dpService, shippingService, paymentService, taxService);
         }
 
         private IDynamicPropertyService GetDynamicPropertyService()
