@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -18,53 +16,61 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
     /// </summary>
     public class CatalogSearchServiceDecorator : ICatalogSearchService
     {
-        private readonly ISettingsManager _settingsManager;
         private readonly ICatalogSearchService _catalogSearchService;
         private readonly ISearchConnection _searchConnection;
         private readonly ISearchProvider _searchProvider;
         private readonly IItemService _itemService;
+        private readonly ISettingsManager _settingsManager;
 
-        public CatalogSearchServiceDecorator(ICatalogSearchService catalogSearchService, ISearchConnection searchConnection, 
-                                             ISearchProvider searchService, IItemService itemService, ISettingsManager settingsManager)
+        public CatalogSearchServiceDecorator(
+            ICatalogSearchService catalogSearchService,
+            ISearchConnection searchConnection,
+            ISearchProvider searchProvider,
+            IItemService itemService,
+            ISettingsManager settingsManager)
         {
             _catalogSearchService = catalogSearchService;
             _searchConnection = searchConnection;
-            _searchProvider = searchService;
+            _searchProvider = searchProvider;
             _itemService = itemService;
             _settingsManager = settingsManager;
         }
 
         public SearchResult Search(SearchCriteria criteria)
         {
-            SearchResult retVal;
-            if (!string.IsNullOrEmpty(criteria.Keyword) && _settingsManager.GetValue("VirtoCommerce.SearchApi.UseCatalogIndexedSearchInManager", true))
-            {              
-                // use indexed search
-                retVal = new SearchResult();
+            SearchResult result;
+
+            var useIndexedSearch = _settingsManager.GetValue("VirtoCommerce.SearchApi.UseCatalogIndexedSearchInManager", true);
+            var searchProducts = criteria.ResponseGroup.HasFlag(SearchResponseGroup.WithProducts);
+
+            if (useIndexedSearch && searchProducts && !string.IsNullOrEmpty(criteria.Keyword))
+            {
+                result = new SearchResult();
 
                 // TODO: create outline for category
                 // TODO: implement sorting
 
-                var serviceCriteria = new SimpleCatalogItemSearchCriteria() {
-                    RawQuery = criteria.Keyword,
+                var serviceCriteria = new SimpleCatalogItemSearchCriteria()
+                {
+                    SearchPhrase = criteria.Keyword,
                     Catalog = criteria.CatalogId,
                     StartingRecord = criteria.Skip,
                     RecordsToRetrieve = criteria.Take,
-                    WithHidden = true
+                    WithHidden = criteria.WithHidden,
                 };
 
-                SearchItems(_searchConnection.Scope, retVal, serviceCriteria, ItemResponseGroup.ItemInfo | ItemResponseGroup.Outlines);
+                SearchItems(_searchConnection.Scope, result, serviceCriteria, ItemResponseGroup.ItemInfo | ItemResponseGroup.Outlines);
             }
             else
             {
                 // use original impl. from catalog module
-                retVal = _catalogSearchService.Search(criteria);
+                result = _catalogSearchService.Search(criteria);
             }
 
-            return retVal;
+            return result;
         }
 
-        public void SearchItems(string scope, SearchResult results, ISearchCriteria criteria, ItemResponseGroup responseGroup)
+        public void SearchItems(string scope, SearchResult result, ISearchCriteria criteria, ItemResponseGroup responseGroup)
         {
             var items = new List<CatalogProduct>();
             var itemsOrderedList = new List<string>();
@@ -76,7 +82,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             //var myCriteria = criteria.Clone();
             var myCriteria = criteria;
 
-            ISearchResults<DocumentDictionary> searchResults = null;
+            ISearchResults<DocumentDictionary> searchResults;
 
             do
             {
@@ -85,7 +91,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
                 searchRetry++;
 
-                if (searchResults == null || searchResults.Documents == null)
+                if (searchResults?.Documents == null)
                 {
                     continue;
                 }
@@ -102,11 +108,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 itemsOrderedList.AddRange(uniqueKeys);
 
                 // if we can determine catalog, pass it to the service
-                string catalog = null;
-                if (criteria is CatalogItemSearchCriteria)
-                {
-                    catalog = (criteria as CatalogItemSearchCriteria).Catalog;
-                }
+                var catalog = (criteria as CatalogItemSearchCriteria)?.Catalog;
 
                 // Now load items from repository
                 var currentItems = _itemService.GetByIds(uniqueKeys.ToArray(), responseGroup, catalog);
@@ -122,13 +124,13 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                     myCriteria.RecordsToRetrieve += (foundItemCount - dbItemCount);
                 }
             }
-            while (foundItemCount > dbItemCount && searchResults != null && searchResults.Documents.Any() && searchRetry <= 3 &&
+            while (foundItemCount > dbItemCount && searchResults?.Documents != null && searchResults.Documents.Any() && searchRetry <= 3 &&
                 (myCriteria.RecordsToRetrieve + myCriteria.StartingRecord) < searchResults.TotalCount);
 
-            results.Products = items.ToArray();
+            result.Products = items.ToArray();
 
             if (searchResults != null)
-                results.ProductsTotalCount = (int)searchResults.TotalCount;
+                result.ProductsTotalCount = (int)searchResults.TotalCount;
         }
     }
 }

@@ -44,15 +44,14 @@ namespace VirtoCommerce.SearchApiModule.Web
             {
                 _container.RegisterType<ISearchQueryBuilder, CatalogLuceneQueryBuilder>("lucene");
             }
-
-            // Replace original ICatalogSearchService with decorator
-            var searchServiceDecorator = _container.Resolve<CatalogSearchServiceDecorator>();
-            _container.RegisterInstance<ICatalogSearchService>(searchServiceDecorator);
         }
 
         public override void PostInitialize()
         {
             base.PostInitialize();
+
+            // Replace original ICatalogSearchService with decorator
+            _container.RegisterInstance<ICatalogSearchService>(_container.Resolve<CatalogSearchServiceDecorator>());
 
             var httpConfiguration = _container.Resolve<HttpConfiguration>();
             httpConfiguration.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new ProductSearchJsonConverter());
