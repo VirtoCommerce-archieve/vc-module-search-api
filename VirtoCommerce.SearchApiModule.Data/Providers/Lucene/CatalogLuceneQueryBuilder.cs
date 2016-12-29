@@ -93,10 +93,12 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
             if (criteria is SimpleCatalogItemSearchCriteria)
             {
                 var c = criteria as SimpleCatalogItemSearchCriteria;
-                var parser = new QueryParser(u.Version.LUCENE_30, "__content", analyzer);
-                parser.DefaultOperator = QueryParser.Operator.AND;
-                var parsedQuery = parser.Parse(c.RawQuery);
-                query.Add(parsedQuery, Occur.MUST);
+                if (!string.IsNullOrEmpty(c.RawQuery))
+                {
+                    var parser = new QueryParser(u.Version.LUCENE_30, "__content", analyzer) { DefaultOperator = QueryParser.Operator.AND };
+                    var parsedQuery = parser.Parse(c.RawQuery);
+                    query.Add(parsedQuery, Occur.MUST);
+                }
             }
 
             #endregion
