@@ -90,7 +90,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                     }
                 }
 
-                foreach (var product in productsMap.Values)
+                foreach (var product in productsMap.Values.Where(v => v != null))
                 {
                     ReduceSearchResult(criteria, responseGroup, product);
                 }
