@@ -57,6 +57,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                     StartingRecord = criteria.Skip,
                     RecordsToRetrieve = criteria.Take,
                     WithHidden = criteria.WithHidden,
+                    Locale = "*",
                 };
 
                 SearchItems(_searchConnection.Scope, result, serviceCriteria, ItemResponseGroup.ItemInfo | ItemResponseGroup.Outlines);
