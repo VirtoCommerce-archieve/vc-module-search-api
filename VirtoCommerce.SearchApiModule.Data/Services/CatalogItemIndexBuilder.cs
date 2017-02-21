@@ -12,10 +12,10 @@ using VirtoCommerce.Domain.Pricing.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
-using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.SearchApiModule.Data.Services
 {
@@ -190,6 +190,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
             // Index custom properties
             IndexItemCustomProperties(doc, item);
+            IndexUserGroups(doc, item);
 
             if (item.Variations != null)
             {
@@ -229,6 +230,69 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             return true;
         }
 
+        protected virtual void IndexUserGroups(ResultDocument doc, CatalogProduct item)
+        {
+            // TODO: Consider virtual catalogs where user groups may be different for each item outline
+
+            var values = GetItemUserGroups(item) ?? new[] { "__any__" };
+            if (!values.Any())
+            {
+                values = new[] { "__none__" };
+            }
+
+            var indexStoreNotAnalyzed = new[] { IndexStore.Yes, IndexType.NotAnalyzed };
+            foreach (var value in values)
+            {
+                doc.Add(new DocumentField("usergroups", value, indexStoreNotAnalyzed));
+            }
+        }
+
+        protected virtual IList<string> GetItemUserGroups(CatalogProduct item)
+        {
+            var categories = GetItemCategories(item);
+
+            // Get user groups for each category
+            var groups = categories
+                .Where(c => c.PropertyValues != null)
+                .Select(c => c.PropertyValues.Where(v => v.PropertyName.EqualsInvariant("UserGroups")).Select(v => (string)v.Value))
+                .Where(e => e.Any())
+                .ToList();
+
+            string[] result;
+
+            if (groups.Any())
+            {
+                // Find intersection of groups in all categories
+                result = groups
+                    .Skip(1)
+                    .Aggregate(new HashSet<string>(groups.First(), StringComparer.OrdinalIgnoreCase), (h, e) => { h.IntersectWith(e); return h; })
+                    .ToArray();
+            }
+            else
+            {
+                result = null;
+            }
+
+            return result;
+        }
+
+        protected virtual IList<Category> GetItemCategories(CatalogProduct item)
+        {
+            var result = new List<Category>();
+
+            if (item.Category != null)
+            {
+                result.Add(item.Category);
+
+                if (item.Category.Parents != null)
+                {
+                    result.AddRange(item.Category.Parents);
+                }
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// is:hidden, property can be used to provide user friendly way of searching products
         /// </summary>
@@ -238,7 +302,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         {
             var indexNoStoreNotAnalyzed = new[] { IndexStore.No, IndexType.NotAnalyzed };
             doc.Add(new DocumentField("is", value, indexNoStoreNotAnalyzed));
-       }
+        }
 
         protected virtual string[] GetOutlineStrings(IEnumerable<Outline> outlines)
         {
