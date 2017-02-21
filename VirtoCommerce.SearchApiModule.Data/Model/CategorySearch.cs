@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Data.Extensions;
 using VirtoCommerce.SearchApiModule.Data.Helpers;
@@ -17,10 +14,13 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
         /// CategoryResponseGroup
         /// </summary>
         public string ResponseGroup { get; set; }
+
         /// <summary>
         /// CategoryId/CategoryId
         /// </summary>
         public string Outline { get; set; }
+
+        public string[] Terms { get; set; }
 
         public string[] Sort { get; set; }
 
@@ -30,28 +30,31 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
 
         public virtual T AsCriteria<T>(string catalog) where T : CategorySearchCriteria, new()
         {
-            var criteria = new T();
+            var criteria = AbstractTypeFactory<T>.TryCreateInstance();
 
             // add outline
-            if (!string.IsNullOrEmpty(Outline))
+            criteria.Outlines.Add($"{catalog}{Outline}".Trim());
+
+            #region Filters
+
+            var terms = Terms.AsKeyValues();
+            foreach (var term in terms)
             {
-                criteria.Outlines.Add(string.Format("{0}{1}", catalog, Outline));
+                var attr = new AttributeFilter { Key = term.Key, Values = BrowseFilterHelper.CreateAttributeFilterValues(term.Values) };
+                criteria.Apply(attr);
             }
-            else
-            {
-                criteria.Outlines.Add(string.Format("{0}", catalog)); // top categories in catalog
-            }
+
+            #endregion
 
             #region Sorting
 
             var categoryId = Outline.AsCategoryId();
             var sorts = Sort.AsSortInfoes();
             var sortFields = new List<SearchSortField>();
-            var priorityFieldName = string.Format(CultureInfo.InvariantCulture, "priority_{0}_{1}", catalog, categoryId).ToLower();
+            var priorityFieldName = $"priority_{catalog}_{categoryId}".ToLower();
 
             if (!sorts.IsNullOrEmpty())
             {
-
                 foreach (var sortInfo in sorts)
                 {
                     var fieldName = sortInfo.SortColumn.ToLowerInvariant();
@@ -85,7 +88,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
 
             #endregion
 
-            return criteria as T;
+            return criteria;
         }
     }
 }

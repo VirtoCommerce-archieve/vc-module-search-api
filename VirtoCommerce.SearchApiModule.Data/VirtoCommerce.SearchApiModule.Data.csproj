@@ -173,6 +173,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\ElasticSearch.Nest\CatalogElasticSearchQueryBuilder.cs" />
     <Compile Include="Providers\Lucene\CatalogLuceneQueryBuilder.cs" />
+    <Compile Include="Services\BaseIndexBuilder.cs" />
     <Compile Include="Services\CatalogItemIndexBuilder.cs" />
     <Compile Include="Services\CatalogSearchServiceDecorator.cs" />
     <Compile Include="Services\CategoryBrowsingService.cs" />

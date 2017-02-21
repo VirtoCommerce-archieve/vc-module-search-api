@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Web.Converters;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
@@ -16,7 +15,7 @@ using VirtoCommerce.SearchModule.Core.Model.Indexing;
 
 namespace VirtoCommerce.SearchApiModule.Data.Services
 {
-    public class CategoryIndexBuilder : ISearchIndexBuilder
+    public class CategoryIndexBuilder : BaseIndexBuilder, ISearchIndexBuilder
     {
         private const int _partitionSizeCount = 100; // the maximum partition size, keep it smaller to prevent too big of the sql requests and too large messages in the queue
 
@@ -67,13 +66,13 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
             if (!partition.Keys.IsNullOrEmpty())
             {
-                var categories = _categoryService.GetByIds(partition.Keys, CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithOutlines | CategoryResponseGroup.WithImages | CategoryResponseGroup.WithSeo);
+                var categories = _categoryService.GetByIds(partition.Keys, CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithOutlines | CategoryResponseGroup.WithImages | CategoryResponseGroup.WithSeo | CategoryResponseGroup.WithParents);
                 foreach (var category in categories)
                 {
                     var doc = new ResultDocument();
                     IndexItem(doc, category);
                     documents.Add(doc);
-                }           
+                }
             }
             return documents;
         }
@@ -152,6 +151,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
             // Index custom properties
             IndexItemCustomProperties(doc, category);
+            IndexUserGroups(doc, category);
 
             // add to content
             doc.Add(new DocumentField("__content", category.Name, indexStoreAnalyzedStringCollection));
@@ -160,7 +160,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             if (_settingsManager.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", true))
             {
                 var itemDto = category.ToWebModel(_blobUrlResolver);
-           
+
                 doc.Add(new DocumentField("__object", itemDto, new[] { IndexStore.Yes, IndexType.Analyzed }));
             }
         }
