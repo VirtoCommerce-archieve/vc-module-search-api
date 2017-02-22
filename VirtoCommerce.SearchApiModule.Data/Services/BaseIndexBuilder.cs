@@ -9,6 +9,8 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 {
     public class BaseIndexBuilder
     {
+        protected const string UserGroupsFieldName = "usergroups";
+
         protected virtual void IndexUserGroups(ResultDocument doc, Category category)
         {
             // TODO: Consider virtual catalogs where user groups may be different for each category path (outline)
@@ -19,10 +21,12 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 values = new[] { "__none__" };
             }
 
+            doc.RemoveField(UserGroupsFieldName);
+
             var indexStoreNotAnalyzed = new[] { IndexStore.Yes, IndexType.NotAnalyzed };
             foreach (var value in values)
             {
-                doc.Add(new DocumentField("usergroups", value, indexStoreNotAnalyzed));
+                doc.Add(new DocumentField(UserGroupsFieldName, value, indexStoreNotAnalyzed));
             }
         }
 
@@ -33,7 +37,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             // Get user groups for each category
             var groups = categories
                 .Where(c => c.PropertyValues != null)
-                .Select(c => c.PropertyValues.Where(v => v.PropertyName.EqualsInvariant("UserGroups")).Select(v => (string)v.Value))
+                .Select(c => c.PropertyValues.Where(v => v.PropertyName.EqualsInvariant(UserGroupsFieldName)).Select(v => (string)v.Value))
                 .Where(e => e.Any())
                 .ToList();
 
