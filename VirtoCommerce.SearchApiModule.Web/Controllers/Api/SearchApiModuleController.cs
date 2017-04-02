@@ -66,10 +66,10 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
         [HttpPost]
         [Route("{storeId}/categories")]
         [ResponseType(typeof(CategorySearchResult))]
-        public IHttpActionResult SearchCategories(string storeId, CategorySearch criteria)
+        public IHttpActionResult SearchCategories(string storeId, CategorySearch criteria, string catalogId = "")
         {
             var responseGroup = EnumUtility.SafeParse(criteria.ResponseGroup, CategoryResponseGroup.Full & ~CategoryResponseGroup.WithProperties);
-            var result = SearchCategories(_searchConnection.Scope, storeId, criteria, responseGroup);
+            var result = SearchCategories(_searchConnection.Scope, catalogId, storeId, criteria, responseGroup);
             return Ok(result);
         }
 
@@ -327,14 +327,15 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
             return result;
         }
 
-        private CategorySearchResult SearchCategories(string scope, string storeId, CategorySearch criteria, CategoryResponseGroup responseGroup)
+        private CategorySearchResult SearchCategories(string scope, string catalogId, string storeId, CategorySearch criteria, CategoryResponseGroup responseGroup)
         {
             var store = _storeService.GetById(storeId);
+            string searchedCatalogId = catalogId != "" ? catalogId : store.Catalog;
 
             if (store == null)
                 return null;
 
-            var serviceCriteria = criteria.AsCriteria<CategorySearchCriteria>(store.Catalog);
+            var serviceCriteria = criteria.AsCriteria<CategorySearchCriteria>(searchedCatalogId);
 
             var searchResults = _categoryBrowseService.SearchCategories(scope, serviceCriteria, responseGroup);
             return searchResults;
