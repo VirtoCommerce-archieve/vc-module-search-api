@@ -2,7 +2,7 @@
 using Nest;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
-using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
+using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch;
 
 namespace VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest
 {
@@ -14,23 +14,6 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest
 
             result &= GetCategoryQuery<T>(criteria as CategorySearchCriteria);
             result &= GetCatalogItemQuery<T>(criteria as CatalogItemSearchCriteria);
-            result &= GetSimpleQuery<T>(criteria as SimpleCatalogItemSearchCriteria);
-
-            return result;
-        }
-
-        protected virtual QueryContainer GetSimpleQuery<T>(SimpleCatalogItemSearchCriteria criteria)
-            where T : class
-        {
-            QueryContainer result = null;
-
-            if (criteria != null)
-            {
-                if (criteria.RawQuery != null && !string.IsNullOrEmpty(criteria.RawQuery))
-                {
-                    result = new QueryStringQuery { Query = criteria.RawQuery, Lenient = true, DefaultOperator = Operator.And, Analyzer = "standard" };
-                }
-            }
 
             return result;
         }
@@ -40,12 +23,9 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest
         {
             QueryContainer result = null;
 
-            if (criteria != null)
+            if (criteria?.Outlines != null && criteria.Outlines.Any())
             {
-                if (criteria.Outlines != null && criteria.Outlines.Count > 0)
-                {
-                    result = CreateQuery("__outline", criteria.Outlines);
-                }
+                result = CreateQuery("__outline", criteria.Outlines, true);
             }
 
             return result;
@@ -59,11 +39,6 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest
             if (criteria != null)
             {
                 result &= new DateRangeQuery { Field = "startdate", LessThanOrEqualTo = criteria.StartDate };
-
-                if (criteria.ProductIds != null)
-                {
-                    result &= new IdsQuery { Values = criteria.ProductIds.Select(id => new Id(id)) };
-                }
 
                 if (criteria.StartDateFrom.HasValue)
                 {
@@ -80,7 +55,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest
 
                 if (criteria.Outlines != null && criteria.Outlines.Count > 0)
                 {
-                    result &= CreateQuery("__outline", criteria.Outlines);
+                    result &= CreateQuery("__outline", criteria.Outlines, true);
                 }
 
                 if (!string.IsNullOrEmpty(criteria.Catalog))

@@ -1,13 +1,10 @@
-﻿using System.Collections.Specialized;
-using System.Linq;
-using Lucene.Net.Analysis.Standard;
+﻿using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
-using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
-using VirtoCommerce.SearchModule.Data.Providers.Lucene;
+using VirtoCommerce.SearchModule.Data.Providers.LuceneSearch;
 using u = Lucene.Net.Util;
 
 namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
@@ -22,7 +19,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
         /// <returns></returns>
         public override object BuildQuery<T>(string scope, ISearchCriteria criteria)
         {
-            var builder = base.BuildQuery<T>(scope, criteria) as QueryBuilder;
+            var builder = base.BuildQuery<T>(scope, criteria) as LuceneSearchQuery;
             var query = builder.Query as BooleanQuery;
             var analyzer = new StandardAnalyzer(u.Version.LUCENE_30);
 
@@ -49,15 +46,6 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
                     "startdate", c.StartDateFrom.HasValue ? DateTools.DateToString(c.StartDateFrom.Value, DateTools.Resolution.SECOND) : null, DateTools.DateToString(c.StartDate, DateTools.Resolution.SECOND), false, true);
                 query.Add(datesFilterStart, Occur.MUST);
 
-                if (c.ProductIds != null && c.ProductIds.Count > 0)
-                {
-                    // TODO: add support for generic string collections
-                    var productIds = new StringCollection();
-                    productIds.AddRange(c.ProductIds.ToArray());
-
-                    AddQuery("__key", query, productIds);
-                }
-
                 if (c.EndDate.HasValue)
                 {
                     var datesFilterEnd = new TermRangeQuery(
@@ -82,22 +70,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.Lucene
 
                 if (!string.IsNullOrEmpty(c.Catalog))
                 {
-                    AddQuery("catalog", query, c.Catalog);
-                }
-            }
-
-            #endregion
-
-            #region SimpleCatalogItemSearchCriteria
-
-            if (criteria is SimpleCatalogItemSearchCriteria)
-            {
-                var c = criteria as SimpleCatalogItemSearchCriteria;
-                if (!string.IsNullOrEmpty(c.RawQuery))
-                {
-                    var parser = new QueryParser(u.Version.LUCENE_30, "__content", analyzer) { DefaultOperator = QueryParser.Operator.AND };
-                    var parsedQuery = parser.Parse(c.RawQuery);
-                    query.Add(parsedQuery, Occur.MUST);
+                    AddWildcardQuery("catalog", query, c.Catalog);
                 }
             }
 

@@ -50,7 +50,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             return result;
         }
 
-        protected virtual Aggregation[] ConvertFacetsToAggregations(FacetGroup[] facets, ISearchCriteria criteria)
+        protected virtual Aggregation[] ConvertFacetsToAggregations(IList<FacetGroup> facets, ISearchCriteria criteria)
         {
             Aggregation[] result = null;
 

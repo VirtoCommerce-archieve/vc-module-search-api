@@ -1,4 +1,4 @@
-﻿using System.Collections.Specialized;
+﻿using System.Collections.Generic;
 using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
 
 namespace VirtoCommerce.SearchApiModule.Data.Model
@@ -24,16 +24,11 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
         {
         }
 
-        private StringCollection _outlines = new StringCollection();
         /// <summary>
         /// Gets or sets the outlines. Outline consists of "Category1/Category2".
         /// </summary>
         /// <example>Everything/digital-cameras</example>
         /// <value>The outlines.</value>
-        public virtual StringCollection Outlines
-        {
-            get { return _outlines; }
-            set { ChangeState(); _outlines = value; }
-        }
+        public virtual IList<string> Outlines { get; set; } = new List<string>();
     }
 }

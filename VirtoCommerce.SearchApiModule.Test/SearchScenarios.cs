@@ -6,27 +6,26 @@ using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Filters;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
 using VirtoCommerce.SearchModule.Core.Model.Search;
-using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
-using VirtoCommerce.SearchModule.Tests;
 using Xunit;
 
 namespace VirtoCommerce.SearchApiModule.Test
 {
     [CLSCompliant(false)]
     [Collection("Search")]
+    [Trait("Category", "CI")]
     public class SearchScenarios : SearchTestsBase
     {
-        private string _DefaultScope = "test";
+        private const string _scope = "test";
+        private const string _documentType = CatalogItemSearchCriteria.DocType;
 
         [Theory]
         [InlineData("Lucene")]
         [InlineData("Elastic")]
-        [Trait("Category", "CI")]
+        //[InlineData("Azure")] // Azure doesn't support complex facets with filters
         public void Can_find_pricelists_prices(string providerType)
         {
-            var scope = _DefaultScope;
-            var provider = GetSearchProvider(providerType, scope);
-            SearchHelper.CreateSampleIndex(provider, scope);
+            var provider = GetSearchProvider(providerType, _scope);
+            SearchTestsHelper.CreateSampleIndex(provider, _scope, _documentType);
 
             var criteria = new CatalogItemSearchCriteria
             {
@@ -35,27 +34,30 @@ namespace VirtoCommerce.SearchApiModule.Test
                 RecordsToRetrieve = 10,
                 StartingRecord = 0,
                 Currency = "usd",
-                Pricelists = new string[] { "default", "sale" }
+                Pricelists = new[] { "default", "sale" }
             };
 
-            var priceRangefilter = new PriceRangeFilter { Currency = "usd" };
-            priceRangefilter.Values = new[]
-                                          {
-                                              new RangeFilterValue { Id = "0_to_100", Lower = "0", Upper = "100" },
-                                              new RangeFilterValue { Id = "100_to_700", Lower = "100", Upper = "700" }
-                                          };
+            var priceRangefilter = new PriceRangeFilter
+            {
+                Currency = "usd",
+                Values = new[]
+                {
+                    new RangeFilterValue {Id = "0_to_100", Lower = "0", Upper = "100"},
+                    new RangeFilterValue {Id = "100_to_700", Lower = "100", Upper = "700"}
+                }
+            };
 
             criteria.Add(priceRangefilter);
 
-            var results = provider.Search<DocumentDictionary>(scope, criteria);
+            var results = provider.Search<DocumentDictionary>(_scope, criteria);
 
-            Assert.True(results.DocCount == 6, string.Format("Returns {0} instead of 6", results.DocCount));
+            Assert.Equal(6, results.DocCount);
 
             var priceCount = GetFacetCount(results, "Price", "0_to_100");
-            Assert.True(priceCount == 2, string.Format("Returns {0} facets of 0_to_100 prices instead of 2", priceCount));
+            Assert.True(priceCount == 2, $"Returns {priceCount} facets of 0_to_100 prices instead of 2");
 
             var priceCount2 = GetFacetCount(results, "Price", "100_to_700");
-            Assert.True(priceCount2 == 3, string.Format("Returns {0} facets of 100_to_700 prices instead of 3", priceCount2));
+            Assert.True(priceCount2 == 3, $"Returns {priceCount2} facets of 100_to_700 prices instead of 3");
 
             criteria = new CatalogItemSearchCriteria
             {
@@ -64,50 +66,44 @@ namespace VirtoCommerce.SearchApiModule.Test
                 RecordsToRetrieve = 10,
                 StartingRecord = 0,
                 Currency = "usd",
-                Pricelists = new string[] { "sale", "default" }
+                Pricelists = new[] { "sale", "default" }
             };
 
             criteria.Add(priceRangefilter);
 
-            results = provider.Search<DocumentDictionary>(scope, criteria);
+            results = provider.Search<DocumentDictionary>(_scope, criteria);
 
-            Assert.True(results.DocCount == 6, string.Format("\"Sample Product\" search returns {0} instead of 6", results.DocCount));
+            Assert.True(results.DocCount == 6, $"\"Sample Product\" search returns {results.DocCount} instead of 6");
 
             var priceSaleCount = GetFacetCount(results, "Price", "0_to_100");
-            Assert.True(priceSaleCount == 3, string.Format("Returns {0} facets of 0_to_100 prices instead of 2", priceSaleCount));
+            Assert.True(priceSaleCount == 3, $"Returns {priceSaleCount} facets of 0_to_100 prices instead of 2");
 
             var priceSaleCount2 = GetFacetCount(results, "Price", "100_to_700");
-            Assert.True(priceSaleCount2 == 2, string.Format("Returns {0} facets of 100_to_700 prices instead of 3", priceSaleCount2));
+            Assert.True(priceSaleCount2 == 2, $"Returns {priceSaleCount2} facets of 100_to_700 prices instead of 3");
 
         }
 
         [Fact]
-        [Trait("Category", "CI")]
         public void Throws_exceptions_elastic()
         {
-            var providerType = "Elastic";
-            var scope = _DefaultScope;
-            var badscope = "doesntexist";
-            var baddocumenttype = "badtype";
-            var provider = GetSearchProvider(providerType, scope);
+            const string providerType = "Elastic";
+            const string badScope = "doesnotexist";
+            const string badDocumentType = "badtype";
+            var provider = GetSearchProvider(providerType, _scope);
 
             // try removing non-existing index
             // no exception should be generated, since 404 will be just eaten when index doesn't exist
-            provider.RemoveAll(badscope, "");
-            provider.RemoveAll(badscope, baddocumenttype);
+            provider.RemoveAll(badScope, _documentType);
+            provider.RemoveAll(badScope, badDocumentType);
 
             // now create an index and try removing non-existent document type
-            SearchHelper.CreateSampleIndex(provider, scope);
-            provider.RemoveAll(scope, "sometype");
+            SearchTestsHelper.CreateSampleIndex(provider, _scope, _documentType);
+            provider.RemoveAll(_scope, "sometype");
 
             // create bad connection
-            var queryBuilder = new ElasticSearchQueryBuilder();
+            var badProvider = GetSearchProvider(providerType, _scope, "localhost:9201");
 
-            var conn = new SearchConnection("localhost:9201", scope);
-            var bad_provider = new ElasticSearchProvider(new[] { queryBuilder }, conn);
-            bad_provider.EnableTrace = true;
-
-            Assert.Throws<ElasticSearchException>(() => bad_provider.RemoveAll(badscope, ""));
+            Assert.Throws<SearchException>(() => badProvider.RemoveAll(badScope, _documentType));
 
             var criteria = new CatalogItemSearchCriteria
             {
@@ -119,40 +115,38 @@ namespace VirtoCommerce.SearchApiModule.Test
                 Pricelists = new string[] { }
             };
 
-            Assert.Throws<ElasticSearchException>(() => bad_provider.Search<DocumentDictionary>(scope, criteria));
+            Assert.Throws<SearchException>(() => badProvider.Search<DocumentDictionary>(_scope, criteria));
         }
 
         [Theory]
         [InlineData("Lucene")]
         [InlineData("Elastic")]
-        [Trait("Category", "CI")]
+        [InlineData("Azure")]
         public void Can_create_search_index(string providerType)
         {
-            var scope = _DefaultScope;
-            var provider = GetSearchProvider(providerType, scope);
-            SearchHelper.CreateSampleIndex(provider, scope);
+            var provider = GetSearchProvider(providerType, _scope);
+            SearchTestsHelper.CreateSampleIndex(provider, _scope, _documentType);
         }
 
         [Theory]
         [InlineData("Lucene")]
         [InlineData("Elastic")]
-        [Trait("Category", "CI")]
+        [InlineData("Azure")]
         public void Can_find_items_by_id(string providerType)
         {
-            var scope = _DefaultScope;
-            var provider = GetSearchProvider(providerType, scope);
-            SearchHelper.CreateSampleIndex(provider, scope);
+            var provider = GetSearchProvider(providerType, _scope);
+            SearchTestsHelper.CreateSampleIndex(provider, _scope, _documentType);
 
             var criteria = new CatalogItemSearchCriteria
             {
                 Catalog = "goods",
-                ProductIds = new[] { "red3", "another" },
+                Ids = new[] { "red3", "another" },
                 RecordsToRetrieve = 10,
                 StartingRecord = 0,
                 Pricelists = new string[] { },
             };
 
-            var results = provider.Search<DocumentDictionary>(scope, criteria);
+            var results = provider.Search<DocumentDictionary>(_scope, criteria);
 
             Assert.True(results.DocCount == 2, $"Returns {results.DocCount} documents instead of 2");
             Assert.True(results.Documents.Any(d => (string)d.Id == "red3"), "Cannot find 'red3'");
@@ -162,12 +156,11 @@ namespace VirtoCommerce.SearchApiModule.Test
         [Theory]
         [InlineData("Lucene")]
         [InlineData("Elastic")]
-        [Trait("Category", "CI")]
+        //[InlineData("Azure")] // Azure cannot sort by non-existent field
         public void Can_find_item_using_search(string providerType)
         {
-            var scope = _DefaultScope;
-            var provider = GetSearchProvider(providerType, scope);
-            SearchHelper.CreateSampleIndex(provider, scope);
+            var provider = GetSearchProvider(providerType, _scope);
+            SearchTestsHelper.CreateSampleIndex(provider, _scope, _documentType);
 
             var criteria = new CatalogItemSearchCriteria
             {
@@ -180,9 +173,9 @@ namespace VirtoCommerce.SearchApiModule.Test
                 Sort = new SearchSort("somefield") // specifically add non-existent field
             };
 
-            var results = provider.Search<DocumentDictionary>(scope, criteria);
+            var results = provider.Search<DocumentDictionary>(_scope, criteria);
 
-            Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
+            Assert.Equal(1, results.DocCount);
 
             criteria = new CatalogItemSearchCriteria
             {
@@ -194,20 +187,19 @@ namespace VirtoCommerce.SearchApiModule.Test
                 Pricelists = new string[] { }
             };
 
-            results = provider.Search<DocumentDictionary>(scope, criteria);
+            results = provider.Search<DocumentDictionary>(_scope, criteria);
 
-            Assert.True(results.DocCount == 1, string.Format("\"Sample Product\" search returns {0} instead of 1", results.DocCount));
+            Assert.True(results.DocCount == 1, $"\"Sample Product\" search returns {results.DocCount} instead of 1");
         }
 
         [Theory]
         [InlineData("Lucene")]
         [InlineData("Elastic")]
-        [Trait("Category", "CI")]
+        [InlineData("Azure")]
         public void Can_sort_using_search(string providerType)
         {
-            var scope = _DefaultScope;
-            var provider = GetSearchProvider(providerType, scope);
-            SearchHelper.CreateSampleIndex(provider, scope);
+            var provider = GetSearchProvider(providerType, _scope);
+            SearchTestsHelper.CreateSampleIndex(provider, _scope, _documentType);
 
             var criteria = new CatalogItemSearchCriteria
             {
@@ -218,9 +210,9 @@ namespace VirtoCommerce.SearchApiModule.Test
                 Sort = new SearchSort("name")
             };
 
-            var results = provider.Search<DocumentDictionary>(scope, criteria);
+            var results = provider.Search<DocumentDictionary>(_scope, criteria);
 
-            Assert.True(results.DocCount == 6, string.Format("Returns {0} instead of 1", results.DocCount));
+            Assert.Equal(6, results.DocCount);
             var productName = results.Documents.ElementAt(0)["name"] as string; // black sox
             Assert.True(productName == "black sox");
 
@@ -233,9 +225,9 @@ namespace VirtoCommerce.SearchApiModule.Test
                 Sort = new SearchSort("name", true)
             };
 
-            results = provider.Search<DocumentDictionary>(scope, criteria);
+            results = provider.Search<DocumentDictionary>(_scope, criteria);
 
-            Assert.True(results.DocCount == 6, string.Format("\"Sample Product\" search returns {0} instead of 1", results.DocCount));
+            Assert.True(results.DocCount == 6, $"\"Sample Product\" search returns {results.DocCount} instead of 1");
             productName = results.Documents.ElementAt(0)["name"] as string; // sample product
             Assert.True(productName == "sample product");
         }
@@ -243,13 +235,12 @@ namespace VirtoCommerce.SearchApiModule.Test
         [Theory]
         [InlineData("Lucene")]
         [InlineData("Elastic")]
-        [Trait("Category", "CI")]
+        [InlineData("Azure")]
         public void Can_get_item_facets(string providerType)
         {
-            var scope = _DefaultScope;
-            var provider = GetSearchProvider(providerType, scope);
+            var provider = GetSearchProvider(providerType, _scope);
 
-            SearchHelper.CreateSampleIndex(provider, scope);
+            SearchTestsHelper.CreateSampleIndex(provider, _scope, _documentType);
 
             var criteria = new CatalogItemSearchCriteria
             {
@@ -262,70 +253,78 @@ namespace VirtoCommerce.SearchApiModule.Test
                 Pricelists = new[] { "default" }
             };
 
-            var filter = new AttributeFilter { Key = "Color" };
-            filter.Values = new[]
-                                {
-                                    new AttributeFilterValue { Id = "red", Value = "red" },
-                                    new AttributeFilterValue { Id = "blue", Value = "blue" },
-                                    new AttributeFilterValue { Id = "black", Value = "black" }
-                                };
+            var filter = new AttributeFilter
+            {
+                Key = "Color",
+                Values = new[]
+                {
+                    new AttributeFilterValue {Id = "red", Value = "red"},
+                    new AttributeFilterValue {Id = "blue", Value = "blue"},
+                    new AttributeFilterValue {Id = "black", Value = "black"}
+                }
+            };
 
-            var rangefilter = new RangeFilter { Key = "size" };
-            rangefilter.Values = new[]
-                                     {
-                                         new RangeFilterValue { Id = "0_to_5", Lower = "0", Upper = "5" },
-                                         new RangeFilterValue { Id = "5_to_10", Lower = "5", Upper = "10" }
-                                     };
+            var rangefilter = new RangeFilter
+            {
+                Key = "size",
+                Values = new[]
+                {
+                    new RangeFilterValue {Id = "0_to_5", Lower = "0", Upper = "5"},
+                    new RangeFilterValue {Id = "5_to_10", Lower = "5", Upper = "10"}
+                }
+            };
 
-            var priceRangefilter = new PriceRangeFilter { Currency = "usd" };
-            priceRangefilter.Values = new[]
-                                          {
-                                              new RangeFilterValue { Id = "0_to_100", Lower = "0", Upper = "100" },
-                                              new RangeFilterValue { Id = "100_to_700", Lower = "100", Upper = "700" },
-                                              new RangeFilterValue { Id = "over_700", Lower = "700" },
-                                              new RangeFilterValue { Id = "under_100", Upper = "100" },
-                                          };
+            var priceRangefilter = new PriceRangeFilter
+            {
+                Currency = "usd",
+                Values = new[]
+                {
+                    new RangeFilterValue {Id = "0_to_100", Lower = "0", Upper = "100"},
+                    new RangeFilterValue {Id = "100_to_700", Lower = "100", Upper = "700"},
+                    new RangeFilterValue {Id = "over_700", Lower = "700"},
+                    new RangeFilterValue {Id = "under_100", Upper = "100"},
+                }
+            };
 
             criteria.Add(filter);
             criteria.Add(rangefilter);
             criteria.Add(priceRangefilter);
 
-            var results = provider.Search<DocumentDictionary>(scope, criteria);
+            var results = provider.Search<DocumentDictionary>(_scope, criteria);
 
-            Assert.True(results.DocCount == 0, string.Format("Returns {0} instead of 0", results.DocCount));
+            Assert.Equal(0, results.DocCount);
 
             var redCount = GetFacetCount(results, "Color", "red");
-            Assert.True(redCount == 3, string.Format("Returns {0} facets of red instead of 3", redCount));
+            Assert.True(redCount == 3, $"Returns {redCount} facets of red instead of 3");
 
             var priceCount = GetFacetCount(results, "Price", "0_to_100");
-            Assert.True(priceCount == 2, string.Format("Returns {0} facets of 0_to_100 prices instead of 2", priceCount));
+            Assert.True(priceCount == 2, $"Returns {priceCount} facets of 0_to_100 prices instead of 2");
 
             var priceCount2 = GetFacetCount(results, "Price", "100_to_700");
-            Assert.True(priceCount2 == 3, string.Format("Returns {0} facets of 100_to_700 prices instead of 3", priceCount2));
+            Assert.True(priceCount2 == 3, $"Returns {priceCount2} facets of 100_to_700 prices instead of 3");
 
             var priceCount3 = GetFacetCount(results, "Price", "over_700");
-            Assert.True(priceCount3 == 1, string.Format("Returns {0} facets of over_700 prices instead of 1", priceCount3));
+            Assert.True(priceCount3 == 1, $"Returns {priceCount3} facets of over_700 prices instead of 1");
 
             var priceCount4 = GetFacetCount(results, "Price", "under_100");
-            Assert.True(priceCount4 == 2, string.Format("Returns {0} facets of priceCount4 prices instead of 2", priceCount4));
+            Assert.True(priceCount4 == 2, $"Returns {priceCount4} facets of priceCount4 prices instead of 2");
 
             var sizeCount = GetFacetCount(results, "size", "0_to_5");
-            Assert.True(sizeCount == 3, string.Format("Returns {0} facets of 0_to_5 size instead of 3", sizeCount));
+            Assert.True(sizeCount == 3, $"Returns {sizeCount} facets of 0_to_5 size instead of 3");
 
             var sizeCount2 = GetFacetCount(results, "size", "5_to_10");
-            Assert.True(sizeCount2 == 1, string.Format("Returns {0} facets of 5_to_10 size instead of 1", sizeCount2)); // only 1 result because upper bound is not included
+            Assert.True(sizeCount2 == 1, $"Returns {sizeCount2} facets of 5_to_10 size instead of 1"); // only 1 result because upper bound is not included
         }
 
         [Theory]
         [InlineData("Lucene")]
         [InlineData("Elastic")]
-        [Trait("Category", "CI")]
+        [InlineData("Azure")]
         public void Can_get_item_outlines(string providerType)
         {
-            var scope = _DefaultScope;
-            var provider = GetSearchProvider(providerType, scope);
+            var provider = GetSearchProvider(providerType, _scope);
 
-            SearchHelper.CreateSampleIndex(provider, scope);
+            SearchTestsHelper.CreateSampleIndex(provider, _scope, _documentType);
 
             var criteria = new CatalogItemSearchCriteria
             {
@@ -338,29 +337,28 @@ namespace VirtoCommerce.SearchApiModule.Test
                 Pricelists = new[] { "default" }
             };
 
-            var results = provider.Search<DocumentDictionary>(scope, criteria);
+            var results = provider.Search<DocumentDictionary>(_scope, criteria);
 
-            Assert.True(results.DocCount == 6, string.Format("Returns {0} instead of 6", results.DocCount));
+            Assert.Equal(6, results.DocCount);
 
-            int outlineCount = 0;
+            int outlineCount;
             var outlineObject = results.Documents.ElementAt(0)["__outline"]; // can be JArray or object[] depending on provider used
             if (outlineObject is JArray)
                 outlineCount = (outlineObject as JArray).Count;
             else
-                outlineCount = (outlineObject as object[]).Count();
+                outlineCount = ((object[])outlineObject).Length;
 
-            Assert.True(outlineCount == 2, string.Format("Returns {0} outlines instead of 2", outlineCount));
+            Assert.True(outlineCount == 2, $"Returns {outlineCount} outlines instead of 2");
         }
 
         [Theory]
         [InlineData("Lucene")]
         [InlineData("Elastic")]
-        [Trait("Category", "CI")]
+        //[InlineData("Azure")] // Azure applies filters before calculating facets
         public void Can_get_item_multiple_filters(string providerType)
         {
-            var scope = _DefaultScope;
-            var provider = GetSearchProvider(providerType, scope);
-            SearchHelper.CreateSampleIndex(provider, scope);
+            var provider = GetSearchProvider(providerType, _scope);
+            SearchTestsHelper.CreateSampleIndex(provider, _scope, _documentType);
 
             var criteria = new CatalogItemSearchCriteria
             {
@@ -373,32 +371,44 @@ namespace VirtoCommerce.SearchApiModule.Test
                 Pricelists = new[] { "default" }
             };
 
-            var colorFilter = new AttributeFilter { Key = "Color" };
-            colorFilter.Values = new[]
-                                {
-                                            new AttributeFilterValue { Id = "red", Value = "red" },
-                                            new AttributeFilterValue { Id = "blue", Value = "blue" },
-                                            new AttributeFilterValue { Id = "black", Value = "black" }
-                                        };
+            var colorFilter = new AttributeFilter
+            {
+                Key = "Color",
+                Values = new[]
+                {
+                    new AttributeFilterValue {Id = "red", Value = "red"},
+                    new AttributeFilterValue {Id = "blue", Value = "blue"},
+                    new AttributeFilterValue {Id = "black", Value = "black"}
+                }
+            };
 
-            var filter = new AttributeFilter { Key = "Color" };
-            filter.Values = new[]
-                                {
-                                            new AttributeFilterValue { Id = "black", Value = "black" }
-                                        };
+            var filter = new AttributeFilter
+            {
+                Key = "Color",
+                Values = new[]
+                {
+                    new AttributeFilterValue {Id = "black", Value = "black"}
+                }
+            };
 
-            var rangefilter = new RangeFilter { Key = "size" };
-            rangefilter.Values = new[]
-                                     {
-                                                 new RangeFilterValue { Id = "0_to_5", Lower = "0", Upper = "5" },
-                                                 new RangeFilterValue { Id = "5_to_10", Lower = "5", Upper = "11" }
-                                             };
+            var rangefilter = new RangeFilter
+            {
+                Key = "size",
+                Values = new[]
+                {
+                    new RangeFilterValue {Id = "0_to_5", Lower = "0", Upper = "5"},
+                    new RangeFilterValue {Id = "5_to_10", Lower = "5", Upper = "11"}
+                }
+            };
 
-            var priceRangefilter = new PriceRangeFilter { Currency = "usd" };
-            priceRangefilter.Values = new[]
-                                          {
-                                                      new RangeFilterValue { Id = "100_to_700", Lower = "100", Upper = "700" }
-                                                  };
+            var priceRangefilter = new PriceRangeFilter
+            {
+                Currency = "usd",
+                Values = new[]
+                {
+                    new RangeFilterValue {Id = "100_to_700", Lower = "100", Upper = "700"}
+                }
+            };
 
             criteria.Add(colorFilter);
             criteria.Add(rangefilter);
@@ -409,91 +419,18 @@ namespace VirtoCommerce.SearchApiModule.Test
             criteria.Apply(rangefilter);
             criteria.Apply(priceRangefilter);
 
-            var results = provider.Search<DocumentDictionary>(scope, criteria);
+            var results = provider.Search<DocumentDictionary>(_scope, criteria);
 
             var blackCount = GetFacetCount(results, "Color", "black");
-            Assert.True(blackCount == 1, string.Format("Returns {0} facets of black instead of 1", blackCount));
+            Assert.True(blackCount == 1, $"Returns {blackCount} facets of black instead of 1");
 
             var redCount = GetFacetCount(results, "Color", "red");
-            Assert.True(redCount == 2, string.Format("Returns {0} facets of black instead of 2", redCount));
+            Assert.True(redCount == 2, $"Returns {redCount} facets of black instead of 2");
 
             var priceCount = GetFacetCount(results, "Price", "100_to_700");
-            Assert.True(priceCount == 1, string.Format("Returns {0} facets of 100_to_700 instead of 1", priceCount));
+            Assert.True(priceCount == 1, $"Returns {priceCount} facets of 100_to_700 instead of 1");
 
-            Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
-        }
-
-        [Theory]
-        [InlineData("Lucene")]
-        [InlineData("Elastic")]
-        [Trait("Category", "CI")]
-        public void Can_find_using_simple_search(string providerType)
-        {
-            var scope = _DefaultScope;
-            var provider = GetSearchProvider(providerType, scope);
-            SearchHelper.CreateSampleIndex(provider, scope);
-
-            var criteria = new SimpleCatalogItemSearchCriteria
-            {
-                Catalog = "goods",
-                RecordsToRetrieve = 10,
-                StartingRecord = 0,
-                RawQuery = "color:bLue"
-            };
-
-            var results = provider.Search<DocumentDictionary>(scope, criteria);
-            Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
-            var productName = results.Documents.ElementAt(0)["name"] as string; // black sox
-            Assert.True(productName == "blue shirt");
-
-            if (providerType == "Elastic")
-            {
-
-                criteria = new SimpleCatalogItemSearchCriteria
-                {
-                    Catalog = "goods",
-                    RecordsToRetrieve = 10,
-                    StartingRecord = 0,
-                    RawQuery = @"price_usd:[100 TO 199]"
-                };
-
-                results = provider.Search<DocumentDictionary>(scope, criteria);
-                Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
-            }
-
-            criteria = new SimpleCatalogItemSearchCriteria
-            {
-                Catalog = "goods",
-                RecordsToRetrieve = 10,
-                StartingRecord = 0,
-                RawQuery = @"is:priced"
-            };
-
-            results = provider.Search<DocumentDictionary>(scope, criteria);
-            Assert.True(results.DocCount > 0, string.Format("Returns {0} instead of >0", results.DocCount));
-
-            criteria = new SimpleCatalogItemSearchCriteria
-            {
-                Catalog = "goods",
-                RecordsToRetrieve = 10,
-                StartingRecord = 0,
-                RawQuery = @"is:visible is:red3"
-            };
-
-            results = provider.Search<DocumentDictionary>(scope, criteria);
-            Assert.True(results.DocCount == 1, string.Format("Returns {0} instead of 1", results.DocCount));
-        }
-
-        private int GetFacetCount(ISearchResults<DocumentDictionary> results, string fieldName, string facetKey)
-        {
-            if (results.Facets == null || results.Facets.Length == 0)
-            {
-                return 0;
-            }
-
-            var group = (from fg in results.Facets where fg.FieldName.Equals(fieldName, StringComparison.OrdinalIgnoreCase) select fg).SingleOrDefault();
-
-            return @group == null ? 0 : (from facet in @group.Facets where facet.Key == facetKey select facet.Count).FirstOrDefault();
+            Assert.Equal(1, results.DocCount);
         }
     }
 }

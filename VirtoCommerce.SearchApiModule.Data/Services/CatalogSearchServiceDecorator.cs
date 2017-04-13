@@ -8,6 +8,7 @@ using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
 using VirtoCommerce.SearchModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
+using SearchCriteria = VirtoCommerce.Domain.Catalog.Model.SearchCriteria;
 
 namespace VirtoCommerce.SearchApiModule.Data.Services
 {
@@ -50,7 +51,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 // TODO: create outline for category
                 // TODO: implement sorting
 
-                var serviceCriteria = new SimpleCatalogItemSearchCriteria()
+                var serviceCriteria = new CatalogItemSearchCriteria()
                 {
                     SearchPhrase = criteria.Keyword,
                     Catalog = criteria.CatalogId,

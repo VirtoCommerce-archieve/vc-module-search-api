@@ -43,7 +43,7 @@ using VirtoCommerce.StoreModule.Data.Services;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace VirtoCommerce.SearchModule.Tests
+namespace VirtoCommerce.SearchApiModule.Test
 {
     [CLSCompliant(false)]
     [Collection("Search")]

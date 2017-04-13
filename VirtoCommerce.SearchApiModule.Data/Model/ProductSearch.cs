@@ -49,7 +49,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
         {
             var criteria = AbstractTypeFactory<T>.TryCreateInstance();
 
-            criteria.ProductIds = ProductIds;
+            criteria.Ids = ProductIds;
             criteria.Currency = Currency;
             criteria.Pricelists = PriceLists;
             criteria.SearchPhrase = SearchPhrase;

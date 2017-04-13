@@ -29,7 +29,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Converters
             var result = new AggregationItem
             {
                 Value = facet.Key,
-                Count = facet.Count,
+                Count = (int)facet.Count,
                 IsApplied = appliedFilters.Any(x => x.Equals(facet.Key, StringComparison.OrdinalIgnoreCase))
             };
 

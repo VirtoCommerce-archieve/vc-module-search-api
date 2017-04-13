@@ -1,54 +1,85 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest;
 using VirtoCommerce.SearchApiModule.Data.Providers.Lucene;
 using VirtoCommerce.SearchModule.Core.Model;
-using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch.Nest;
-using VirtoCommerce.SearchModule.Data.Providers.Lucene;
+using VirtoCommerce.SearchModule.Core.Model.Indexing;
+using VirtoCommerce.SearchModule.Core.Model.Search;
+using VirtoCommerce.SearchModule.Data.Providers.AzureSearch;
+using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch;
+using VirtoCommerce.SearchModule.Data.Providers.LuceneSearch;
 
-namespace VirtoCommerce.SearchModule.Tests
+namespace VirtoCommerce.SearchApiModule.Test
 {
     public class SearchTestsBase : IDisposable
     {
-        private string _LuceneStorageDir = Path.Combine(Path.GetTempPath(), "lucene");
+        private readonly string _luceneStorageDir = Path.Combine(Path.GetTempPath(), "lucene");
 
-        protected ISearchProvider GetSearchProvider(string searchProvider, string scope)
+        protected ISearchProvider GetSearchProvider(string searchProvider, string scope, string dataSource = null)
         {
+            ISearchProvider provider = null;
+
             if (searchProvider == "Lucene")
             {
-                var queryBuilder = new CatalogLuceneQueryBuilder();
-
-                var conn = new SearchConnection(_LuceneStorageDir, scope);
-                var provider = new LuceneSearchProvider(new[] { queryBuilder }, conn);
-
-                return provider;
+                var connection = new SearchConnection(_luceneStorageDir, scope);
+                var queryBuilder = new CatalogLuceneQueryBuilder() as ISearchQueryBuilder;
+                provider = new LuceneSearchProvider(new[] { queryBuilder }, connection);
             }
 
             if (searchProvider == "Elastic")
             {
-                var queryBuilder = new CatalogElasticSearchQueryBuilder();
+                var elasticsearchHost = dataSource ?? Environment.GetEnvironmentVariable("TestElasticsearchHost") ?? "localhost:9200";
 
-                var conn = new SearchConnection("localhost:9200", scope);
-                var provider = new ElasticSearchProvider(new[] { queryBuilder }, conn);
-                provider.EnableTrace = true;
-
-                return provider;
+                var connection = new SearchConnection(elasticsearchHost, scope);
+                var queryBuilder = new CatalogElasticSearchQueryBuilder() as ISearchQueryBuilder;
+                var elasticSearchProvider = new ElasticSearchProvider(new[] { queryBuilder }, connection) { EnableTrace = true };
+                provider = elasticSearchProvider;
             }
 
-            throw new NullReferenceException(string.Format("{0} is not supported", searchProvider));
+            if (searchProvider == "Azure")
+            {
+                var azureSearchServiceName = Environment.GetEnvironmentVariable("TestAzureSearchServiceName");
+                var azureSearchAccessKey = Environment.GetEnvironmentVariable("TestAzureSearchAccessKey");
+
+                var connection = new SearchConnection(azureSearchServiceName, scope, accessKey: azureSearchAccessKey);
+                var queryBuilder = new AzureSearchQueryBuilder() as ISearchQueryBuilder;
+                provider = new AzureSearchProvider(connection, new[] { queryBuilder });
+            }
+
+            if (provider == null)
+                throw new ArgumentException($"Search provider '{searchProvider}' is not supported", nameof(searchProvider));
+
+            return provider;
+        }
+
+        protected long GetFacetCount(ISearchResults<DocumentDictionary> results, string fieldName, string facetKey)
+        {
+            if (results.Facets == null || results.Facets.Count == 0)
+            {
+                return 0;
+            }
+
+            var group = results.Facets.SingleOrDefault(fg => fg.FieldName.EqualsInvariant(fieldName));
+
+            return group?.Facets
+                .Where(facet => facet.Key == facetKey)
+                .Select(facet => facet.Count)
+                .FirstOrDefault() ?? 0;
         }
 
         public virtual void Dispose()
         {
             try
             {
-                if(Directory.Exists(_LuceneStorageDir))
-                    Directory.Delete(_LuceneStorageDir, true);
+                if (Directory.Exists(_luceneStorageDir))
+                    Directory.Delete(_luceneStorageDir, true);
             }
-            finally
+            catch
             {
+                // ignored
             }
         }
-
     }
 }

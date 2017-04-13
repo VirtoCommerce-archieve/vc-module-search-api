@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using VirtoCommerce.CatalogModule.Web.Converters;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
@@ -12,7 +12,6 @@ using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
-using VirtoCommerce.SearchModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
 
 namespace VirtoCommerce.SearchApiModule.Data.Services
@@ -26,7 +25,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         public CategoryBrowsingService(
             ICategoryService categoryService,
-            ISearchProvider searchService, 
+            ISearchProvider searchService,
             IBlobUrlResolver blobUrlResolver,
             ISettingsManager settingsManager)
         {
@@ -49,9 +48,10 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 var documents = searchResults.Documents;
                 if (_settingsManager.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", true))
                 {
-                    var fullIndexedDocuments = documents.Where(x => x.ContainsKey("__object") && !string.IsNullOrEmpty(x["__object"].ToString()));
-                    documents = documents.Except(fullIndexedDocuments);
-                    var deserializeProductsTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
+                    var fullIndexedDocuments = documents.Where(x => x.ContainsKey("__object") && !string.IsNullOrEmpty(x["__object"].ToString())).ToList();
+                    documents = documents.Except(fullIndexedDocuments).ToList();
+
+                    var deserializeProductsTask = Task.Factory.StartNew(() =>
                     {
                         Parallel.ForEach(fullIndexedDocuments, new ParallelOptions { MaxDegreeOfParallelism = 5 }, (x) =>
                         {
@@ -65,7 +65,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
                 if (documents.Any())
                 {
-                    var loadProductsTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
+                    var loadProductsTask = Task.Factory.StartNew(() =>
                     {
                         string catalog = null;
                         if (criteria is CatalogItemSearchCriteria)
