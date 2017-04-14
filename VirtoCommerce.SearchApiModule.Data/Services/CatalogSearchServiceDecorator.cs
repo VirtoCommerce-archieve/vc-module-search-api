@@ -7,8 +7,7 @@ using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
 using VirtoCommerce.SearchModule.Core.Model.Search;
-using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
-using SearchCriteria = VirtoCommerce.Domain.Catalog.Model.SearchCriteria;
+using VirtoCommerce.SearchModule.Core.Model.Search.Criteria;
 
 namespace VirtoCommerce.SearchApiModule.Data.Services
 {

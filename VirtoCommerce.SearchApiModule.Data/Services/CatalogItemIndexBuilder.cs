@@ -12,10 +12,10 @@ using VirtoCommerce.Domain.Pricing.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
-using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.SearchApiModule.Data.Services
 {
@@ -238,7 +238,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         {
             var indexNoStoreNotAnalyzed = new[] { IndexStore.No, IndexType.NotAnalyzed };
             doc.Add(new DocumentField("is", value, indexNoStoreNotAnalyzed));
-       }
+        }
 
         protected virtual string[] GetOutlineStrings(IEnumerable<Outline> outlines)
         {
@@ -285,6 +285,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 var propertyName = (propValue.PropertyName ?? "").ToLower();
                 var property = properties.FirstOrDefault(x => string.Equals(x.Name, propValue.PropertyName, StringComparison.InvariantCultureIgnoreCase) && x.ValueType == propValue.ValueType);
                 var contentField = string.Concat("__content", property != null && property.Multilanguage && !string.IsNullOrWhiteSpace(propValue.LanguageCode) ? "_" + propValue.LanguageCode.ToLower() : string.Empty);
+                var stringCollection = property?.Multivalue == true ? IndexDataType.StringCollection : string.Empty;
 
                 switch (propValue.ValueType)
                 {
@@ -308,10 +309,10 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                         doc.Add(new DocumentField(propertyName, propValue.Value, new[] { IndexStore.Yes, IndexType.Analyzed }));
                         break;
                     case PropertyValueType.LongText:
-                        doc.Add(new DocumentField(propertyName, propValue.Value.ToString().ToLowerInvariant(), new[] { IndexStore.Yes, IndexType.Analyzed }));
+                        doc.Add(new DocumentField(propertyName, propValue.Value.ToString().ToLowerInvariant(), new[] { IndexStore.Yes, IndexType.Analyzed, stringCollection }));
                         break;
                     case PropertyValueType.ShortText: // do not tokenize small values as they will be used for lookups and filters
-                        doc.Add(new DocumentField(propertyName, propValue.Value.ToString(), new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
+                        doc.Add(new DocumentField(propertyName, propValue.Value.ToString(), new[] { IndexStore.Yes, IndexType.NotAnalyzed, stringCollection }));
                         break;
                 }
             }

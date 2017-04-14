@@ -1,10 +1,11 @@
-﻿using System;
-using System.Web.Http;
+﻿using System.Web.Http;
 using Microsoft.Practices.Unity;
 using VirtoCommerce.Domain.Catalog.Services;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest;
-using VirtoCommerce.SearchApiModule.Data.Providers.Lucene;
+using VirtoCommerce.SearchApiModule.Data.Providers.AzureSearch;
+using VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch;
+using VirtoCommerce.SearchApiModule.Data.Providers.LuceneSearch;
 using VirtoCommerce.SearchApiModule.Data.Services;
 using VirtoCommerce.SearchApiModule.Web.JsonConverters;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -36,13 +37,17 @@ namespace VirtoCommerce.SearchApiModule.Web
             _container.RegisterType<IBrowseFilterService, BrowseFilterService>();
 
             var searchConnection = _container.Resolve<ISearchConnection>();
-            if (searchConnection.Provider.Equals(SearchProviders.Elasticsearch.ToString(), StringComparison.OrdinalIgnoreCase))
+            if (searchConnection.Provider.EqualsInvariant(SearchProviders.Lucene.ToString()))
             {
-                _container.RegisterType<ISearchQueryBuilder, CatalogElasticSearchQueryBuilder>("elastic-search");
+                _container.RegisterType<ISearchQueryBuilder, CatalogLuceneSearchQueryBuilder>("lucene");
             }
-            else if (searchConnection.Provider.Equals(SearchProviders.Lucene.ToString(), StringComparison.OrdinalIgnoreCase))
+            else if (searchConnection.Provider.EqualsInvariant(SearchProviders.Elasticsearch.ToString()))
             {
-                _container.RegisterType<ISearchQueryBuilder, CatalogLuceneQueryBuilder>("lucene");
+                _container.RegisterType<ISearchQueryBuilder, CatalogElasticSearchQueryBuilder>("elasticsearch");
+            }
+            else if (searchConnection.Provider.EqualsInvariant(SearchProviders.AzureSearch.ToString()))
+            {
+                _container.RegisterType<ISearchQueryBuilder, CatalogAzureSearchQueryBuilder>("azure-search");
             }
         }
 

@@ -2,8 +2,9 @@
 using System.IO;
 using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch.Nest;
-using VirtoCommerce.SearchApiModule.Data.Providers.Lucene;
+using VirtoCommerce.SearchApiModule.Data.Providers.AzureSearch;
+using VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch;
+using VirtoCommerce.SearchApiModule.Data.Providers.LuceneSearch;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
 using VirtoCommerce.SearchModule.Core.Model.Search;
@@ -24,7 +25,7 @@ namespace VirtoCommerce.SearchApiModule.Test
             if (searchProvider == "Lucene")
             {
                 var connection = new SearchConnection(_luceneStorageDir, scope);
-                var queryBuilder = new CatalogLuceneQueryBuilder() as ISearchQueryBuilder;
+                var queryBuilder = new CatalogLuceneSearchQueryBuilder() as ISearchQueryBuilder;
                 provider = new LuceneSearchProvider(new[] { queryBuilder }, connection);
             }
 
@@ -44,7 +45,7 @@ namespace VirtoCommerce.SearchApiModule.Test
                 var azureSearchAccessKey = Environment.GetEnvironmentVariable("TestAzureSearchAccessKey");
 
                 var connection = new SearchConnection(azureSearchServiceName, scope, accessKey: azureSearchAccessKey);
-                var queryBuilder = new AzureSearchQueryBuilder() as ISearchQueryBuilder;
+                var queryBuilder = new CatalogAzureSearchQueryBuilder() as ISearchQueryBuilder;
                 provider = new AzureSearchProvider(connection, new[] { queryBuilder });
             }
 

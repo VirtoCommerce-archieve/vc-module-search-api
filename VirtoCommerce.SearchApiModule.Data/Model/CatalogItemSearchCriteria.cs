@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using VirtoCommerce.SearchModule.Core.Model.Search;
-using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
+using VirtoCommerce.SearchModule.Core.Model.Search.Criteria;
 
 namespace VirtoCommerce.SearchApiModule.Data.Model
 {
     // TODO: move to catalog module as it is catalog specific criteria and not generic search one
 
-    public class CatalogItemSearchCriteria : KeywordSearchCriteria
+    public class CatalogItemSearchCriteria : BaseSearchCriteria
     {
         public const string DocType = "catalogitem";
 
@@ -35,20 +35,18 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
         public static SearchSort DefaultSortOrder => new SearchSort("__sort", false);
 
         /// <summary>
+        /// Gets or sets the class types.
+        /// </summary>
+        /// <value>The class types.</value>
+        public virtual IList<string> ClassTypes { get; set; } = new List<string>();
+
+        /// <summary>
         /// Gets or sets the indexes of the search.
         /// </summary>
         /// <value>
         /// The index of the search.
         /// </value>
         public virtual string Catalog { get; set; }
-
-        /// <summary>
-        /// Gets or sets the response groups.
-        /// </summary>
-        /// <value>
-        /// The response groups.
-        /// </value>
-        public virtual IList<string> ResponseGroups { get; set; }
 
         /// <summary>
         /// Gets or sets the outlines. Outline consists of "Category1/Category2".
@@ -58,10 +56,9 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
         public virtual IList<string> Outlines { get; set; } = new List<string>();
 
         /// <summary>
-        /// Gets or sets the class types.
+        /// Specifies if we search hidden products.
         /// </summary>
-        /// <value>The class types.</value>
-        public virtual IList<string> ClassTypes { get; set; } = new List<string>();
+        public virtual bool WithHidden { get; set; }
 
         /// <summary>
         /// Gets or sets the start date. The date must be in UTC format as that is format indexes are stored in.
@@ -82,8 +79,11 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
         public DateTime? EndDate { get; set; }
 
         /// <summary>
-        /// Specifies if we search hidden products.
+        /// Gets or sets the response groups.
         /// </summary>
-        public virtual bool WithHidden { get; set; }
+        /// <value>
+        /// The response groups.
+        /// </value>
+        public virtual IList<string> ResponseGroups { get; set; }
     }
 }

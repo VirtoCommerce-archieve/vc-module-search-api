@@ -36,12 +36,10 @@ using VirtoCommerce.SearchApiModule.Data.Services;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Filters;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
-using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
 using VirtoCommerce.SearchModule.Data.Services;
 using VirtoCommerce.StoreModule.Data.Repositories;
 using VirtoCommerce.StoreModule.Data.Services;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace VirtoCommerce.SearchApiModule.Test
 {
@@ -49,13 +47,6 @@ namespace VirtoCommerce.SearchApiModule.Test
     [Collection("Search")]
     public class SearchFunctionalScenarios : SearchTestsBase
     {
-        private readonly ITestOutputHelper _output;
-
-        public SearchFunctionalScenarios(ITestOutputHelper output)
-        {
-            _output = output;
-        }
-
         [Theory]
         [InlineData("Lucene")]
         [InlineData("Elastic")]
@@ -67,22 +58,20 @@ namespace VirtoCommerce.SearchApiModule.Test
             provider.RemoveAll(scope, "");
             var controller = GetSearchIndexController(provider);
             controller.RemoveIndex(scope, "category");
-            controller.BuildIndex(scope, "category", x => { return; });
+            controller.BuildIndex(scope, "category", x => { });
             //controller.BuildIndex(scope, "category", x => { return; }, new[] { "0d4ad9bab9184d69a6e586effdf9c2ea" });
 
             // sleep for index to be commited
             Thread.Sleep(5000);
 
             // find all prodducts in the category
-            var categoryCriteria = new CategorySearchCriteria()
-            {
-            };
+            var categoryCriteria = new CategorySearchCriteria();
 
             categoryCriteria.Outlines.Add("4974648a41df4e6ea67ef2ad76d7bbd4");
             //categoryCriteria.Outlines.Add("4974648a41df4e6ea67ef2ad76d7bbd4/45d3fc9a913d4610a5c7d0470558*");
 
             var response = provider.Search<DocumentDictionary>(scope, categoryCriteria);
-            Assert.True(response.TotalCount > 0, string.Format("Didn't find any categories using {0} search", providerType));
+            Assert.True(response.TotalCount > 0, $"Didn't find any categories using {providerType} provider");
         }
 
         [Theory]
@@ -96,7 +85,7 @@ namespace VirtoCommerce.SearchApiModule.Test
             provider.RemoveAll(scope, "");
             var controller = GetSearchIndexController(provider);
             controller.RemoveIndex(scope, CatalogItemSearchCriteria.DocType);
-            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { return; });
+            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { });
 
             // sleep for index to be commited
             Thread.Sleep(5000);
@@ -105,19 +94,18 @@ namespace VirtoCommerce.SearchApiModule.Test
             var catalogRepo = GetCatalogRepository();
             var catalog = catalogRepo.Catalogs.SingleOrDefault(x => x.Name.Equals("electronics", StringComparison.OrdinalIgnoreCase));
 
-            // find all prodducts in the category
-            var catalogCriteria = new CatalogItemSearchCriteria()
+            // find all products in the category
+            var catalogCriteria = new CatalogItemSearchCriteria
             {
-                Catalog = catalog.Id,
-                Currency = "USD"
+                Catalog = catalog?.Id,
+                Currency = "USD",
+                Outlines = new[] { "4974648a41df4e6ea67ef2ad76d7bbd4/c76774f9047d4f18a916b38681c50557*" },
             };
-
-            catalogCriteria.Outlines.Add("4974648a41df4e6ea67ef2ad76d7bbd4/c76774f9047d4f18a916b38681c50557*");
 
             var ibs = GetItemBrowsingService(provider);
             var searchResults = ibs.SearchItems(scope, catalogCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
 
-            Assert.True(searchResults.TotalCount > 0, string.Format("Didn't find any products using {0} search", providerType));
+            Assert.True(searchResults.TotalCount > 0, $"Didn't find any products using {providerType} provider");
         }
 
         [Theory]
@@ -134,7 +122,7 @@ namespace VirtoCommerce.SearchApiModule.Test
             provider.RemoveAll(scope, "");
             var controller = GetSearchIndexController(provider);
             controller.RemoveIndex(scope, CatalogItemSearchCriteria.DocType);
-            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { return; });
+            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { });
 
 
             // sleep for index to be commited
@@ -145,35 +133,45 @@ namespace VirtoCommerce.SearchApiModule.Test
             var catalog = catalogRepo.Catalogs.SingleOrDefault(x => x.Name.Equals("electronics", StringComparison.OrdinalIgnoreCase));
 
             // find all prodducts in the category
-            var catalogCriteria = new CatalogItemSearchCriteria()
+            var catalogCriteria = new CatalogItemSearchCriteria
             {
-                Catalog = catalog.Id,
+                Catalog = catalog?.Id,
                 Currency = "USD"
             };
 
             // Add all filters
             var brandFilter = new AttributeFilter { Key = "brand" };
-            var filter = new AttributeFilter { Key = "color", IsLocalized = true };
-            filter.Values = new[]
-                                {
-                                    new AttributeFilterValue { Id = "Red", Value = "Red" },
-                                    new AttributeFilterValue { Id = "Gray", Value = "Gray" },
-                                    new AttributeFilterValue { Id = "Black", Value = "Black" }
-                                };
+            var filter = new AttributeFilter
+            {
+                Key = "color",
+                IsLocalized = true,
+                Values = new[]
+                {
+                    new AttributeFilterValue { Id = "Red", Value = "Red" },
+                    new AttributeFilterValue { Id = "Gray", Value = "Gray" },
+                    new AttributeFilterValue { Id = "Black", Value = "Black" }
+                }
+            };
 
-            var rangefilter = new RangeFilter { Key = "size" };
-            rangefilter.Values = new[]
-                                     {
-                                         new RangeFilterValue { Id = "0_to_5", Lower = "0", Upper = "5" },
-                                         new RangeFilterValue { Id = "5_to_10", Lower = "5", Upper = "10" }
-                                     };
+            var rangefilter = new RangeFilter
+            {
+                Key = "size",
+                Values = new[]
+                {
+                    new RangeFilterValue { Id = "0_to_5", Lower = "0", Upper = "5" },
+                    new RangeFilterValue { Id = "5_to_10", Lower = "5", Upper = "10" }
+                }
+            };
 
-            var priceRangefilter = new PriceRangeFilter { Currency = "USD" };
-            priceRangefilter.Values = new[]
-                                          {
-                                              new RangeFilterValue { Id = "under-100", Upper = "100" },
-                                              new RangeFilterValue { Id = "200-600", Lower = "200", Upper = "600" }
-                                          };
+            var priceRangefilter = new PriceRangeFilter
+            {
+                Currency = "USD",
+                Values = new[]
+                {
+                    new RangeFilterValue { Id = "under-100", Upper = "100" },
+                    new RangeFilterValue { Id = "200-600", Lower = "200", Upper = "600" }
+                }
+            };
 
             catalogCriteria.Add(filter);
             catalogCriteria.Add(rangefilter);
@@ -183,18 +181,18 @@ namespace VirtoCommerce.SearchApiModule.Test
             var ibs = GetItemBrowsingService(provider);
             var searchResults = ibs.SearchItems(scope, catalogCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
 
-            Assert.True(searchResults.TotalCount > 0, string.Format("Didn't find any products using {0} search", providerType));
-            Assert.True(searchResults.Aggregations.Count() > 0, string.Format("Didn't find any aggregations using {0} search", providerType));
+            Assert.True(searchResults.TotalCount > 0, $"Didn't find any products using {providerType} provider");
+            Assert.True(searchResults.Aggregations.Any(), $"Didn't find any aggregations using {providerType} provider");
 
             var colorAggregation = searchResults.Aggregations.SingleOrDefault(a => a.Field.Equals("color", StringComparison.OrdinalIgnoreCase));
-            Assert.True(colorAggregation.Items.Where(x => x.Value.ToString().Equals("Red", StringComparison.OrdinalIgnoreCase)).SingleOrDefault().Count == 6);
-            Assert.True(colorAggregation.Items.Where(x => x.Value.ToString().Equals("Gray", StringComparison.OrdinalIgnoreCase)).SingleOrDefault().Count == 3);
-            Assert.True(colorAggregation.Items.Where(x => x.Value.ToString().Equals("Black", StringComparison.OrdinalIgnoreCase)).SingleOrDefault().Count == 13);
+            Assert.True(colorAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Red", StringComparison.OrdinalIgnoreCase))?.Count == 6);
+            Assert.True(colorAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Gray", StringComparison.OrdinalIgnoreCase))?.Count == 3);
+            Assert.True(colorAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Black", StringComparison.OrdinalIgnoreCase))?.Count == 13);
 
             var brandAggregation = searchResults.Aggregations.SingleOrDefault(a => a.Field.Equals("brand", StringComparison.OrdinalIgnoreCase));
-            Assert.True(brandAggregation.Items.Where(x => x.Value.ToString().Equals("Beats By Dr Dre", StringComparison.OrdinalIgnoreCase)).SingleOrDefault().Count == 3);
+            Assert.True(brandAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Beats By Dr Dre", StringComparison.OrdinalIgnoreCase))?.Count == 3);
 
-            var keywordSearchCriteria = new KeywordSearchCriteria(CatalogItemSearchCriteria.DocType) { Currency = "USD", Locale = "en-us", SearchPhrase = "sony" };
+            var keywordSearchCriteria = new CatalogItemSearchCriteria(CatalogItemSearchCriteria.DocType) { Currency = "USD", Locale = "en-us", SearchPhrase = "sony" };
             searchResults = ibs.SearchItems(scope, keywordSearchCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
             Assert.True(searchResults.TotalCount > 0);
         }
@@ -211,27 +209,22 @@ namespace VirtoCommerce.SearchApiModule.Test
             provider.RemoveAll(scope, "");
             var controller = GetSearchIndexController(provider);
             controller.RemoveIndex(scope, CatalogItemSearchCriteria.DocType);
-            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { return; });
+            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { });
 
             // sleep for index to be commited
             Thread.Sleep(5000);
 
             var storeRepo = GetStoreRepository();
             var storeObject = storeRepo.Stores.SingleOrDefault(x => x.Name.Equals(storeName, StringComparison.OrdinalIgnoreCase));
-            var store = GetStoreService().GetById(storeObject.Id);
-
-            // get catalog id by name
-            var catalogRepo = GetCatalogRepository();
-            var catalog = catalogRepo.Catalogs.SingleOrDefault(x => x.Name.Equals("electronics", StringComparison.OrdinalIgnoreCase));
+            var store = GetStoreService().GetById(storeObject?.Id);
 
             // find all prodducts in the category
-            var criteria = new ProductSearch()
+            var criteria = new ProductSearch
             {
                 Currency = "USD",
                 Outline = "*" // find all products
                 //Terms = new[] { "price:200-600" }
             };
-
 
             var context = new Dictionary<string, object>
             {
@@ -246,19 +239,19 @@ namespace VirtoCommerce.SearchApiModule.Test
             //Load ALL products 
             var searchResults = ibs.SearchItems(scope, serviceCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
 
-            Assert.True(searchResults.TotalCount > 0, string.Format("Didn't find any products using {0} search", providerType));
-            Assert.True(searchResults.Aggregations.Count() > 0, string.Format("Didn't find any aggregations using {0} search", providerType));
+            Assert.True(searchResults.TotalCount > 0, $"Didn't find any products using {providerType} provider");
+            Assert.True(searchResults.Aggregations.Length > 0, $"Didn't find any aggregations using {providerType} provider");
 
             var colorAggregation = searchResults.Aggregations.SingleOrDefault(a => a.Field.Equals("color", StringComparison.OrdinalIgnoreCase));
-            Assert.True(colorAggregation.Items.Where(x => x.Value.ToString().Equals("Red", StringComparison.OrdinalIgnoreCase)).SingleOrDefault().Count == 6);
-            Assert.True(colorAggregation.Items.Where(x => x.Value.ToString().Equals("Gray", StringComparison.OrdinalIgnoreCase)).SingleOrDefault().Count == 3);
-            Assert.True(colorAggregation.Items.Where(x => x.Value.ToString().Equals("Black", StringComparison.OrdinalIgnoreCase)).SingleOrDefault().Count == 13);
+            Assert.True(colorAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Red", StringComparison.OrdinalIgnoreCase))?.Count == 6);
+            Assert.True(colorAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Gray", StringComparison.OrdinalIgnoreCase))?.Count == 3);
+            Assert.True(colorAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Black", StringComparison.OrdinalIgnoreCase))?.Count == 13);
 
             var brandAggregation = searchResults.Aggregations.SingleOrDefault(a => a.Field.Equals("brand", StringComparison.OrdinalIgnoreCase));
-            Assert.True(brandAggregation.Items.Where(x => x.Value.ToString().Equals("Beats By Dr Dre", StringComparison.OrdinalIgnoreCase)).SingleOrDefault().Count == 3);
+            Assert.True(brandAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Beats By Dr Dre", StringComparison.OrdinalIgnoreCase))?.Count == 3);
 
             // now test sorting
-            criteria = new ProductSearch()
+            criteria = new ProductSearch
             {
                 Currency = "USD",
                 Outline = "*", // find all products
@@ -271,7 +264,7 @@ namespace VirtoCommerce.SearchApiModule.Test
             var productName = searchResults.Products[0].Name;
             Assert.True(productName == "3DR Solo Quadcopter (No Gimbal)");
 
-            criteria = new ProductSearch()
+            criteria = new ProductSearch
             {
                 Currency = "USD",
                 Outline = "*", // find all products
@@ -286,11 +279,13 @@ namespace VirtoCommerce.SearchApiModule.Test
             Assert.True(productName == "xFold CINEMA X12 RTF U7");
 
             // now test filtering by outline
+            // get catalog id by name
+            var catalogRepo = GetCatalogRepository();
             var category = catalogRepo.Categories.SingleOrDefault(x => x.Name.Equals("Cell phones", StringComparison.OrdinalIgnoreCase));
 
-            criteria = new ProductSearch()
+            criteria = new ProductSearch
             {
-                Outline = category.Id,
+                Outline = category?.Id,
                 Currency = "USD",
                 Sort = new[] { "name" }
             };
@@ -298,7 +293,7 @@ namespace VirtoCommerce.SearchApiModule.Test
             serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Id, store.Catalog, filters);
             searchResults = ibs.SearchItems(scope, serviceCriteria, Domain.Catalog.Model.ItemResponseGroup.ItemLarge);
 
-            Assert.True(searchResults.TotalCount == 6, string.Format("Expected 6, but found {0}", searchResults.TotalCount));
+            Assert.True(searchResults.TotalCount == 6, $"Expected 6, but found {searchResults.TotalCount}");
         }
 
         #region Performance Tests
@@ -315,7 +310,7 @@ namespace VirtoCommerce.SearchApiModule.Test
             provider.RemoveAll(scope, "");
             var controller = GetSearchIndexController(provider);
             controller.RemoveIndex(scope, CatalogItemSearchCriteria.DocType);
-            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { return; });
+            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { });
 
             // sleep for index to be commited
             Thread.Sleep(5000);
@@ -324,16 +319,11 @@ namespace VirtoCommerce.SearchApiModule.Test
             var storeObject = storeRepo.Stores.SingleOrDefault(x => x.Name.Equals(storeName, StringComparison.OrdinalIgnoreCase));
             var store = GetStoreService().GetById(storeObject.Id);
 
-            // get catalog id by name
-            var catalogRepo = GetCatalogRepository();
-            var catalog = catalogRepo.Catalogs.SingleOrDefault(x => x.Name.Equals("electronics", StringComparison.OrdinalIgnoreCase));
-
             // find all prodducts in the category
-            var criteria = new ProductSearch()
+            var criteria = new ProductSearch
             {
                 Currency = "USD"
             };
-
 
             var context = new Dictionary<string, object>
             {
@@ -354,14 +344,14 @@ namespace VirtoCommerce.SearchApiModule.Test
 
         #region Private Helper Methods
 
-        private ItemBrowsingService GetItemBrowsingService(ISearchProvider provider)
+        private static ItemBrowsingService GetItemBrowsingService(ISearchProvider provider)
         {
             var settings = GetSettingsManager();
             var service = new ItemBrowsingService(GetItemService(), provider, new FileSystemBlobProvider("", "http://samplesite.com"), settings);
             return service;
         }
 
-        private SearchIndexController GetSearchIndexController(ISearchProvider provider)
+        private static SearchIndexController GetSearchIndexController(ISearchProvider provider)
         {
             var settings = GetSettingsManager();
             return new SearchIndexController(settings, provider,
@@ -369,12 +359,12 @@ namespace VirtoCommerce.SearchApiModule.Test
                 new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetChangeLogService(), new FileSystemBlobProvider("", "http://samplesite.com"), settings));
         }
 
-        private ICommerceService GetCommerceService()
+        private static ICommerceService GetCommerceService()
         {
             return new CommerceServiceImpl(GetCommerceRepository);
         }
 
-        private ISettingsManager GetSettingsManager()
+        private static ISettingsManager GetSettingsManager()
         {
             var mock = new Mock<ISettingsManager>();
             mock.Setup(s => s.GetModuleSettings("VirtoCommerce.Store")).Returns(new SettingEntry[] { });
@@ -382,17 +372,17 @@ namespace VirtoCommerce.SearchApiModule.Test
             return mock.Object;
         }
 
-        private ICatalogSearchService GetSearchService()
+        private static ICatalogSearchService GetSearchService()
         {
-            return new CatalogModule.Data.Services.CatalogSearchServiceImpl(GetCatalogRepository, GetItemService(), GetCatalogService(), GetCategoryService());
+            return new CatalogSearchServiceImpl(GetCatalogRepository, GetItemService(), GetCatalogService(), GetCategoryService());
         }
 
-        private IOutlineService GetOutlineService()
+        private static IOutlineService GetOutlineService()
         {
             return new OutlineService();
         }
 
-        private IPricingService GetPricingService()
+        private static IPricingService GetPricingService()
         {
             var cacheManager = new Mock<ICacheManager<object>>();
             var log = new Mock<ILog>();
@@ -404,80 +394,75 @@ namespace VirtoCommerce.SearchApiModule.Test
             return new PricingServiceImpl(GetPricingRepository, GetItemService(), log.Object, cacheManager.Object, null, null, null);
         }
 
-        private IBrowseFilterService GetBrowseFilterService()
+        private static IBrowseFilterService GetBrowseFilterService()
         {
             return new BrowseFilterService();
         }
 
-        private IStoreService GetStoreService()
+        private static IStoreService GetStoreService()
         {
             var settings = GetSettingsManager();
-            var shippingService = Moq.Mock.Of<IShippingMethodsService>(s => s.GetAllShippingMethods() == new ShippingMethod[] { });
-            var paymentService = Moq.Mock.Of<IPaymentMethodsService>(s => s.GetAllPaymentMethods() == new PaymentMethod[] { });
-            var taxService = Moq.Mock.Of<ITaxService>(s => s.GetAllTaxProviders() == new TaxProvider[] { });
+            var shippingService = Mock.Of<IShippingMethodsService>(s => s.GetAllShippingMethods() == new ShippingMethod[] { });
+            var paymentService = Mock.Of<IPaymentMethodsService>(s => s.GetAllPaymentMethods() == new PaymentMethod[] { });
+            var taxService = Mock.Of<ITaxService>(s => s.GetAllTaxProviders() == new TaxProvider[] { });
             var dpService = GetDynamicPropertyService();
 
             return new StoreServiceImpl(GetStoreRepository, GetCommerceService(), settings, dpService, shippingService, paymentService, taxService);
         }
 
-        private IDynamicPropertyService GetDynamicPropertyService()
+        private static IDynamicPropertyService GetDynamicPropertyService()
         {
-            var service = new DynamicPropertyService(() => GetPlatformRepository());
+            var service = new DynamicPropertyService(GetPlatformRepository);
             return service;
         }
 
-        private IPropertyService GetPropertyService()
-        {
-            return new PropertyServiceImpl(GetCatalogRepository, GetCacheManager());
-        }
-
-        private ICategoryService GetCategoryService()
+        private static ICategoryService GetCategoryService()
         {
             return new CategoryServiceImpl(GetCatalogRepository, GetCommerceService(), GetOutlineService(), GetCacheManager());
         }
 
-        private ICatalogService GetCatalogService()
+        private static ICatalogService GetCatalogService()
         {
             return new CatalogServiceImpl(GetCatalogRepository, GetCommerceService(), GetCacheManager());
         }
 
-        private IItemService GetItemService()
+        private static IItemService GetItemService()
         {
             return new ItemServiceImpl(GetCatalogRepository, GetCommerceService(), GetOutlineService(), GetCacheManager());
         }
 
-        private IChangeLogService GetChangeLogService()
+        private static IChangeLogService GetChangeLogService()
         {
             return new ChangeLogService(GetPlatformRepository);
         }
 
-        private IStoreRepository GetStoreRepository()
+        private static IStoreRepository GetStoreRepository()
         {
             var result = new StoreRepositoryImpl("VirtoCommerce", new EntityPrimaryKeyGeneratorInterceptor(), new AuditableInterceptor(null));
             return result;
         }
 
-        private IPlatformRepository GetPlatformRepository()
+        private static IPlatformRepository GetPlatformRepository()
         {
             var result = new PlatformRepository("VirtoCommerce", new EntityPrimaryKeyGeneratorInterceptor(), new AuditableInterceptor(null));
             return result;
         }
 
-        private IPricingRepository GetPricingRepository()
+        private static IPricingRepository GetPricingRepository()
         {
             var result = new PricingRepositoryImpl("VirtoCommerce", new EntityPrimaryKeyGeneratorInterceptor(), new AuditableInterceptor(null));
             return result;
         }
 
-        private ICatalogRepository GetCatalogRepository()
+        private static ICatalogRepository GetCatalogRepository()
         {
             var result = new CatalogRepositoryImpl("VirtoCommerce", new EntityPrimaryKeyGeneratorInterceptor(), new AuditableInterceptor(null));
             return result;
         }
 
-        private ICacheManager<object> GetCacheManager()
+        private static ICacheManager<object> GetCacheManager()
         {
-            return new Moq.Mock<ICacheManager<object>>().Object;
+            return new Mock<ICacheManager<object>>().Object;
         }
 
         private static IСommerceRepository GetCommerceRepository()

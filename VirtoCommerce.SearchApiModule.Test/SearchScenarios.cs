@@ -12,7 +12,6 @@ namespace VirtoCommerce.SearchApiModule.Test
 {
     [CLSCompliant(false)]
     [Collection("Search")]
-    [Trait("Category", "CI")]
     public class SearchScenarios : SearchTestsBase
     {
         private const string _scope = "test";

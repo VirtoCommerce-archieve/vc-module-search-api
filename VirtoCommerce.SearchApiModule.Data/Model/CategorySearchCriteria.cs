@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using VirtoCommerce.SearchModule.Core.Model.Search.Criterias;
+using VirtoCommerce.SearchModule.Core.Model.Search.Criteria;
 
 namespace VirtoCommerce.SearchApiModule.Data.Model
 {
-    public class CategorySearchCriteria : KeywordSearchCriteria
+    public class CategorySearchCriteria : BaseSearchCriteria
     {
         public const string DocType = "category";
 
