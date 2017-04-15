@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Data.Model;
+using VirtoCommerce.SearchModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Core.Model.Search.Criteria;
 using VirtoCommerce.SearchModule.Data.Providers.AzureSearch;
 
@@ -11,9 +12,9 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.AzureSearch
     [CLSCompliant(false)]
     public class CatalogAzureSearchQueryBuilder : AzureSearchQueryBuilder
     {
-        protected override void AddFilters(ISearchCriteria criteria, IList<string> filters)
+        protected override void AddFilters(ISearchCriteria criteria, IList<string> filters, IList<IFieldDescriptor> availableFields)
         {
-            base.AddFilters(criteria, filters);
+            base.AddFilters(criteria, filters, availableFields);
             AddCatalogItemFilters(criteria as CatalogItemSearchCriteria, filters);
         }
 

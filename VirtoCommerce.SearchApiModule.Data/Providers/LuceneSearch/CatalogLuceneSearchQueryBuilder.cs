@@ -1,8 +1,10 @@
-﻿using Lucene.Net.Documents;
+﻿using System.Collections.Generic;
+using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Data.Model;
+using VirtoCommerce.SearchModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Core.Model.Search.Criteria;
 using VirtoCommerce.SearchModule.Data.Providers.LuceneSearch;
 
@@ -15,10 +17,11 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.LuceneSearch
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="criteria">The criteria.</param>
+        /// <param name="availableFields"></param>
         /// <returns></returns>
-        public override object BuildQuery<T>(string scope, ISearchCriteria criteria)
+        public override object BuildQuery<T>(string scope, ISearchCriteria criteria, IList<IFieldDescriptor> availableFields)
         {
-            var result = base.BuildQuery<T>(scope, criteria) as LuceneSearchQuery;
+            var result = base.BuildQuery<T>(scope, criteria, availableFields) as LuceneSearchQuery;
             var query = result?.Query as BooleanQuery;
 
             ApplyCategoryFilters<T>(criteria as CategorySearchCriteria, query);
