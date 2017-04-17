@@ -15,7 +15,28 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.AzureSearch
         protected override void AddFilters(ISearchCriteria criteria, IList<string> filters, IList<IFieldDescriptor> availableFields)
         {
             base.AddFilters(criteria, filters, availableFields);
-            AddCatalogItemFilters(criteria as CatalogItemSearchCriteria, filters);
+
+            var catalogItemSearchCriteria = criteria as CatalogItemSearchCriteria;
+            var categorySearchCriteria = criteria as CategorySearchCriteria;
+
+            if (catalogItemSearchCriteria != null)
+            {
+                AddCatalogItemFilters(catalogItemSearchCriteria, filters);
+            }
+            else if (categorySearchCriteria != null)
+            {
+                AddCategoryFilters(categorySearchCriteria, filters);
+            }
+        }
+
+        protected virtual void AddCategoryFilters(CategorySearchCriteria criteria, IList<string> filters)
+        {
+            if (criteria?.Outlines != null && criteria.Outlines.Any())
+            {
+                var outlines = criteria.Outlines.Select(o => o.TrimEnd('*'));
+                var filter = GetContainsFilterExpression("__outline", outlines);
+                filters.Add(filter);
+            }
         }
 
         protected virtual void AddCatalogItemFilters(CatalogItemSearchCriteria criteria, IList<string> filters)

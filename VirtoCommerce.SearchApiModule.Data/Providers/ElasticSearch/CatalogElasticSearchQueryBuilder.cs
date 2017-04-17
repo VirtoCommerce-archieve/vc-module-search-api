@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using Nest;
+﻿using Nest;
+using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model.Search.Criteria;
@@ -13,8 +13,17 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch
         {
             var result = base.GetQuery<T>(criteria);
 
-            result &= GetCategoryQuery<T>(criteria as CategorySearchCriteria);
-            result &= GetCatalogItemQuery<T>(criteria as CatalogItemSearchCriteria);
+            var catalogItemSearchCriteria = criteria as CatalogItemSearchCriteria;
+            var categorySearchCriteria = criteria as CategorySearchCriteria;
+
+            if (catalogItemSearchCriteria != null)
+            {
+                result &= GetCatalogItemQuery<T>(catalogItemSearchCriteria);
+            }
+            else if (categorySearchCriteria != null)
+            {
+                result &= GetCategoryQuery<T>(categorySearchCriteria);
+            }
 
             return result;
         }

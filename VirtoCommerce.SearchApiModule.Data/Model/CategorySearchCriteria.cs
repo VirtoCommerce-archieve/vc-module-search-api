@@ -10,17 +10,17 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="CategorySearchCriteria"/> class.
         /// </summary>
-        /// <param name="documentType">Type of the document.</param>
-        public CategorySearchCriteria(string documentType)
-            : base(documentType)
+        public CategorySearchCriteria()
+            : base(DocType)
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CategorySearchCriteria"/> class.
         /// </summary>
-        public CategorySearchCriteria()
-            : base(DocType)
+        /// <param name="documentType">Type of the document.</param>
+        public CategorySearchCriteria(string documentType)
+            : base(documentType)
         {
         }
 

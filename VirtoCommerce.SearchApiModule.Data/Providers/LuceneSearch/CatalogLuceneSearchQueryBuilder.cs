@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using Lucene.Net.Documents;
+﻿using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
+using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model.Search;
@@ -24,8 +24,17 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.LuceneSearch
             var result = base.BuildQuery<T>(scope, criteria, availableFields) as LuceneSearchQuery;
             var query = result?.Query as BooleanQuery;
 
-            ApplyCategoryFilters<T>(criteria as CategorySearchCriteria, query);
-            ApplyCatalogItemFilters<T>(criteria as CatalogItemSearchCriteria, query);
+            var catalogItemSearchCriteria = criteria as CatalogItemSearchCriteria;
+            var categorySearchCriteria = criteria as CategorySearchCriteria;
+
+            if (catalogItemSearchCriteria != null)
+            {
+                ApplyCatalogItemFilters<T>(catalogItemSearchCriteria, query);
+            }
+            else if (categorySearchCriteria != null)
+            {
+                ApplyCategoryFilters<T>(categorySearchCriteria, query);
+            }
 
             return result;
         }
