@@ -13,6 +13,7 @@ using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchApiModule.Data.Helpers;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
@@ -223,7 +224,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 //Do not store variations in index
                 //itemDto.Variations = null;
                 // index full web serialized object
-                doc.Add(new DocumentField("__object", itemDto, new[] { IndexStore.Yes, IndexType.Analyzed }));
+                doc.AddObjectFieldValue(itemDto);
             }
 
             return true;

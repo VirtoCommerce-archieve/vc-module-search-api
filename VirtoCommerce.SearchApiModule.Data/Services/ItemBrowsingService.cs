@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using VirtoCommerce.CatalogModule.Web.Converters;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchApiModule.Data.Converters;
+using VirtoCommerce.SearchApiModule.Data.Helpers;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
@@ -71,7 +70,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
             if (documents != null && documents.Any())
             {
-                var productsMap = documents.ToDictionary(doc => doc.Id.ToString(), doc => returnProductsFromIndex ? ConvertDocumentToProduct(doc) : null);
+                var productsMap = documents.ToDictionary(doc => doc.Id.ToString(), doc => returnProductsFromIndex ? doc.GetObjectFieldValue<catalogModel.Product>() : null);
 
                 var missingProductIds = productsMap
                     .Where(kvp => kvp.Value == null)
@@ -97,36 +96,6 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
                 // Preserve original sorting order
                 result = documents.Select(doc => productsMap[doc.Id.ToString()]).ToArray();
-            }
-
-            return result;
-        }
-
-        protected virtual catalogModel.Product ConvertDocumentToProduct(DocumentDictionary doc)
-        {
-            catalogModel.Product result = null;
-
-            if (doc.ContainsKey("__object"))
-            {
-                var obj = doc["__object"];
-                result = obj as catalogModel.Product;
-
-                if (result == null)
-                {
-                    var jobj = obj as JObject;
-                    if (jobj != null)
-                    {
-                        result = jobj.ToObject<catalogModel.Product>();
-                    }
-                    else
-                    {
-                        var productString = obj as string;
-                        if (!string.IsNullOrEmpty(productString))
-                        {
-                            result = JsonConvert.DeserializeObject<catalogModel.Product>(productString);
-                        }
-                    }
-                }
             }
 
             return result;

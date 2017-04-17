@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Web.Converters;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
@@ -11,6 +10,7 @@ using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchApiModule.Data.Helpers;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
 
@@ -73,7 +73,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                     var doc = new ResultDocument();
                     IndexItem(doc, category);
                     documents.Add(doc);
-                }           
+                }
             }
             return documents;
         }
@@ -160,8 +160,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             if (_settingsManager.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", true))
             {
                 var itemDto = category.ToWebModel(_blobUrlResolver);
-           
-                doc.Add(new DocumentField("__object", itemDto, new[] { IndexStore.Yes, IndexType.Analyzed }));
+                doc.AddObjectFieldValue(itemDto);
             }
         }
 

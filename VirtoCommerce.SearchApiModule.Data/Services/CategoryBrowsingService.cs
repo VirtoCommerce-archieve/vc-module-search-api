@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using VirtoCommerce.CatalogModule.Web.Converters;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Platform.Core.Assets;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchApiModule.Data.Helpers;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
@@ -40,7 +39,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             var response = new CategorySearchResult();
             var searchResults = _searchProvider.Search<DocumentDictionary>(scope, criteria);
 
-            if (searchResults != null && searchResults.Documents != null)
+            if (searchResults?.Documents != null)
             {
                 var categoryDtos = new ConcurrentBag<CatalogModule.Web.Model.Category>();
                 var taskList = new List<Task>();
@@ -48,15 +47,14 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 var documents = searchResults.Documents;
                 if (_settingsManager.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", true))
                 {
-                    var fullIndexedDocuments = documents.Where(x => x.ContainsKey("__object") && !string.IsNullOrEmpty(x["__object"].ToString())).ToList();
+                    var fullIndexedDocuments = documents.Where(doc => doc.ContainsKey(IndexHelper.ObjectFieldName) && !string.IsNullOrEmpty(doc[IndexHelper.ObjectFieldName].ToString())).ToList();
                     documents = documents.Except(fullIndexedDocuments).ToList();
 
                     var deserializeProductsTask = Task.Factory.StartNew(() =>
                     {
-                        Parallel.ForEach(fullIndexedDocuments, new ParallelOptions { MaxDegreeOfParallelism = 5 }, (x) =>
+                        Parallel.ForEach(fullIndexedDocuments, new ParallelOptions { MaxDegreeOfParallelism = 5 }, doc =>
                         {
-                            var jsonCategory = x["__object"].ToString();
-                            var category = JsonConvert.DeserializeObject(jsonCategory, typeof(CatalogModule.Web.Model.Category)) as CatalogModule.Web.Model.Category;
+                            var category = doc.GetObjectFieldValue<CatalogModule.Web.Model.Category>();
                             categoryDtos.Add(category);
                         });
                     });
@@ -68,16 +66,18 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                     var loadProductsTask = Task.Factory.StartNew(() =>
                     {
                         string catalog = null;
-                        if (criteria is CatalogItemSearchCriteria)
+                        var catalogItemSearchCriteria = criteria as CatalogItemSearchCriteria;
+                        if (catalogItemSearchCriteria != null)
                         {
-                            catalog = (criteria as CatalogItemSearchCriteria).Catalog;
+                            catalog = catalogItemSearchCriteria.Catalog;
                         }
+
                         var categoryIds = documents.Select(x => x.Id.ToString()).Distinct().ToArray();
                         if (categoryIds.Any())
                         {
                             // Now load items from repository
                             var categories = _categoryService.GetByIds(categoryIds, responseGroup, catalog);
-                            Parallel.ForEach(categories, (x) =>
+                            Parallel.ForEach(categories, x =>
                             {
                                 categoryDtos.Add(x.ToWebModel(_blobUrlResolver));
                             });

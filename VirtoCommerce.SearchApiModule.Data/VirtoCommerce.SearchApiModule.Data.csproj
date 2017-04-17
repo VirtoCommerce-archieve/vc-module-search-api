@@ -159,6 +159,7 @@
     <Compile Include="Extensions\SearchCriteriaExtensions.cs" />
     <Compile Include="Extensions\SearchFilterExtensions.cs" />
     <Compile Include="Helpers\BrowseFilterHelper.cs" />
+    <Compile Include="Helpers\IndexHelper.cs" />
     <Compile Include="Model\CatalogItemSearchCriteria.cs" />
     <Compile Include="Model\CategorySearch.cs" />
     <Compile Include="Model\CategorySearchCriteria.cs" />
@@ -186,7 +187,9 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="VirtoCommerce.SearchApiModule.Data.nuspec" />
+    <None Include="VirtoCommerce.SearchApiModule.Data.nuspec">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
