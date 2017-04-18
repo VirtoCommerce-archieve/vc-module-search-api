@@ -33,7 +33,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.AzureSearch
         {
             if (criteria?.Outlines != null && criteria.Outlines.Any())
             {
-                var outlines = criteria.Outlines.Select(o => o.TrimEnd('*'));
+                var outlines = criteria.Outlines.Select(o => o.TrimEnd('/', '*'));
                 var filter = GetContainsFilterExpression("__outline", outlines);
                 filters.Add(filter);
             }
@@ -69,7 +69,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Providers.AzureSearch
 
                 if (!criteria.Outlines.IsNullOrEmpty())
                 {
-                    var outlines = criteria.Outlines.Select(o => o.TrimEnd('*'));
+                    var outlines = criteria.Outlines.Select(o => o.TrimEnd('/', '*'));
                     var filter = GetContainsFilterExpression("__outline", outlines);
                     filters.Add(filter);
                 }

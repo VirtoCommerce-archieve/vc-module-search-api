@@ -51,17 +51,11 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         /// The maximum items count per partition.
         /// Keep it smaller to prevent too large SQL requests and too large messages in the queue.
         /// </summary>
-        protected virtual int PartitionSize { get { return 500; } }
+        protected virtual int PartitionSize => 500;
 
         #region ISearchIndexBuilder Members
 
-        public virtual string DocumentType
-        {
-            get
-            {
-                return CatalogItemSearchCriteria.DocType;
-            }
-        }
+        public virtual string DocumentType => CatalogItemSearchCriteria.DocType;
 
         public virtual IEnumerable<Partition> GetPartitions(bool rebuild, DateTime startDate, DateTime endDate)
         {
@@ -75,7 +69,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         public virtual IEnumerable<IDocument> CreateDocuments(Partition partition)
         {
             if (partition == null)
-                throw new ArgumentNullException("partition");
+                throw new ArgumentNullException(nameof(partition));
 
             //Trace.TraceInformation(string.Format("Processing documents starting {0} of {1} - {2}%", partition.Start, partition.Total, (partition.Start * 100 / partition.Total)));
 
@@ -158,7 +152,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             IndexIsProperty(doc, item.Code);
             doc.Add(new DocumentField("name", item.Name, indexStoreNotAnalyzed));
             doc.Add(new DocumentField("startdate", item.StartDate, indexStoreNotAnalyzed));
-            doc.Add(new DocumentField("enddate", item.EndDate.HasValue ? item.EndDate : DateTime.MaxValue, indexStoreNotAnalyzed));
+            doc.Add(new DocumentField("enddate", item.EndDate ?? DateTime.MaxValue, indexStoreNotAnalyzed));
             doc.Add(new DocumentField("createddate", item.CreatedDate, indexStoreNotAnalyzed));
             doc.Add(new DocumentField("lastmodifieddate", item.ModifiedDate ?? DateTime.MaxValue, indexStoreNotAnalyzed));
             doc.Add(new DocumentField("priority", item.Priority, indexStoreNotAnalyzed));
@@ -258,17 +252,25 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 .Select(i => i.Id)
                 .ToList();
 
-            var catalogId = items.First();
+            var result = new List<string>();
 
-            var result = new List<string>
+            // Add partial outline for each parent:
+            // catalog/category1/category2
+            // catalog/category1
+            // catalog
+            if (items.Count > 0)
             {
-                //catalogId,
-                string.Join("/", items)
-            };
+                for (var i = items.Count; i > 0; i--)
+                {
+                    result.Add(string.Join("/", items.Take(i)));
+                }
+            }
 
-            // For each child category create a separate outline: catalog/child_category
+            // For each parent category create a separate outline: catalog/parent_category
             if (items.Count > 2)
             {
+                var catalogId = items.First();
+
                 result.AddRange(
                     items.Skip(1)
                     .Select(i => string.Join("/", catalogId, i)));
@@ -332,14 +334,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 doc.Add(new DocumentField("price", price.EffectiveValue, new[] { IndexStore.No, IndexType.NotAnalyzed }));
             }
 
-            if (prices.Length == 0) // mark product without prices defined
-            {
-                IndexIsProperty(doc, "unpriced");
-            }
-            else
-            {
-                IndexIsProperty(doc, "priced");
-            }
+            IndexIsProperty(doc, prices.Length > 0 ? "priced" : "unpriced");
         }
 
         #endregion
@@ -352,7 +347,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             var parts = result.ProductsTotalCount / PartitionSize + 1;
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 5 };
 
-            Parallel.For(0, parts, parallelOptions, (index) =>
+            Parallel.For(0, parts, parallelOptions, index =>
             {
                 var criteria = new SearchCriteria
                 {

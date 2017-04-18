@@ -41,13 +41,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         #region ISearchIndexBuilder Members
 
-        public string DocumentType
-        {
-            get
-            {
-                return "category";
-            }
-        }
+        public string DocumentType => "category";
 
         public IEnumerable<Partition> GetPartitions(bool rebuild, DateTime startDate, DateTime endDate)
         {
@@ -61,7 +55,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         public IEnumerable<IDocument> CreateDocuments(Partition partition)
         {
             if (partition == null)
-                throw new ArgumentNullException("partition");
+                throw new ArgumentNullException(nameof(partition));
 
             var documents = new ConcurrentBag<IDocument>();
 
@@ -192,16 +186,29 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 .Select(i => i.Id)
                 .ToList();
 
-            var catalogId = items.First();
 
             var result = new List<string>
             {
                 string.Join("/", items)
             };
 
-            // For each child category create a separate outline: catalog/child_category
+            // Add partial outline for each parent:
+            // catalog/category1/category2
+            // catalog/category1
+            // catalog
+            if (items.Count > 0)
+            {
+                for (var i = items.Count; i > 0; i--)
+                {
+                    result.Add(string.Join("/", items.Take(i)));
+                }
+            }
+
+            // For each parent category create a separate outline: catalog/parent_category
             if (items.Count > 2)
             {
+                var catalogId = items.First();
+
                 result.AddRange(
                     items.Skip(1)
                     .Select(i => string.Join("/", catalogId, i)));
