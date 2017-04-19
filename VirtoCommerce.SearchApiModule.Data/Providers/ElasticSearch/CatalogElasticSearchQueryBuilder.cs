@@ -1,8 +1,8 @@
-﻿using Nest;
-using System.Linq;
+﻿using System.Linq;
+using Nest;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Data.Model;
-using VirtoCommerce.SearchModule.Core.Model.Search.Criteria;
+using VirtoCommerce.SearchModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch;
 
 namespace VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch

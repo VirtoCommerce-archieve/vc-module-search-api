@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using VirtoCommerce.SearchModule.Core.Model.Search.Criteria;
+using VirtoCommerce.SearchModule.Core.Model.Search;
 
 namespace VirtoCommerce.SearchApiModule.Data.Model
 {

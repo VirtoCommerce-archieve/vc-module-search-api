@@ -1,11 +1,10 @@
-﻿using Lucene.Net.Documents;
+﻿using System.Collections.Generic;
+using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
-using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model.Search;
-using VirtoCommerce.SearchModule.Core.Model.Search.Criteria;
 using VirtoCommerce.SearchModule.Data.Providers.LuceneSearch;
 
 namespace VirtoCommerce.SearchApiModule.Data.Providers.LuceneSearch

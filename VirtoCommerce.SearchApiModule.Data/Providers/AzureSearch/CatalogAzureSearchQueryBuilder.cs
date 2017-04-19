@@ -4,7 +4,6 @@ using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model.Search;
-using VirtoCommerce.SearchModule.Core.Model.Search.Criteria;
 using VirtoCommerce.SearchModule.Data.Providers.AzureSearch;
 
 namespace VirtoCommerce.SearchApiModule.Data.Providers.AzureSearch

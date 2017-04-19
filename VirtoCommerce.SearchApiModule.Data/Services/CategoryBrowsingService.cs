@@ -11,7 +11,7 @@ using VirtoCommerce.SearchApiModule.Data.Helpers;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
-using VirtoCommerce.SearchModule.Core.Model.Search.Criteria;
+using VirtoCommerce.SearchModule.Core.Model.Search;
 
 namespace VirtoCommerce.SearchApiModule.Data.Services
 {
