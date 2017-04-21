@@ -22,7 +22,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             _settingsManager = settingsManager;
         }
 
-        public bool UpdateDocument(IDocument document, Category item, object context)
+        public virtual bool UpdateDocument(IDocument document, Category item, object context)
         {
             var indexStoreNotAnalyzed = new[] { IndexStore.Yes, IndexType.NotAnalyzed };
             var indexStoreNotAnalyzedStringCollection = new[] { IndexStore.Yes, IndexType.NotAnalyzed, IndexDataType.StringCollection };
