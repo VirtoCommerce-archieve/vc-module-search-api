@@ -10,7 +10,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Helpers
     {
         public const string ObjectFieldName = "__object";
 
-        public static void AddObjectFieldValue<T>(this ResultDocument document, T value)
+        public static void AddObjectFieldValue<T>(this IDocument document, T value)
         {
             document.Add(new DocumentField(ObjectFieldName, SerializeObject(value), new[] { IndexStore.Yes, IndexType.No }));
         }

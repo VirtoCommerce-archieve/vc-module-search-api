@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Omu.ValueInjecter;
-using VirtoCommerce.SearchModule.Data.Services;
+using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Filters;
-using System.Collections.Generic;
 
 namespace VirtoCommerce.SearchApiModule.Data.Helpers
 {

@@ -1,8 +1,10 @@
 ﻿using System.Web.Http;
 using Microsoft.Practices.Unity;
+using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchApiModule.Data.Providers.AzureSearch;
 using VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch;
 using VirtoCommerce.SearchApiModule.Data.Providers.LuceneSearch;
@@ -31,6 +33,9 @@ namespace VirtoCommerce.SearchApiModule.Web
             // Register index builders
             _container.RegisterType<ISearchIndexBuilder, CategoryIndexBuilder>("category-indexer");
             _container.RegisterType<ISearchIndexBuilder, CatalogItemIndexBuilder>("catalogitem-indexer");
+
+            _container.RegisterType<IDocumentBuilder<Category, object>, CategoryDocumentBuilder>(nameof(CategoryDocumentBuilder));
+            _container.RegisterType<IDocumentBuilder<CatalogProduct, ProductDocumentBuilderContext>, ProductDocumentBuilder>(nameof(ProductDocumentBuilder));
 
             _container.RegisterType<IItemBrowsingService, ItemBrowsingService>();
             _container.RegisterType<ICategoryBrowsingService, CategoryBrowsingService>();

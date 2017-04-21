@@ -46,7 +46,7 @@ namespace VirtoCommerce.SearchApiModule.Test
             provider.Index(scope, documentType, CreateDocument(catalog, "type3", "hhhhhh", "blue shirt", "Blue", 8, "hidden", -2, 2, new[] { new Price("USD", "default", 23.12m) }, new[] { "sony/186d61d8-d843-4675-9f77-ec5ef603fda3", "apple/186d61d8-d843-4675-9f77-ec5ef603fda3" }));
         }
 
-        public static ResultDocument CreateDocument(string catalog, string type, string key, string name, string color, int size, string status, int startDate, int endDate, Price[] prices, string[] outlines)
+        public static IDocument CreateDocument(string catalog, string type, string key, string name, string color, int size, string status, int startDate, int endDate, Price[] prices, string[] outlines)
         {
             var doc = new ResultDocument();
 
