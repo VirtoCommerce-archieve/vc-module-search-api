@@ -11,7 +11,7 @@ using VirtoCommerce.SearchModule.Core.Model.Indexing;
 
 namespace VirtoCommerce.SearchApiModule.Data.Services
 {
-    public class CategoryDocumentBuilder : IDocumentBuilder<Category, object>
+    public class CategoryDocumentBuilder : IDocumentBuilder<Category>
     {
         private readonly IBlobUrlResolver _blobUrlResolver;
         private readonly ISettingsManager _settingsManager;

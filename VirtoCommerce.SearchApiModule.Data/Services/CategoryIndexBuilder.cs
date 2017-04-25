@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.Domain.Catalog.Model;
@@ -19,14 +18,14 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         private readonly ICatalogSearchService _catalogSearchService;
         private readonly ICategoryService _categoryService;
         private readonly IChangeLogService _changeLogService;
-        private readonly IDocumentBuilder<Category, object>[] _documentBuilders;
+        private readonly IDocumentBuilder<Category>[] _documentBuilders;
 
         public CategoryIndexBuilder(
             ISearchProvider searchProvider,
             ICatalogSearchService catalogSearchService,
             ICategoryService categoryService,
             IChangeLogService changeLogService,
-            params IDocumentBuilder<Category, object>[] documentBuilders)
+            params IDocumentBuilder<Category>[] documentBuilders)
         {
             _searchProvider = searchProvider;
             _catalogSearchService = catalogSearchService;
@@ -39,7 +38,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         public string DocumentType => "category";
 
-        public IEnumerable<Partition> GetPartitions(bool rebuild, DateTime startDate, DateTime endDate)
+        public IList<Partition> GetPartitions(bool rebuild, DateTime startDate, DateTime endDate)
         {
             var partitions = (rebuild || startDate == DateTime.MinValue)
                 ? GetPartitionsForAllCategories()
@@ -48,12 +47,12 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             return partitions;
         }
 
-        public IEnumerable<IDocument> CreateDocuments(Partition partition)
+        public IList<IDocument> CreateDocuments(Partition partition)
         {
             if (partition == null)
                 throw new ArgumentNullException(nameof(partition));
 
-            var documents = new ConcurrentBag<IDocument>();
+            var documents = new List<IDocument>();
 
             if (_documentBuilders != null && !partition.Keys.IsNullOrEmpty())
             {
@@ -110,7 +109,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         {
         }
 
-        private IEnumerable<Partition> GetPartitionsForAllCategories()
+        private IList<Partition> GetPartitionsForAllCategories()
         {
             var partitions = new List<Partition>();
 
@@ -128,7 +127,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             return partitions;
         }
 
-        private IEnumerable<Partition> GetPartitionsForModifiedCategories(DateTime startDate, DateTime endDate)
+        private IList<Partition> GetPartitionsForModifiedCategories(DateTime startDate, DateTime endDate)
         {
             var partitions = new List<Partition>();
 

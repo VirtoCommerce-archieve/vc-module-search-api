@@ -8,12 +8,11 @@ using VirtoCommerce.Domain.Pricing.Model;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchApiModule.Data.Helpers;
-using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
 
 namespace VirtoCommerce.SearchApiModule.Data.Services
 {
-    public class ProductDocumentBuilder : IDocumentBuilder<CatalogProduct, ProductDocumentBuilderContext>
+    public class ProductDocumentBuilder : IDocumentBuilder<CatalogProduct>
     {
         private readonly IBlobUrlResolver _blobUrlResolver;
         private readonly ISettingsManager _settingsManager;
@@ -24,7 +23,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             _settingsManager = settingsManager;
         }
 
-        public virtual bool UpdateDocument(IDocument document, CatalogProduct item, ProductDocumentBuilderContext context)
+        public virtual bool UpdateDocument(IDocument document, CatalogProduct item, object context)
         {
             var indexStoreNotAnalyzed = new[] { IndexStore.Yes, IndexType.NotAnalyzed };
             var indexStoreNotAnalyzedStringCollection = new[] { IndexStore.Yes, IndexType.NotAnalyzed, IndexDataType.StringCollection };
@@ -97,7 +96,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 }
             }
 
-            IndexItemPrices(document, context?.Prices, item);
+            IndexItemPrices(document, context as IList<Price>, item);
 
             // add to content
             document.Add(new DocumentField("__content", item.Name, indexStoreAnalyzedStringCollection));

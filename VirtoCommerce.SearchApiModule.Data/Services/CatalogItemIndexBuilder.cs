@@ -22,7 +22,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         private readonly IItemService _itemService;
         private readonly IPricingService _pricingService;
         private readonly IChangeLogService _changeLogService;
-        private readonly IDocumentBuilder<CatalogProduct, ProductDocumentBuilderContext>[] _documentBuilders;
+        private readonly IBatchDocumentBuilder<CatalogProduct>[] _batchDocumentBuilders;
 
         public CatalogItemIndexBuilder(
             ISearchProvider searchProvider,
@@ -30,14 +30,14 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             IItemService itemService,
             IPricingService pricingService,
             IChangeLogService changeLogService,
-            params IDocumentBuilder<CatalogProduct, ProductDocumentBuilderContext>[] documentBuilders)
+            params IBatchDocumentBuilder<CatalogProduct>[] batchDocumentBuilders)
         {
             _searchProvider = searchProvider;
             _catalogSearchService = catalogSearchService;
             _itemService = itemService;
             _pricingService = pricingService;
             _changeLogService = changeLogService;
-            _documentBuilders = documentBuilders;
+            _batchDocumentBuilders = batchDocumentBuilders;
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         public virtual string DocumentType => CatalogItemSearchCriteria.DocType;
 
-        public virtual IEnumerable<Partition> GetPartitions(bool rebuild, DateTime startDate, DateTime endDate)
+        public virtual IList<Partition> GetPartitions(bool rebuild, DateTime startDate, DateTime endDate)
         {
             var partitions = rebuild || startDate == DateTime.MinValue
                 ? GetPartitionsForAllProducts()
@@ -59,43 +59,30 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             return partitions;
         }
 
-        public virtual IEnumerable<IDocument> CreateDocuments(Partition partition)
+        public virtual IList<IDocument> CreateDocuments(Partition partition)
         {
             if (partition == null)
                 throw new ArgumentNullException(nameof(partition));
 
             //Trace.TraceInformation(string.Format("Processing documents starting {0} of {1} - {2}%", partition.Start, partition.Total, (partition.Start * 100 / partition.Total)));
 
-            var documents = new ConcurrentBag<IDocument>();
+            var result = new List<IDocument>();
 
-            if (_documentBuilders != null && !partition.Keys.IsNullOrEmpty())
+            if (_batchDocumentBuilders != null && !partition.Keys.IsNullOrEmpty())
             {
+                var documents = partition.Keys.Select(k => new ResultDocument() as IDocument).ToList();
                 var products = GetItems(partition.Keys);
                 var prices = GetItemPrices(partition.Keys);
 
-                foreach (var product in products)
+                foreach (var batchDocumentBuilder in _batchDocumentBuilders)
                 {
-                    var context = new ProductDocumentBuilderContext
-                    {
-                        Prices = prices.Where(p => p.ProductId == product.Id).ToArray(),
-                    };
-
-                    var shouldIndex = true;
-                    var doc = new ResultDocument();
-
-                    foreach (var documentBuilder in _documentBuilders)
-                    {
-                        shouldIndex &= documentBuilder.UpdateDocument(doc, product, context);
-                    }
-
-                    if (shouldIndex)
-                    {
-                        documents.Add(doc);
-                    }
+                    batchDocumentBuilder.UpdateDocuments(documents, products, prices);
                 }
+
+                result.AddRange(documents.Where(d => d != null));
             }
 
-            return documents;
+            return result;
         }
 
         public virtual void PublishDocuments(string scope, IDocument[] documents)
@@ -146,7 +133,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         #endregion
 
-        protected virtual IEnumerable<Partition> GetPartitionsForAllProducts()
+        protected virtual IList<Partition> GetPartitionsForAllProducts()
         {
             var partitions = new ConcurrentBag<Partition>();
 
@@ -171,10 +158,10 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                 partitions.Add(new Partition(OperationType.Index, productIds));
             });
 
-            return partitions;
+            return partitions.ToList();
         }
 
-        protected virtual IEnumerable<Partition> GetPartitionsForModifiedProducts(DateTime startDate, DateTime endDate)
+        protected virtual IList<Partition> GetPartitionsForModifiedProducts(DateTime startDate, DateTime endDate)
         {
             var partitions = new List<Partition>();
 

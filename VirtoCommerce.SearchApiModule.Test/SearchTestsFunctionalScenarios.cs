@@ -158,11 +158,11 @@ namespace VirtoCommerce.SearchApiModule.Test
             Assert.True(searchResults.TotalCount > 0, $"Didn't find any products using {providerType} provider");
             Assert.True(searchResults.Aggregations.Any(), $"Didn't find any aggregations using {providerType} provider");
 
-            Assert.True(GetFacetCount(searchResults, "color", "Red") == 6);
-            Assert.True(GetFacetCount(searchResults, "color", "Gray") == 3);
-            Assert.True(GetFacetCount(searchResults, "color", "Black") == 13);
+            Assert.Equal(6, GetFacetCount(searchResults, "color", "Red"));
+            Assert.Equal(3, GetFacetCount(searchResults, "color", "Gray"));
+            Assert.Equal(13, GetFacetCount(searchResults, "color", "Black"));
 
-            Assert.True(GetFacetCount(searchResults, "brand", "Beats By Dr Dre") == 3);
+            Assert.Equal(3, GetFacetCount(searchResults, "brand", "Beats By Dr Dre"));
 
             criteria = new CatalogItemSearchCriteria { Currency = "USD", Locale = "en-us", SearchPhrase = "sony" };
             searchResults = ibs.SearchItems(_scope, criteria, ItemResponseGroup.ItemLarge);
@@ -205,11 +205,11 @@ namespace VirtoCommerce.SearchApiModule.Test
             Assert.True(searchResults.TotalCount > 0, $"Didn't find any products using {providerType} provider");
             Assert.True(searchResults.Aggregations.Length > 0, $"Didn't find any aggregations using {providerType} provider");
 
-            Assert.True(GetFacetCount(searchResults, "color", "Red") == 6);
-            Assert.True(GetFacetCount(searchResults, "color", "Gray") == 3);
-            Assert.True(GetFacetCount(searchResults, "color", "Black") == 13);
+            Assert.Equal(6, GetFacetCount(searchResults, "color", "Red"));
+            Assert.Equal(3, GetFacetCount(searchResults, "color", "Gray"));
+            Assert.Equal(13, GetFacetCount(searchResults, "color", "Black"));
 
-            Assert.True(GetFacetCount(searchResults, "brand", "Beats By Dr Dre") == 3);
+            Assert.Equal(3, GetFacetCount(searchResults, "brand", "Beats By Dr Dre"));
 
             // now test sorting
             criteria = new ProductSearch
@@ -344,15 +344,20 @@ namespace VirtoCommerce.SearchApiModule.Test
         {
             return new SearchIndexController(GetSettingsManager(), provider,
                 new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetChangeLogService(), GetCategoryDocumentBuilder()),
-                new CatalogItemIndexBuilder(provider, GetSearchService(), GetItemService(), GetPricingService(), GetChangeLogService(), GetProductDocumentBuilder()));
+                new CatalogItemIndexBuilder(provider, GetSearchService(), GetItemService(), GetPricingService(), GetChangeLogService(), GetProductBatchDocumentBuilder()));
         }
 
-        private static IDocumentBuilder<Category, object> GetCategoryDocumentBuilder()
+        private static IDocumentBuilder<Category> GetCategoryDocumentBuilder()
         {
             return new CategoryDocumentBuilder(GetBlobUrlResolver(), GetSettingsManager());
         }
 
-        private static IDocumentBuilder<CatalogProduct, ProductDocumentBuilderContext> GetProductDocumentBuilder()
+        private static IBatchDocumentBuilder<CatalogProduct> GetProductBatchDocumentBuilder()
+        {
+            return new ProductBatchDocumentBuilder(GetProductDocumentBuilder());
+        }
+
+        private static IDocumentBuilder<CatalogProduct> GetProductDocumentBuilder()
         {
             return new ProductDocumentBuilder(GetBlobUrlResolver(), GetSettingsManager());
         }

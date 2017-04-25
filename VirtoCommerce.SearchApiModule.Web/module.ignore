@@ -36,4 +36,5 @@ System.Web.Http.WebHost.xml
 VirtoCommerce.CatalogModule.Web.Core.dll
 VirtoCommerce.Domain.dll
 VirtoCommerce.SearchModule.Core.dll
+VirtoCommerce.SearchModule.Core.xml
 VirtoCommerce.SearchModule.Data.dll

@@ -141,10 +141,10 @@
       <HintPath>..\packages\VirtoCommerce.Platform.Data.2.12.5\lib\net461\VirtoCommerce.Platform.Data.dll</HintPath>
     </Reference>
     <Reference Include="VirtoCommerce.SearchModule.Core, Version=2.14.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\VirtoCommerce.SearchModule.Core.2.14.0-rc5\lib\net461\VirtoCommerce.SearchModule.Core.dll</HintPath>
+      <HintPath>..\packages\VirtoCommerce.SearchModule.Core.2.14.0-rc6\lib\net461\VirtoCommerce.SearchModule.Core.dll</HintPath>
     </Reference>
     <Reference Include="VirtoCommerce.SearchModule.Data, Version=2.14.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\VirtoCommerce.SearchModule.Data.2.14.0-rc5\lib\net461\VirtoCommerce.SearchModule.Data.dll</HintPath>
+      <HintPath>..\packages\VirtoCommerce.SearchModule.Data.2.14.0-rc6\lib\net461\VirtoCommerce.SearchModule.Data.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -157,8 +157,8 @@
     <Compile Include="Helpers\BrowseFilterHelper.cs" />
     <Compile Include="Helpers\IndexHelper.cs" />
     <Compile Include="Model\CatalogItemSearchCriteria.cs" />
-    <Compile Include="Model\ProductDocumentBuilderContext.cs" />
     <Compile Include="Services\CategoryDocumentBuilder.cs" />
+    <Compile Include="Services\ProductBatchDocumentBuilder.cs" />
     <Compile Include="Services\ProductDocumentBuilder.cs" />
     <Compile Include="Model\CategorySearch.cs" />
     <Compile Include="Model\CategorySearchCriteria.cs" />

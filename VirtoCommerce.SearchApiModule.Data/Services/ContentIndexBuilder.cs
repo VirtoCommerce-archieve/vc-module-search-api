@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
 
@@ -13,33 +11,24 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
     public class ContentIndexBuilder : ISearchIndexBuilder
     {
         private readonly ISearchProvider _searchProvider;
-        private readonly ISettingsManager _settingsManager;
         private readonly IBlobStorageProvider _storageProvider;
 
-        public string DocumentType
-        {
-            get
-            {
-                return "page";
-            }
-        }
+        public string DocumentType => "page";
 
         public ContentIndexBuilder(
             IBlobStorageProvider storageProvider,
-            ISearchProvider searchProvider,
-            ISettingsManager settingsManager)
+            ISearchProvider searchProvider)
         {
             _searchProvider = searchProvider;
-            _settingsManager = settingsManager;
             _storageProvider = storageProvider;
         }
 
-        public IEnumerable<IDocument> CreateDocuments(Partition partition)
+        public IList<IDocument> CreateDocuments(Partition partition)
         {
             if (partition == null)
-                throw new ArgumentNullException("partition");
+                throw new ArgumentNullException(nameof(partition));
 
-            var documents = new ConcurrentBag<IDocument>();
+            var documents = new List<IDocument>();
 
             if (!partition.Keys.IsNullOrEmpty())
             {
@@ -61,13 +50,9 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             return documents;
         }
 
-        public IEnumerable<Partition> GetPartitions(bool rebuild, DateTime startDate, DateTime endDate)
+        public IList<Partition> GetPartitions(bool rebuild, DateTime startDate, DateTime endDate)
         {
-            var partitions = rebuild || startDate == DateTime.MinValue
-                ? GetPartitionsForAll()
-                : GetPartitionsForModified(startDate, endDate);
-
-            return partitions;
+            return GetPartitionsForAllPages();
         }
 
         public void PublishDocuments(string scope, IDocument[] documents)
@@ -96,7 +81,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         }
 
 
-        private IEnumerable<Partition> GetPartitionsForAll()
+        private IList<Partition> GetPartitionsForAllPages()
         {
             var partitions = new List<Partition>();
 
@@ -106,12 +91,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             return partitions;
         }
 
-        private IEnumerable<Partition> GetPartitionsForModified(DateTime startDate, DateTime endDate)
-        {
-            return GetPartitionsForAll();
-        }
-
-        //private IEnumerable<Partition> GetPartitionsForModified(DateTime startDate, DateTime endDate)
+        //private IEnumerable<Partition> GetPartitionsForModifiedPages(DateTime startDate, DateTime endDate)
         //{
         //    var partitions = new List<Partition>();
 
