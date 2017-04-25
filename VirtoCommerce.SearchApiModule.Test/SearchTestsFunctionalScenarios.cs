@@ -19,11 +19,13 @@ using VirtoCommerce.Domain.Payment.Services;
 using VirtoCommerce.Domain.Pricing.Services;
 using VirtoCommerce.Domain.Shipping.Model;
 using VirtoCommerce.Domain.Shipping.Services;
+using VirtoCommerce.Domain.Store.Model;
 using VirtoCommerce.Domain.Store.Services;
 using VirtoCommerce.Domain.Tax.Model;
 using VirtoCommerce.Domain.Tax.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.ChangeLog;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Assets;
@@ -47,65 +49,49 @@ namespace VirtoCommerce.SearchApiModule.Test
 {
     [CLSCompliant(false)]
     [Collection("Search")]
-    public class SearchFunctionalScenarios : SearchTestsBase
+    public class SearchTestsFunctionalScenarios : SearchTestsBase
     {
+        private const string _scope = "test-func";
+
         [Theory]
         [InlineData("Lucene")]
         [InlineData("Elastic")]
+        [InlineData("Azure")]
         public void Can_index_category_demo_data_and_search_using_outline(string providerType)
         {
-            var scope = "test";
-            var provider = GetSearchProvider(providerType, scope);
-
-            provider.RemoveAll(scope, "");
-            var controller = GetSearchIndexController(provider);
-            controller.RemoveIndex(scope, "category");
-            controller.BuildIndex(scope, "category", x => { });
-            //controller.BuildIndex(scope, "category", x => { return; }, new[] { "0d4ad9bab9184d69a6e586effdf9c2ea" });
-
-            // sleep for index to be commited
-            Thread.Sleep(5000);
+            var provider = GetSearchProvider(providerType, _scope);
+            RebuildIndex(provider, CategorySearchCriteria.DocType);
 
             // find all products in the category
-            var categoryCriteria = new CategorySearchCriteria();
+            var criteria = new CategorySearchCriteria
+            {
+                Outlines = new[] { "4974648a41df4e6ea67ef2ad76d7bbd4" },
+            };
 
-            categoryCriteria.Outlines.Add("4974648a41df4e6ea67ef2ad76d7bbd4");
-            //categoryCriteria.Outlines.Add("4974648a41df4e6ea67ef2ad76d7bbd4/45d3fc9a913d4610a5c7d0470558*");
+            var searchResults = provider.Search<DocumentDictionary>(_scope, criteria);
 
-            var response = provider.Search<DocumentDictionary>(scope, categoryCriteria);
-            Assert.True(response.TotalCount > 0, $"Didn't find any categories using {providerType} provider");
+            Assert.True(searchResults.TotalCount > 0, $"Didn't find any categories using {providerType} provider");
         }
 
         [Theory]
         [InlineData("Lucene")]
         [InlineData("Elastic")]
+        [InlineData("Azure")]
         public void Can_index_product_demo_data_and_search_using_outline(string providerType)
         {
-            var scope = "test";
-            var provider = GetSearchProvider(providerType, scope);
-
-            provider.RemoveAll(scope, "");
-            var controller = GetSearchIndexController(provider);
-            controller.RemoveIndex(scope, CatalogItemSearchCriteria.DocType);
-            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { });
-
-            // sleep for index to be commited
-            Thread.Sleep(5000);
-
-            // get catalog id by name
-            var catalogRepo = GetCatalogRepository();
-            var catalog = catalogRepo.Catalogs.SingleOrDefault(x => x.Name.Equals("electronics", StringComparison.OrdinalIgnoreCase));
+            var provider = GetSearchProvider(providerType, _scope);
+            RebuildIndex(provider, CatalogItemSearchCriteria.DocType);
 
             // find all products in the category
-            var catalogCriteria = new CatalogItemSearchCriteria
+            var criteria = new CatalogItemSearchCriteria
             {
-                Catalog = catalog?.Id,
+                Catalog = GetCatalogId("electronics"),
                 Currency = "USD",
                 Outlines = new[] { "4974648a41df4e6ea67ef2ad76d7bbd4/c76774f9047d4f18a916b38681c50557*" },
             };
 
             var ibs = GetItemBrowsingService(provider);
-            var searchResults = ibs.SearchItems(scope, catalogCriteria, ItemResponseGroup.ItemLarge);
+            var searchResults = ibs.SearchItems(_scope, criteria, ItemResponseGroup.ItemLarge);
 
             Assert.True(searchResults.TotalCount > 0, $"Didn't find any products using {providerType} provider");
         }
@@ -113,37 +99,23 @@ namespace VirtoCommerce.SearchApiModule.Test
         [Theory]
         [InlineData("Lucene")]
         [InlineData("Elastic")]
+        [InlineData("Azure")]
         public void Can_index_product_demo_data_and_search(string providerType)
         {
-            var scope = "test";
-            var provider = GetSearchProvider(providerType, scope);
-
-            //if (provider is ElasticSearchProvider)
-            //    (provider as ElasticSearchProvider).AutoCommitCount = 1; // commit every one document
-
-            provider.RemoveAll(scope, "");
-            var controller = GetSearchIndexController(provider);
-            controller.RemoveIndex(scope, CatalogItemSearchCriteria.DocType);
-            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { });
-
-
-            // sleep for index to be commited
-            Thread.Sleep(5000);
-
-            // get catalog id by name
-            var catalogRepo = GetCatalogRepository();
-            var catalog = catalogRepo.Catalogs.SingleOrDefault(x => x.Name.Equals("electronics", StringComparison.OrdinalIgnoreCase));
+            var provider = GetSearchProvider(providerType, _scope);
+            RebuildIndex(provider, CatalogItemSearchCriteria.DocType);
 
             // find all products in the category
-            var catalogCriteria = new CatalogItemSearchCriteria
+            var criteria = new CatalogItemSearchCriteria
             {
-                Catalog = catalog?.Id,
+                Catalog = GetCatalogId("electronics"),
                 Currency = "USD"
             };
 
-            // Add all filters
-            var brandFilter = new AttributeFilter { Key = "brand" };
-            var filter = new AttributeFilter
+            // Add facets
+            var brandFacet = new AttributeFilter { Key = "brand" };
+
+            var colorFacet = new AttributeFilter
             {
                 Key = "color",
                 IsLocalized = true,
@@ -155,9 +127,9 @@ namespace VirtoCommerce.SearchApiModule.Test
                 }
             };
 
-            var rangefilter = new RangeFilter
+            var sizeFacet = new RangeFilter
             {
-                Key = "size",
+                Key = "display_size",
                 Values = new[]
                 {
                     new RangeFilterValue { Id = "0_to_5", Lower = "0", Upper = "5" },
@@ -165,7 +137,7 @@ namespace VirtoCommerce.SearchApiModule.Test
                 }
             };
 
-            var priceRangefilter = new PriceRangeFilter
+            var priceFacet = new PriceRangeFilter
             {
                 Currency = "USD",
                 Values = new[]
@@ -175,50 +147,39 @@ namespace VirtoCommerce.SearchApiModule.Test
                 }
             };
 
-            catalogCriteria.Add(filter);
-            catalogCriteria.Add(rangefilter);
-            catalogCriteria.Add(priceRangefilter);
-            catalogCriteria.Add(brandFilter);
+            criteria.Add(brandFacet);
+            criteria.Add(colorFacet);
+            criteria.Add(sizeFacet);
+            criteria.Add(priceFacet);
 
             var ibs = GetItemBrowsingService(provider);
-            var searchResults = ibs.SearchItems(scope, catalogCriteria, ItemResponseGroup.ItemLarge);
+            var searchResults = ibs.SearchItems(_scope, criteria, ItemResponseGroup.ItemLarge);
 
             Assert.True(searchResults.TotalCount > 0, $"Didn't find any products using {providerType} provider");
             Assert.True(searchResults.Aggregations.Any(), $"Didn't find any aggregations using {providerType} provider");
 
-            var colorAggregation = searchResults.Aggregations.SingleOrDefault(a => a.Field.Equals("color", StringComparison.OrdinalIgnoreCase));
-            Assert.True(colorAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Red", StringComparison.OrdinalIgnoreCase))?.Count == 6);
-            Assert.True(colorAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Gray", StringComparison.OrdinalIgnoreCase))?.Count == 3);
-            Assert.True(colorAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Black", StringComparison.OrdinalIgnoreCase))?.Count == 13);
+            Assert.True(GetFacetCount(searchResults, "color", "Red") == 6);
+            Assert.True(GetFacetCount(searchResults, "color", "Gray") == 3);
+            Assert.True(GetFacetCount(searchResults, "color", "Black") == 13);
 
-            var brandAggregation = searchResults.Aggregations.SingleOrDefault(a => a.Field.Equals("brand", StringComparison.OrdinalIgnoreCase));
-            Assert.True(brandAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Beats By Dr Dre", StringComparison.OrdinalIgnoreCase))?.Count == 3);
+            Assert.True(GetFacetCount(searchResults, "brand", "Beats By Dr Dre") == 3);
 
-            var keywordSearchCriteria = new CatalogItemSearchCriteria(CatalogItemSearchCriteria.DocType) { Currency = "USD", Locale = "en-us", SearchPhrase = "sony" };
-            searchResults = ibs.SearchItems(scope, keywordSearchCriteria, ItemResponseGroup.ItemLarge);
+            criteria = new CatalogItemSearchCriteria { Currency = "USD", Locale = "en-us", SearchPhrase = "sony" };
+            searchResults = ibs.SearchItems(_scope, criteria, ItemResponseGroup.ItemLarge);
+
             Assert.True(searchResults.TotalCount > 0);
         }
 
         [Theory]
         [InlineData("Lucene")]
         [InlineData("Elastic")]
+        [InlineData("Azure")]
         public void Can_web_search_products(string providerType)
         {
-            var scope = "test";
-            var storeName = "electronics";
-            var provider = GetSearchProvider(providerType, scope);
+            var provider = GetSearchProvider(providerType, _scope);
+            RebuildIndex(provider, CatalogItemSearchCriteria.DocType);
 
-            provider.RemoveAll(scope, "");
-            var controller = GetSearchIndexController(provider);
-            controller.RemoveIndex(scope, CatalogItemSearchCriteria.DocType);
-            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { });
-
-            // sleep for index to be commited
-            Thread.Sleep(5000);
-
-            var storeRepo = GetStoreRepository();
-            var storeObject = storeRepo.Stores.SingleOrDefault(x => x.Name.Equals(storeName, StringComparison.OrdinalIgnoreCase));
-            var store = GetStoreService().GetById(storeObject?.Id);
+            var store = GetStore("electronics");
 
             // find all products in the category
             var criteria = new ProductSearch
@@ -239,18 +200,16 @@ namespace VirtoCommerce.SearchApiModule.Test
             var ibs = GetItemBrowsingService(provider);
 
             //Load ALL products 
-            var searchResults = ibs.SearchItems(scope, serviceCriteria, ItemResponseGroup.ItemLarge);
+            var searchResults = ibs.SearchItems(_scope, serviceCriteria, ItemResponseGroup.ItemLarge);
 
             Assert.True(searchResults.TotalCount > 0, $"Didn't find any products using {providerType} provider");
             Assert.True(searchResults.Aggregations.Length > 0, $"Didn't find any aggregations using {providerType} provider");
 
-            var colorAggregation = searchResults.Aggregations.SingleOrDefault(a => a.Field.Equals("color", StringComparison.OrdinalIgnoreCase));
-            Assert.True(colorAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Red", StringComparison.OrdinalIgnoreCase))?.Count == 6);
-            Assert.True(colorAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Gray", StringComparison.OrdinalIgnoreCase))?.Count == 3);
-            Assert.True(colorAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Black", StringComparison.OrdinalIgnoreCase))?.Count == 13);
+            Assert.True(GetFacetCount(searchResults, "color", "Red") == 6);
+            Assert.True(GetFacetCount(searchResults, "color", "Gray") == 3);
+            Assert.True(GetFacetCount(searchResults, "color", "Black") == 13);
 
-            var brandAggregation = searchResults.Aggregations.SingleOrDefault(a => a.Field.Equals("brand", StringComparison.OrdinalIgnoreCase));
-            Assert.True(brandAggregation?.Items.SingleOrDefault(x => x.Value.ToString().Equals("Beats By Dr Dre", StringComparison.OrdinalIgnoreCase))?.Count == 3);
+            Assert.True(GetFacetCount(searchResults, "brand", "Beats By Dr Dre") == 3);
 
             // now test sorting
             criteria = new ProductSearch
@@ -261,7 +220,7 @@ namespace VirtoCommerce.SearchApiModule.Test
             };
 
             serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Id, store.Catalog, filters);
-            searchResults = ibs.SearchItems(scope, serviceCriteria, ItemResponseGroup.ItemLarge);
+            searchResults = ibs.SearchItems(_scope, serviceCriteria, ItemResponseGroup.ItemLarge);
 
             var productName = searchResults.Products[0].Name;
             Assert.True(productName == "3DR Solo Quadcopter (No Gimbal)");
@@ -274,52 +233,39 @@ namespace VirtoCommerce.SearchApiModule.Test
             };
 
             serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Id, store.Catalog, filters);
-            searchResults = ibs.SearchItems(scope, serviceCriteria, ItemResponseGroup.ItemLarge);
+            searchResults = ibs.SearchItems(_scope, serviceCriteria, ItemResponseGroup.ItemLarge);
 
             productName = searchResults.Products[0].Name;
 
             Assert.True(productName == "xFold CINEMA X12 RTF U7");
 
             // now test filtering by outline
-            // get catalog id by name
-            var catalogRepo = GetCatalogRepository();
-            var category = catalogRepo.Categories.SingleOrDefault(x => x.Name.Equals("Cell phones", StringComparison.OrdinalIgnoreCase));
-
             criteria = new ProductSearch
             {
-                Outline = category?.Id,
+                Outline = GetCategoryId("Cell phones"),
                 Currency = "USD",
                 Sort = new[] { "name" }
             };
 
             serviceCriteria = criteria.AsCriteria<CatalogItemSearchCriteria>(store.Id, store.Catalog, filters);
-            searchResults = ibs.SearchItems(scope, serviceCriteria, ItemResponseGroup.ItemLarge);
+            searchResults = ibs.SearchItems(_scope, serviceCriteria, ItemResponseGroup.ItemLarge);
 
             Assert.True(searchResults.TotalCount == 6, $"Expected 6, but found {searchResults.TotalCount}");
         }
 
         #region Performance Tests
+
         [Benchmark(InnerIterationCount = 10)]
         [InlineData("Lucene")]
         [InlineData("Elastic")]
+        [InlineData("Azure")]
         [Trait("Category", "performance")]
         public void Can_perf_web_search_products(string providerType)
         {
-            var scope = "test";
-            var storeName = "electronics";
-            var provider = GetSearchProvider(providerType, scope);
+            var provider = GetSearchProvider(providerType, _scope);
+            RebuildIndex(provider, CatalogItemSearchCriteria.DocType);
 
-            provider.RemoveAll(scope, "");
-            var controller = GetSearchIndexController(provider);
-            controller.RemoveIndex(scope, CatalogItemSearchCriteria.DocType);
-            controller.BuildIndex(scope, CatalogItemSearchCriteria.DocType, x => { });
-
-            // sleep for index to be commited
-            Thread.Sleep(5000);
-
-            var storeRepo = GetStoreRepository();
-            var storeObject = storeRepo.Stores.SingleOrDefault(x => x.Name.Equals(storeName, StringComparison.OrdinalIgnoreCase));
-            var store = GetStoreService().GetById(storeObject.Id);
+            var store = GetStore("electronics");
 
             // find all products in the category
             var criteria = new ProductSearch
@@ -339,21 +285,62 @@ namespace VirtoCommerce.SearchApiModule.Test
 
             Benchmark.Iterate(() =>
             {
-                var searchResults = ibs.SearchItems(scope, serviceCriteria, ItemResponseGroup.ItemLarge);
+                var searchResults = ibs.SearchItems(_scope, serviceCriteria, ItemResponseGroup.ItemLarge);
+                Assert.Equal(true, searchResults.Products.Any());
             });
         }
+
         #endregion
 
         #region Private Helper Methods
 
-        private static ItemBrowsingService GetItemBrowsingService(ISearchProvider provider)
+        private static void RebuildIndex(ISearchProvider provider, string documentType)
+        {
+            provider.RemoveAll(_scope, documentType); // ???
+
+            var controller = GetSearchIndexController(provider);
+            controller.RemoveIndex(_scope, documentType);
+            controller.BuildIndex(_scope, documentType, progressInfo => { });
+
+            // sleep for index to be commited
+            Thread.Sleep(5000);
+        }
+
+        private static long GetFacetCount(ProductSearchResult results, string fieldName, string facetKey)
+        {
+            var aggregation = results.Aggregations?.SingleOrDefault(a => a.Field.EqualsInvariant(fieldName));
+            var item = aggregation?.Items.SingleOrDefault(x => x.Value.ToString() == facetKey);
+            return item?.Count ?? 0;
+        }
+
+        private static string GetCatalogId(string name)
+        {
+            var catalogRepo = GetCatalogRepository();
+            return catalogRepo.Catalogs.Where(c => c.Name == name).Select(c => c.Id).FirstOrDefault();
+        }
+
+        private static string GetCategoryId(string name)
+        {
+            var catalogRepo = GetCatalogRepository();
+            return catalogRepo.Categories.Where(c => c.Name == name).Select(c => c.Id).FirstOrDefault();
+        }
+
+        private static Store GetStore(string name)
+        {
+            var storeRepo = GetStoreRepository();
+            var storeEntity = storeRepo.Stores.SingleOrDefault(s => s.Name == name);
+            var store = storeEntity != null ? GetStoreService().GetById(storeEntity.Id) : null;
+            return store;
+        }
+
+        private static IItemBrowsingService GetItemBrowsingService(ISearchProvider provider)
         {
             var settings = GetSettingsManager();
             var service = new ItemBrowsingService(GetItemService(), provider, GetBlobUrlResolver(), settings);
             return service;
         }
 
-        private static SearchIndexController GetSearchIndexController(ISearchProvider provider)
+        private static ISearchIndexController GetSearchIndexController(ISearchProvider provider)
         {
             return new SearchIndexController(GetSettingsManager(), provider,
                 new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetChangeLogService(), GetCategoryDocumentBuilder()),

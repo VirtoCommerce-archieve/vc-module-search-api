@@ -1,12 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Data.Providers.AzureSearch;
 using VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch;
 using VirtoCommerce.SearchApiModule.Data.Providers.LuceneSearch;
 using VirtoCommerce.SearchModule.Core.Model;
-using VirtoCommerce.SearchModule.Core.Model.Indexing;
 using VirtoCommerce.SearchModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Data.Providers.AzureSearch;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch;
@@ -53,21 +50,6 @@ namespace VirtoCommerce.SearchApiModule.Test
                 throw new ArgumentException($"Search provider '{searchProvider}' is not supported", nameof(searchProvider));
 
             return provider;
-        }
-
-        protected long GetFacetCount(ISearchResults<DocumentDictionary> results, string fieldName, string facetKey)
-        {
-            if (results.Facets == null || results.Facets.Count == 0)
-            {
-                return 0;
-            }
-
-            var group = results.Facets.SingleOrDefault(fg => fg.FieldName.EqualsInvariant(fieldName));
-
-            return group?.Facets
-                .Where(facet => facet.Key == facetKey)
-                .Select(facet => facet.Count)
-                .FirstOrDefault() ?? 0;
         }
 
         public virtual void Dispose()
