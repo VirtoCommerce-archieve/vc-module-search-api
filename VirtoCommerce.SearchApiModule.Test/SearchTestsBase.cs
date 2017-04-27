@@ -8,6 +8,7 @@ using VirtoCommerce.SearchModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Data.Providers.AzureSearch;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch;
 using VirtoCommerce.SearchModule.Data.Providers.LuceneSearch;
+using VirtoCommerce.SearchModule.Data.Services.SearchPhraseParsing;
 
 namespace VirtoCommerce.SearchApiModule.Test
 {
@@ -19,11 +20,13 @@ namespace VirtoCommerce.SearchApiModule.Test
         {
             ISearchProvider provider = null;
 
+            var searchPhraseParser = new SearchPhraseParser();
+
             if (searchProvider == "Lucene")
             {
                 var connection = new SearchConnection(_luceneStorageDir, scope);
                 var queryBuilder = new CatalogLuceneSearchQueryBuilder() as ISearchQueryBuilder;
-                provider = new LuceneSearchProvider(new[] { queryBuilder }, connection);
+                provider = new LuceneSearchProvider(new[] { queryBuilder }, connection, searchPhraseParser);
             }
 
             if (searchProvider == "Elastic")
@@ -32,7 +35,7 @@ namespace VirtoCommerce.SearchApiModule.Test
 
                 var connection = new SearchConnection(elasticsearchHost, scope);
                 var queryBuilder = new CatalogElasticSearchQueryBuilder() as ISearchQueryBuilder;
-                var elasticSearchProvider = new ElasticSearchProvider(new[] { queryBuilder }, connection) { EnableTrace = true };
+                var elasticSearchProvider = new ElasticSearchProvider(new[] { queryBuilder }, connection, searchPhraseParser) { EnableTrace = true };
                 provider = elasticSearchProvider;
             }
 
@@ -43,7 +46,7 @@ namespace VirtoCommerce.SearchApiModule.Test
 
                 var connection = new SearchConnection(azureSearchServiceName, scope, accessKey: azureSearchAccessKey);
                 var queryBuilder = new CatalogAzureSearchQueryBuilder() as ISearchQueryBuilder;
-                provider = new AzureSearchProvider(connection, new[] { queryBuilder });
+                provider = new AzureSearchProvider(connection, searchPhraseParser, new[] { queryBuilder });
             }
 
             if (provider == null)
