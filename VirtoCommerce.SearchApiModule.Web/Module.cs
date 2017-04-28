@@ -2,14 +2,9 @@
 using Microsoft.Practices.Unity;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.SearchApiModule.Data.Providers.AzureSearch;
-using VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch;
-using VirtoCommerce.SearchApiModule.Data.Providers.LuceneSearch;
 using VirtoCommerce.SearchApiModule.Data.Services;
 using VirtoCommerce.SearchApiModule.Web.JsonConverters;
-using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Filters;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
 using VirtoCommerce.SearchModule.Core.Model.Search;
@@ -42,19 +37,20 @@ namespace VirtoCommerce.SearchApiModule.Web
             _container.RegisterType<ICategoryBrowsingService, CategoryBrowsingService>();
             _container.RegisterType<IBrowseFilterService, BrowseFilterService>();
 
-            var searchConnection = _container.Resolve<ISearchConnection>();
-            if (searchConnection.Provider.EqualsInvariant(SearchProviders.Lucene.ToString()))
-            {
-                _container.RegisterType<ISearchQueryBuilder, CatalogLuceneSearchQueryBuilder>("lucene");
-            }
-            else if (searchConnection.Provider.EqualsInvariant(SearchProviders.Elasticsearch.ToString()))
-            {
-                _container.RegisterType<ISearchQueryBuilder, CatalogElasticSearchQueryBuilder>("elasticsearch");
-            }
-            else if (searchConnection.Provider.EqualsInvariant(SearchProviders.AzureSearch.ToString()))
-            {
-                _container.RegisterType<ISearchQueryBuilder, CatalogAzureSearchQueryBuilder>("azure-search");
-            }
+            //var searchConnection = _container.Resolve<ISearchConnection>();
+            //if (searchConnection.Provider.EqualsInvariant(SearchProviders.Lucene.ToString()))
+            //{
+            //    _container.RegisterType<ISearchQueryBuilder, CatalogLuceneSearchQueryBuilder>("lucene");
+            //}
+            //else if (searchConnection.Provider.EqualsInvariant(SearchProviders.Elasticsearch.ToString()))
+            //{
+            //    _container.RegisterType<ISearchQueryBuilder, CatalogElasticSearchQueryBuilder>("elasticsearch");
+            //}
+            //else if (searchConnection.Provider.EqualsInvariant(SearchProviders.AzureSearch.ToString()))
+            //{
+            //    _container.RegisterType<ISearchQueryBuilder, CatalogAzureSearchQueryBuilder>("azure-search");
+            //}
+            _container.RegisterType<ISearchCriteriaPreprocessor, CatalogSearchCriteriaPreprocessor>(nameof(CatalogSearchCriteriaPreprocessor));
         }
 
         public override void PostInitialize()

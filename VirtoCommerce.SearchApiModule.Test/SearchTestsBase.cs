@@ -1,13 +1,12 @@
 ﻿using System;
 using System.IO;
-using VirtoCommerce.SearchApiModule.Data.Providers.AzureSearch;
-using VirtoCommerce.SearchApiModule.Data.Providers.ElasticSearch;
-using VirtoCommerce.SearchApiModule.Data.Providers.LuceneSearch;
+using VirtoCommerce.SearchApiModule.Data.Services;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Data.Providers.AzureSearch;
 using VirtoCommerce.SearchModule.Data.Providers.ElasticSearch;
 using VirtoCommerce.SearchModule.Data.Providers.LuceneSearch;
+using VirtoCommerce.SearchModule.Data.Services;
 using VirtoCommerce.SearchModule.Data.Services.SearchPhraseParsing;
 
 namespace VirtoCommerce.SearchApiModule.Test
@@ -20,13 +19,15 @@ namespace VirtoCommerce.SearchApiModule.Test
         {
             ISearchProvider provider = null;
 
-            var searchPhraseParser = new SearchPhraseParser();
+            var phraseSearchCriteriaPreprocessor = new PhraseSearchCriteriaPreprocessor(new SearchPhraseParser()) as ISearchCriteriaPreprocessor;
+            var catalogSearchCriteriaPreprocessor = new CatalogSearchCriteriaPreprocessor();
+            var searchCriteriaPreprocessors = new[] { phraseSearchCriteriaPreprocessor, catalogSearchCriteriaPreprocessor };
 
             if (searchProvider == "Lucene")
             {
                 var connection = new SearchConnection(_luceneStorageDir, scope);
-                var queryBuilder = new CatalogLuceneSearchQueryBuilder() as ISearchQueryBuilder;
-                provider = new LuceneSearchProvider(new[] { queryBuilder }, connection, searchPhraseParser);
+                var queryBuilder = new LuceneSearchQueryBuilder() as ISearchQueryBuilder;
+                provider = new LuceneSearchProvider(new[] { queryBuilder }, connection, searchCriteriaPreprocessors);
             }
 
             if (searchProvider == "Elastic")
@@ -34,8 +35,8 @@ namespace VirtoCommerce.SearchApiModule.Test
                 var elasticsearchHost = dataSource ?? Environment.GetEnvironmentVariable("TestElasticsearchHost") ?? "localhost:9200";
 
                 var connection = new SearchConnection(elasticsearchHost, scope);
-                var queryBuilder = new CatalogElasticSearchQueryBuilder() as ISearchQueryBuilder;
-                var elasticSearchProvider = new ElasticSearchProvider(new[] { queryBuilder }, connection, searchPhraseParser) { EnableTrace = true };
+                var queryBuilder = new ElasticSearchQueryBuilder() as ISearchQueryBuilder;
+                var elasticSearchProvider = new ElasticSearchProvider(new[] { queryBuilder }, connection, searchCriteriaPreprocessors) { EnableTrace = true };
                 provider = elasticSearchProvider;
             }
 
@@ -45,8 +46,8 @@ namespace VirtoCommerce.SearchApiModule.Test
                 var azureSearchAccessKey = Environment.GetEnvironmentVariable("TestAzureSearchAccessKey");
 
                 var connection = new SearchConnection(azureSearchServiceName, scope, accessKey: azureSearchAccessKey);
-                var queryBuilder = new CatalogAzureSearchQueryBuilder() as ISearchQueryBuilder;
-                provider = new AzureSearchProvider(connection, searchPhraseParser, new[] { queryBuilder });
+                var queryBuilder = new AzureSearchQueryBuilder() as ISearchQueryBuilder;
+                provider = new AzureSearchProvider(connection, searchCriteriaPreprocessors, new[] { queryBuilder });
             }
 
             if (provider == null)

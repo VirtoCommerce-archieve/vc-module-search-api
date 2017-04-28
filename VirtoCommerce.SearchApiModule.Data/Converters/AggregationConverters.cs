@@ -1,6 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using VirtoCommerce.Domain.Catalog.Model;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model.Search;
 
 namespace VirtoCommerce.SearchApiModule.Data.Converters
@@ -30,7 +30,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Converters
             {
                 Value = facet.Key,
                 Count = (int)facet.Count,
-                IsApplied = appliedFilters.Any(x => x.Equals(facet.Key, StringComparison.OrdinalIgnoreCase))
+                IsApplied = appliedFilters.Any(x => x.EqualsInvariant(facet.Key))
             };
 
             if (facet.Labels != null)

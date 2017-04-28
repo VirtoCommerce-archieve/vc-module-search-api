@@ -223,7 +223,7 @@ namespace VirtoCommerce.SearchApiModule.Test
             searchResults = ibs.SearchItems(_scope, serviceCriteria, ItemResponseGroup.ItemLarge);
 
             var productName = searchResults.Products[0].Name;
-            Assert.True(productName == "3DR Solo Quadcopter (No Gimbal)");
+            Assert.Equal("3DR Solo Quadcopter (No Gimbal)", productName);
 
             criteria = new ProductSearch
             {
@@ -237,7 +237,7 @@ namespace VirtoCommerce.SearchApiModule.Test
 
             productName = searchResults.Products[0].Name;
 
-            Assert.True(productName == "xFold CINEMA X12 RTF U7");
+            Assert.Equal("xFold CINEMA X12 RTF U7", productName);
 
             // now test filtering by outline
             criteria = new ProductSearch
@@ -296,6 +296,7 @@ namespace VirtoCommerce.SearchApiModule.Test
 
         private static void RebuildIndex(ISearchProvider provider, string documentType)
         {
+            if (provider != null) return;
             provider.RemoveAll(_scope, documentType); // ???
 
             var controller = GetSearchIndexController(provider);
