@@ -178,7 +178,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
             var result = new List<string>();
 
             var browsing = GetFilteredBrowsing(store);
-            if (browsing != null && browsing.Attributes != null)
+            if (browsing?.Attributes != null)
             {
                 result.AddRange(browsing.Attributes.Select(a => a.Key));
             }
@@ -230,7 +230,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
             var result = properties
                 .GroupBy(p => p.Id)
                 .Select(g => g.FirstOrDefault())
-                .OrderBy(p => p.Name)
+                .OrderBy(p => p?.Name)
                 .ToArray();
 
             return result;
@@ -242,7 +242,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
                 .Where(n => !string.IsNullOrEmpty(n.Language) && !string.IsNullOrEmpty(n.Name))
                 .GroupBy(n => n.Language, StringComparer.OrdinalIgnoreCase)
                 .Select(g => g.FirstOrDefault())
-                .OrderBy(n => n.Language)
+                .OrderBy(n => n?.Language)
                 .ThenBy(n => n.Name)
                 .ToArray();
         }
@@ -263,24 +263,7 @@ namespace VirtoCommerce.SearchApiModule.Web.Controllers.Api
                 .ToArray();
         }
 
-        private static List<string> GetDistinctValues(string value, string[] values)
-        {
-            var result = new List<string>();
-
-            if (!string.IsNullOrEmpty(value))
-            {
-                result.Add(value);
-            }
-
-            if (values != null)
-            {
-                result.AddDistinct(StringComparer.OrdinalIgnoreCase, values);
-            }
-
-            return result;
-        }
-
-        private static FilterProperty ConvertToFilterProperty(Property property, string[] selectedPropertyNames)
+        private static FilterProperty ConvertToFilterProperty(Property property, IEnumerable<string> selectedPropertyNames)
         {
             return new FilterProperty
             {

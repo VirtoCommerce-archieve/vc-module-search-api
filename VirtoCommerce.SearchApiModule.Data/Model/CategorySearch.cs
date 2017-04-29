@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchApiModule.Data.Extensions;
-using VirtoCommerce.SearchApiModule.Data.Helpers;
-using VirtoCommerce.SearchModule.Core.Model.Filters;
 using VirtoCommerce.SearchModule.Core.Model.Search;
 
 namespace VirtoCommerce.SearchApiModule.Data.Model
@@ -28,19 +24,14 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
 
         public int Take { get; set; }
 
-        public virtual T AsCriteria<T>(string catalog) where T : CategorySearchCriteria, new()
+        public virtual T AsCriteria<T>(string catalog)
+            where T : CategorySearchCriteria, new()
         {
             var criteria = new T();
 
             // add outline
-            if (!string.IsNullOrEmpty(Outline))
-            {
-                criteria.Outlines.Add(string.Format("{0}{1}", catalog, Outline));
-            }
-            else
-            {
-                criteria.Outlines.Add(string.Format("{0}", catalog)); // top categories in catalog
-            }
+            var outline = string.IsNullOrEmpty(Outline) ? $"{catalog}" : $"{catalog}{Outline}";
+            criteria.Outlines.Add(outline);
 
             #region Sorting
 
@@ -85,7 +76,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
 
             #endregion
 
-            return criteria as T;
+            return criteria;
         }
     }
 }

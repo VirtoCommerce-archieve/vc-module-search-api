@@ -296,7 +296,6 @@ namespace VirtoCommerce.SearchApiModule.Test
 
         private static void RebuildIndex(ISearchProvider provider, string documentType)
         {
-            if (provider != null) return;
             provider.RemoveAll(_scope, documentType); // ???
 
             var controller = GetSearchIndexController(provider);

@@ -40,7 +40,6 @@ namespace VirtoCommerce.SearchApiModule.Data.Extensions
             if (query != null && query.Length > 0)
             {
                 var directionDelimeter = new[] { '-' };
-                var valuesDelimeter = new[] { ',' };
 
                 result.AddRange(query
                         .Select(item => item.Split(directionDelimeter, 2))
@@ -53,17 +52,14 @@ namespace VirtoCommerce.SearchApiModule.Data.Extensions
 
         public static string AsCategoryId(this string outline)
         {
-            if(string.IsNullOrEmpty(outline))
+            if (string.IsNullOrEmpty(outline))
             {
                 return string.Empty;
             }
 
-            var outlineArray = outline.Split(new[] { '/' });
+            var outlineArray = outline.Split('/');
 
-            if (outlineArray == null || outlineArray.Length == 0)
-                return string.Empty;
-
-            return outlineArray[outlineArray.Length - 1];
+            return outlineArray.Length > 0 ? outlineArray[outlineArray.Length - 1] : string.Empty;
         }
 
         public static string AsCatalog(this string outline)
@@ -73,12 +69,9 @@ namespace VirtoCommerce.SearchApiModule.Data.Extensions
                 return string.Empty;
             }
 
-            var outlineArray = outline.Split(new[] { '/' });
+            var outlineArray = outline.Split('/');
 
-            if (outlineArray == null || outlineArray.Length == 0)
-                return string.Empty;
-
-            return outlineArray[0];
+            return outlineArray.Length > 0 ? outlineArray[0] : string.Empty;
         }
     }
 

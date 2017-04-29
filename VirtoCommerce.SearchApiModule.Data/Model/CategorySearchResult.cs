@@ -1,17 +1,11 @@
-﻿
-using VirtoCommerce.CatalogModule.Web.Model;
+﻿using VirtoCommerce.CatalogModule.Web.Model;
 
 namespace VirtoCommerce.SearchApiModule.Data.Model
 {
     public class CategorySearchResult
     {
-        public CategorySearchResult()
-        {
-
-        }
+        public long TotalCount { get; set; }
 
         public Category[] Categories { get; set; }
-
-        public long TotalCount { get; set; }
     }
 }
