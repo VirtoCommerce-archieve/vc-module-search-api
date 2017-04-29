@@ -113,17 +113,17 @@ namespace VirtoCommerce.SearchApiModule.Test
             };
 
             // Add facets
-            var brandFacet = new AttributeFilter { Key = "brand" };
+            var colorFacet = new AttributeFilter { Key = "color" };
 
-            var colorFacet = new AttributeFilter
+            var brandFacet = new AttributeFilter
             {
-                Key = "color",
+                Key = "brand",
                 IsLocalized = true,
                 Values = new[]
                 {
-                    new AttributeFilterValue { Id = "Red", Value = "Red" },
-                    new AttributeFilterValue { Id = "Gray", Value = "Gray" },
-                    new AttributeFilterValue { Id = "Black", Value = "Black" }
+                    new AttributeFilterValue { Id = "Apple", Value = "Apple" },
+                    new AttributeFilterValue { Id = "Asus", Value = "Asus" },
+                    new AttributeFilterValue { Id = "Samsung", Value = "Samsung" }
                 }
             };
 
@@ -158,11 +158,11 @@ namespace VirtoCommerce.SearchApiModule.Test
             Assert.True(searchResults.TotalCount > 0, $"Didn't find any products using {providerType} provider");
             Assert.True(searchResults.Aggregations.Any(), $"Didn't find any aggregations using {providerType} provider");
 
-            Assert.Equal(6, GetFacetCount(searchResults, "color", "Red"));
-            Assert.Equal(3, GetFacetCount(searchResults, "color", "Gray"));
-            Assert.Equal(13, GetFacetCount(searchResults, "color", "Black"));
+            Assert.True(GetFacetValuesCount(searchResults, "color") > 0, $"Didn't find any aggregation value for Color using {providerType} provider");
 
-            Assert.Equal(3, GetFacetCount(searchResults, "brand", "Beats By Dr Dre"));
+            Assert.Equal(0, GetFacetValue(searchResults, "brand", "Apple"));
+            Assert.Equal(2, GetFacetValue(searchResults, "brand", "Asus"));
+            Assert.Equal(5, GetFacetValue(searchResults, "brand", "Samsung"));
 
             criteria = new CatalogItemSearchCriteria { Currency = "USD", Locale = "en-us", SearchPhrase = "sony" };
             searchResults = ibs.SearchItems(_scope, criteria, ItemResponseGroup.ItemLarge);
@@ -205,11 +205,11 @@ namespace VirtoCommerce.SearchApiModule.Test
             Assert.True(searchResults.TotalCount > 0, $"Didn't find any products using {providerType} provider");
             Assert.True(searchResults.Aggregations.Length > 0, $"Didn't find any aggregations using {providerType} provider");
 
-            Assert.Equal(6, GetFacetCount(searchResults, "color", "Red"));
-            Assert.Equal(3, GetFacetCount(searchResults, "color", "Gray"));
-            Assert.Equal(13, GetFacetCount(searchResults, "color", "Black"));
+            Assert.True(GetFacetValuesCount(searchResults, "color") > 0, $"Didn't find any aggregation value for Color using {providerType} provider");
 
-            Assert.Equal(3, GetFacetCount(searchResults, "brand", "Beats By Dr Dre"));
+            Assert.Equal(0, GetFacetValue(searchResults, "brand", "Apple"));
+            Assert.Equal(2, GetFacetValue(searchResults, "brand", "Asus"));
+            Assert.Equal(5, GetFacetValue(searchResults, "brand", "Samsung"));
 
             // now test sorting
             criteria = new ProductSearch
@@ -306,7 +306,13 @@ namespace VirtoCommerce.SearchApiModule.Test
             Thread.Sleep(5000);
         }
 
-        private static long GetFacetCount(ProductSearchResult results, string fieldName, string facetKey)
+        private static long GetFacetValuesCount(ProductSearchResult results, string fieldName)
+        {
+            var aggregation = results.Aggregations?.SingleOrDefault(a => a.Field.EqualsInvariant(fieldName));
+            return aggregation?.Items?.Length ?? 0;
+        }
+
+        private static long GetFacetValue(ProductSearchResult results, string fieldName, string facetKey)
         {
             var aggregation = results.Aggregations?.SingleOrDefault(a => a.Field.EqualsInvariant(fieldName));
             var item = aggregation?.Items.SingleOrDefault(x => x.Value.ToString() == facetKey);
