@@ -30,30 +30,20 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         {
             if (criteria != null)
             {
-                //filters.Add(GetRangeFilterExpression("startdate", null, false, criteria.StartDate, true));
-                criteria.Apply(CreateDateRangeFilter("startdate", null, criteria.StartDate, false, true));
-
-                if (criteria.StartDateFrom != null)
-                {
-                    //filters.Add(GetRangeFilterExpression("startdate", criteria.StartDateFrom, false, null, false));
-                    criteria.Apply(CreateDateRangeFilter("startdate", criteria.StartDateFrom, null, false, false));
-                }
+                criteria.Apply(CreateDateRangeFilter("startdate", criteria.StartDateFrom, criteria.StartDate, false, true));
 
                 if (criteria.EndDate != null)
                 {
-                    //filters.Add(GetRangeFilterExpression("enddate", criteria.EndDate, false, null, false));
                     criteria.Apply(CreateDateRangeFilter("enddate", criteria.EndDate, null, false, false));
                 }
 
                 if (!criteria.ClassTypes.IsNullOrEmpty())
                 {
-                    //result &= CreateQuery("__type", criteria.ClassTypes, false);
                     criteria.Apply(CreateAttributeFilter("__type", criteria.ClassTypes));
                 }
 
                 if (!string.IsNullOrEmpty(criteria.Catalog))
                 {
-                    //result &= CreateQuery("catalog", criteria.Catalog);
                     criteria.Apply(CreateAttributeFilter("catalog", criteria.Catalog));
                 }
 
@@ -65,7 +55,6 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
                 if (!criteria.WithHidden)
                 {
-                    //result &= new TermQuery { Field = "status", Value = "visible" };
                     criteria.Apply(CreateAttributeFilter("status", "visible"));
                 }
             }
