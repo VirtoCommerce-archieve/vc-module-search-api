@@ -343,8 +343,13 @@ namespace VirtoCommerce.SearchApiModule.Test
         private static ISearchIndexController GetSearchIndexController(ISearchProvider provider)
         {
             return new SearchIndexController(GetSettingsManager(), provider,
-                new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetChangeLogService(), GetCategoryDocumentBuilder()),
+                new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetChangeLogService(), GetCategoryBatchDocumentBuilder()),
                 new CatalogItemIndexBuilder(provider, GetSearchService(), GetItemService(), GetPricingService(), GetChangeLogService(), GetProductBatchDocumentBuilder()));
+        }
+
+        private static IBatchDocumentBuilder<Category> GetCategoryBatchDocumentBuilder()
+        {
+            return new CategoryBatchDocumentBuilder(GetCategoryDocumentBuilder());
         }
 
         private static IDocumentBuilder<Category> GetCategoryDocumentBuilder()

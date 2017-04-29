@@ -31,6 +31,7 @@ namespace VirtoCommerce.SearchApiModule.Web
             _container.RegisterType<IDocumentBuilder<Category>, CategoryDocumentBuilder>(nameof(CategoryDocumentBuilder));
             _container.RegisterType<IDocumentBuilder<CatalogProduct>, ProductDocumentBuilder>(nameof(ProductDocumentBuilder));
 
+            _container.RegisterType<IBatchDocumentBuilder<Category>, CategoryBatchDocumentBuilder>(nameof(CategoryBatchDocumentBuilder));
             _container.RegisterType<IBatchDocumentBuilder<CatalogProduct>, ProductBatchDocumentBuilder>(nameof(ProductBatchDocumentBuilder));
 
             _container.RegisterType<IItemBrowsingService, ItemBrowsingService>();

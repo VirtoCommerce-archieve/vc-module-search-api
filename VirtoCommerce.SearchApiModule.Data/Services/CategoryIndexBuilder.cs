@@ -18,20 +18,20 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         private readonly ICatalogSearchService _catalogSearchService;
         private readonly ICategoryService _categoryService;
         private readonly IChangeLogService _changeLogService;
-        private readonly IDocumentBuilder<Category>[] _documentBuilders;
+        private readonly IBatchDocumentBuilder<Category>[] _batchDocumentBuilders;
 
         public CategoryIndexBuilder(
             ISearchProvider searchProvider,
             ICatalogSearchService catalogSearchService,
             ICategoryService categoryService,
             IChangeLogService changeLogService,
-            params IDocumentBuilder<Category>[] documentBuilders)
+            params IBatchDocumentBuilder<Category>[] batchDocumentBuilders)
         {
             _searchProvider = searchProvider;
             _catalogSearchService = catalogSearchService;
             _categoryService = categoryService;
             _changeLogService = changeLogService;
-            _documentBuilders = documentBuilders;
+            _batchDocumentBuilders = batchDocumentBuilders;
         }
 
         #region ISearchIndexBuilder Members
@@ -52,29 +52,22 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             if (partition == null)
                 throw new ArgumentNullException(nameof(partition));
 
-            var documents = new List<IDocument>();
+            var result = new List<IDocument>();
 
-            if (_documentBuilders != null && !partition.Keys.IsNullOrEmpty())
+            if (_batchDocumentBuilders != null && !partition.Keys.IsNullOrEmpty())
             {
-                var categories = _categoryService.GetByIds(partition.Keys, CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithOutlines | CategoryResponseGroup.WithImages | CategoryResponseGroup.WithSeo);
-                foreach (var category in categories)
+                var documents = partition.Keys.Select(k => new ResultDocument() as IDocument).ToList();
+                var categories = GetCategories(partition.Keys);
+
+                foreach (var batchDocumentBuilder in _batchDocumentBuilders)
                 {
-                    var shouldIndex = true;
-                    var doc = new ResultDocument();
-
-                    foreach (var documentBuilder in _documentBuilders)
-                    {
-                        shouldIndex &= documentBuilder.UpdateDocument(doc, category, null);
-                    }
-
-                    if (shouldIndex)
-                    {
-                        documents.Add(doc);
-                    }
+                    batchDocumentBuilder.UpdateDocuments(documents, categories, null);
                 }
+
+                result.AddRange(documents.Where(d => d != null));
             }
 
-            return documents;
+            return result;
         }
 
         public void PublishDocuments(string scope, IDocument[] documents)
@@ -104,12 +97,17 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         #endregion
 
+        protected virtual Category[] GetCategories(string[] categoryIds)
+        {
+            return _categoryService.GetByIds(categoryIds, CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithOutlines | CategoryResponseGroup.WithImages | CategoryResponseGroup.WithSeo);
+        }
+
         [Obsolete("Use CategoryDocumentBuilder", true)]
         protected virtual void IndexItem(ResultDocument doc, Category category)
         {
         }
 
-        private IList<Partition> GetPartitionsForAllCategories()
+        protected virtual IList<Partition> GetPartitionsForAllCategories()
         {
             var partitions = new List<Partition>();
 
@@ -127,7 +125,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             return partitions;
         }
 
-        private IList<Partition> GetPartitionsForModifiedCategories(DateTime startDate, DateTime endDate)
+        protected virtual IList<Partition> GetPartitionsForModifiedCategories(DateTime startDate, DateTime endDate)
         {
             var partitions = new List<Partition>();
 
@@ -141,7 +139,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             return partitions;
         }
 
-        private List<OperationLog> GetCategoryChanges(DateTime startDate, DateTime endDate)
+        protected virtual List<OperationLog> GetCategoryChanges(DateTime startDate, DateTime endDate)
         {
             var allCategoryChanges = _changeLogService.FindChangeHistory("Category", startDate, endDate).ToList();
 
@@ -154,7 +152,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             return result;
         }
 
-        private static IEnumerable<Partition> CreatePartitions(OperationType operationType, List<string> allCategoriesIds)
+        protected virtual IEnumerable<Partition> CreatePartitions(OperationType operationType, List<string> allCategoriesIds)
         {
             var partitions = new List<Partition>();
 
