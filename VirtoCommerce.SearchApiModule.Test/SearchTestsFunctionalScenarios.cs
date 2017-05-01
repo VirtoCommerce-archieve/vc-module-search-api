@@ -349,13 +349,13 @@ namespace VirtoCommerce.SearchApiModule.Test
         private static ISearchIndexController GetSearchIndexController(ISearchProvider provider)
         {
             return new SearchIndexController(GetSettingsManager(), provider,
-                new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetChangeLogService(), GetCategoryBatchDocumentBuilder()),
-                new CatalogItemIndexBuilder(provider, GetSearchService(), GetItemService(), GetPricingService(), GetChangeLogService(), GetProductBatchDocumentBuilder()));
+                new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetChangeLogService(), new[] { GetCategoryBatchDocumentBuilder() }),
+                new CatalogItemIndexBuilder(provider, GetSearchService(), GetItemService(), GetPricingService(), GetChangeLogService(), new[] { GetProductBatchDocumentBuilder() }));
         }
 
         private static IBatchDocumentBuilder<Category> GetCategoryBatchDocumentBuilder()
         {
-            return new CategoryBatchDocumentBuilder(GetCategoryDocumentBuilder());
+            return new CategoryBatchDocumentBuilder(new[] { GetCategoryDocumentBuilder() });
         }
 
         private static IDocumentBuilder<Category> GetCategoryDocumentBuilder()
@@ -365,7 +365,7 @@ namespace VirtoCommerce.SearchApiModule.Test
 
         private static IBatchDocumentBuilder<CatalogProduct> GetProductBatchDocumentBuilder()
         {
-            return new ProductBatchDocumentBuilder(GetProductDocumentBuilder());
+            return new ProductBatchDocumentBuilder(new[] { GetProductDocumentBuilder() });
         }
 
         private static IDocumentBuilder<CatalogProduct> GetProductDocumentBuilder()

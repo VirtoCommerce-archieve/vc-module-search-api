@@ -8,7 +8,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
     {
         private readonly IDocumentBuilder<Category>[] _documentBuilders;
 
-        public CategoryBatchDocumentBuilder(params IDocumentBuilder<Category>[] documentBuilders)
+        public CategoryBatchDocumentBuilder(IDocumentBuilder<Category>[] documentBuilders)
         {
             _documentBuilders = documentBuilders;
         }

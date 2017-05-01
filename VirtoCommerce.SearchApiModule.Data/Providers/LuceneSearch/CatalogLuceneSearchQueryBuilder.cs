@@ -2,7 +2,7 @@
 
 namespace VirtoCommerce.SearchApiModule.Data.Providers.LuceneSearch
 {
-    [Obsolete("Use VirtoCommerce.SearchApiModule.Data.Services.CatalogSearchCriteriaPreprocessor")]
+    [Obsolete("Implement and register your own ISearchCriteriaPreprocessor or override VirtoCommerce.SearchApiModule.Data.Services.CatalogSearchCriteriaPreprocessor")]
     public class CatalogLuceneSearchQueryBuilder
     {
     }

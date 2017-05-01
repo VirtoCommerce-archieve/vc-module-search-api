@@ -25,7 +25,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             ICatalogSearchService catalogSearchService,
             ICategoryService categoryService,
             IChangeLogService changeLogService,
-            params IBatchDocumentBuilder<Category>[] batchDocumentBuilders)
+            IBatchDocumentBuilder<Category>[] batchDocumentBuilders)
         {
             _searchProvider = searchProvider;
             _catalogSearchService = catalogSearchService;
