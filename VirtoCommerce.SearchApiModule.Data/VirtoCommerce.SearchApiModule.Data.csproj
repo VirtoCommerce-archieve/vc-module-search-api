@@ -74,6 +74,7 @@
     <Compile Include="Helpers\BrowseFilterHelper.cs" />
     <Compile Include="Helpers\IndexHelper.cs" />
     <Compile Include="Model\CatalogItemSearchCriteria.cs" />
+    <Compile Include="Services\CatalogItemIndexBuilder.cs" />
     <Compile Include="Services\CatalogSearchCriteriaPreprocessor.cs" />
     <Compile Include="Services\CategoryBatchDocumentBuilder.cs" />
     <Compile Include="Services\CategoryDocumentBuilder.cs" />
