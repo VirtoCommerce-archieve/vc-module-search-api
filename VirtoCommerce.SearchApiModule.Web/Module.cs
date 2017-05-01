@@ -26,7 +26,7 @@ namespace VirtoCommerce.SearchApiModule.Web
 
             // Register index builders
             _container.RegisterType<ISearchIndexBuilder, CategoryIndexBuilder>("category-indexer");
-            _container.RegisterType<ISearchIndexBuilder, CatalogItemIndexBuilder>("catalogitem-indexer");
+            _container.RegisterType<ISearchIndexBuilder, ProductIndexBuilder>("catalogitem-indexer");
 
             _container.RegisterType<IDocumentBuilder<Category>, CategoryDocumentBuilder>(nameof(CategoryDocumentBuilder));
             _container.RegisterType<IDocumentBuilder<CatalogProduct>, ProductDocumentBuilder>(nameof(ProductDocumentBuilder));

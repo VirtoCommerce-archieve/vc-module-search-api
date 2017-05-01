@@ -88,7 +88,7 @@
     <Compile Include="Providers\AzureSearch\CatalogAzureSearchQueryBuilder.cs" />
     <Compile Include="Providers\ElasticSearch\CatalogElasticSearchQueryBuilder.cs" />
     <Compile Include="Providers\LuceneSearch\CatalogLuceneSearchQueryBuilder.cs" />
-    <Compile Include="Services\CatalogItemIndexBuilder.cs" />
+    <Compile Include="Services\ProductIndexBuilder.cs" />
     <Compile Include="Services\CatalogSearchServiceDecorator.cs" />
     <Compile Include="Services\CategoryBrowsingService.cs" />
     <Compile Include="Services\CategoryIndexBuilder.cs" />

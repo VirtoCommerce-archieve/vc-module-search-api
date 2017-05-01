@@ -15,7 +15,7 @@ using VirtoCommerce.SearchModule.Core.Model.Indexing;
 
 namespace VirtoCommerce.SearchApiModule.Data.Services
 {
-    public class CatalogItemIndexBuilder : ISearchIndexBuilder
+    public class ProductIndexBuilder : ISearchIndexBuilder
     {
         private readonly ISearchProvider _searchProvider;
         private readonly ICatalogSearchService _catalogSearchService;
@@ -24,7 +24,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         private readonly IChangeLogService _changeLogService;
         private readonly IBatchDocumentBuilder<CatalogProduct>[] _batchDocumentBuilders;
 
-        public CatalogItemIndexBuilder(
+        public ProductIndexBuilder(
             ISearchProvider searchProvider,
             ICatalogSearchService catalogSearchService,
             IItemService itemService,
