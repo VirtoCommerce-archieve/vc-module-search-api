@@ -27,7 +27,6 @@ using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
-using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Assets;
 using VirtoCommerce.Platform.Data.ChangeLog;
 using VirtoCommerce.Platform.Data.DynamicProperties;
@@ -348,29 +347,58 @@ namespace VirtoCommerce.SearchApiModule.Test
 
         private static ISearchIndexController GetSearchIndexController(ISearchProvider provider)
         {
-            var categoryIndexBuilder = new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetChangeLogService(), new[] { GetCategoryBatchDocumentBuilder() }) as ISearchIndexBuilder;
-            var productIndexBuilder = new ProductIndexBuilder(provider, GetSearchService(), GetItemService(), GetPricingService(), GetChangeLogService(), new[] { GetProductBatchDocumentBuilder() }) as ISearchIndexBuilder;
-            return new SearchIndexController(GetSettingsManager(), provider, new[] { categoryIndexBuilder, productIndexBuilder });
+            return new SearchIndexController(GetSettingsManager(), provider, GetIndexBuilders(provider));
         }
 
-        private static IBatchDocumentBuilder<Category> GetCategoryBatchDocumentBuilder()
+        private static ISearchIndexBuilder[] GetIndexBuilders(ISearchProvider provider)
         {
-            return new CategoryBatchDocumentBuilder(new[] { GetCategoryDocumentBuilder() });
+            return new ISearchIndexBuilder[]
+            {
+                new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetOperationProviders(), GetCategoryBatchDocumentBuilders()),
+                new ProductIndexBuilder(provider, GetSearchService(), GetItemService(), GetPricingService(), GetOperationProviders(), GetProductBatchDocumentBuilders()),
+            };
         }
 
-        private static IDocumentBuilder<Category> GetCategoryDocumentBuilder()
+        private static IOperationProvider[] GetOperationProviders()
         {
-            return new CategoryDocumentBuilder(GetBlobUrlResolver(), GetSettingsManager());
+            return new IOperationProvider[]
+            {
+                new CategoryOperationProvider(GetChangeLogService()),
+                new ProductOperationProvider(GetChangeLogService()),
+                new ProductPriceOperationProvider(GetChangeLogService(), GetPricingService()),
+            };
         }
 
-        private static IBatchDocumentBuilder<CatalogProduct> GetProductBatchDocumentBuilder()
+        private static IBatchDocumentBuilder<Category>[] GetCategoryBatchDocumentBuilders()
         {
-            return new ProductBatchDocumentBuilder(new[] { GetProductDocumentBuilder() });
+            return new IBatchDocumentBuilder<Category>[]
+            {
+                new CategoryBatchDocumentBuilder(GetCategoryDocumentBuilders()),
+            };
         }
 
-        private static IDocumentBuilder<CatalogProduct> GetProductDocumentBuilder()
+        private static IBatchDocumentBuilder<CatalogProduct>[] GetProductBatchDocumentBuilders()
         {
-            return new ProductDocumentBuilder(GetBlobUrlResolver(), GetSettingsManager());
+            return new IBatchDocumentBuilder<CatalogProduct>[]
+            {
+                new ProductBatchDocumentBuilder(GetProductDocumentBuilders()),
+            };
+        }
+
+        private static IDocumentBuilder<Category>[] GetCategoryDocumentBuilders()
+        {
+            return new IDocumentBuilder<Category>[]
+            {
+                new CategoryDocumentBuilder(GetBlobUrlResolver(), GetSettingsManager()),
+            };
+        }
+
+        private static IDocumentBuilder<CatalogProduct>[] GetProductDocumentBuilders()
+        {
+            return new IDocumentBuilder<CatalogProduct>[]
+            {
+                new ProductDocumentBuilder(GetBlobUrlResolver(), GetSettingsManager()),
+            };
         }
 
         private static IBlobUrlResolver GetBlobUrlResolver()
@@ -381,14 +409,6 @@ namespace VirtoCommerce.SearchApiModule.Test
         private static ICommerceService GetCommerceService()
         {
             return new CommerceServiceImpl(GetCommerceRepository);
-        }
-
-        private static ISettingsManager GetSettingsManager()
-        {
-            var mock = new Mock<ISettingsManager>();
-            mock.Setup(s => s.GetModuleSettings("VirtoCommerce.Store")).Returns(new SettingEntry[] { });
-            mock.Setup(s => s.GetValue("VirtoCommerce.SearchApi.UseFullObjectIndexStoring", true)).Returns(true);
-            return mock.Object;
         }
 
         private static ICatalogSearchService GetSearchService()

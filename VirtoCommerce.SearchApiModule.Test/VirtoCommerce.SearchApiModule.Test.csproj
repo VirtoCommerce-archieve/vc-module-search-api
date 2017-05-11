@@ -174,11 +174,11 @@
     <Reference Include="VirtoCommerce.PricingModule.Data, Version=2.16.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\VirtoCommerce.PricingModule.Data.2.16.0\lib\net461\VirtoCommerce.PricingModule.Data.dll</HintPath>
     </Reference>
-    <Reference Include="VirtoCommerce.SearchModule.Core, Version=2.14.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\VirtoCommerce.SearchModule.Core.2.14.0\lib\net461\VirtoCommerce.SearchModule.Core.dll</HintPath>
+    <Reference Include="VirtoCommerce.SearchModule.Core, Version=2.14.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\VirtoCommerce.SearchModule.Core.2.14.2\lib\net461\VirtoCommerce.SearchModule.Core.dll</HintPath>
     </Reference>
-    <Reference Include="VirtoCommerce.SearchModule.Data, Version=2.14.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\VirtoCommerce.SearchModule.Data.2.14.0\lib\net461\VirtoCommerce.SearchModule.Data.dll</HintPath>
+    <Reference Include="VirtoCommerce.SearchModule.Data, Version=2.14.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\VirtoCommerce.SearchModule.Data.2.14.2\lib\net461\VirtoCommerce.SearchModule.Data.dll</HintPath>
     </Reference>
     <Reference Include="VirtoCommerce.StoreModule.Data, Version=2.13.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\VirtoCommerce.StoreModule.Data.2.13.0\lib\net461\VirtoCommerce.StoreModule.Data.dll</HintPath>

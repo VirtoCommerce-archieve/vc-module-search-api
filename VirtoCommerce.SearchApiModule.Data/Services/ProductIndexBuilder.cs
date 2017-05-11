@@ -7,8 +7,8 @@ using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Domain.Pricing.Model;
 using VirtoCommerce.Domain.Pricing.Services;
-using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.SearchApiModule.Data.Extensions;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
@@ -21,7 +21,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         private readonly ICatalogSearchService _catalogSearchService;
         private readonly IItemService _itemService;
         private readonly IPricingService _pricingService;
-        private readonly IChangeLogService _changeLogService;
+        private readonly IOperationProvider[] _operationProviders;
         private readonly IBatchDocumentBuilder<CatalogProduct>[] _batchDocumentBuilders;
 
         public ProductIndexBuilder(
@@ -29,14 +29,14 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             ICatalogSearchService catalogSearchService,
             IItemService itemService,
             IPricingService pricingService,
-            IChangeLogService changeLogService,
+            IOperationProvider[] operationProviders,
             IBatchDocumentBuilder<CatalogProduct>[] batchDocumentBuilders)
         {
             _searchProvider = searchProvider;
             _catalogSearchService = catalogSearchService;
             _itemService = itemService;
             _pricingService = pricingService;
-            _changeLogService = changeLogService;
+            _operationProviders = operationProviders;
             _batchDocumentBuilders = batchDocumentBuilders;
         }
 
@@ -151,7 +151,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
                     WithHidden = true
                 };
 
-                // TODO: Need optimize search to return only product ids
+                // TODO: Need to optimize search to return only product IDs
                 result = _catalogSearchService.Search(criteria);
 
                 var productIds = result.Products.Select(p => p.Id).ToArray();
@@ -163,93 +163,16 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         protected virtual IList<Partition> GetPartitionsForModifiedProducts(DateTime startDate, DateTime endDate)
         {
-            var partitions = new List<Partition>();
+            var operations = _operationProviders.GetLatestIndexOperationForEachObject(DocumentType, startDate, endDate);
 
-            var productChanges = GetProductChanges(startDate, endDate);
-            var deletedProductIds = productChanges.Where(c => c.OperationType == EntryState.Deleted).Select(c => c.ObjectId).ToList();
-            var modifiedProductIds = productChanges.Where(c => c.OperationType != EntryState.Deleted).Select(c => c.ObjectId).ToList();
-
-            partitions.AddRange(CreatePartitions(OperationType.Remove, deletedProductIds));
-            partitions.AddRange(CreatePartitions(OperationType.Index, modifiedProductIds));
+            var partitions = operations.GroupBy(o => o.OperationType)
+                .SelectMany(g => CreatePartitions(g.Key, g.Select(o => o.ObjectId).ToList()))
+                .ToList();
 
             return partitions;
         }
 
-        protected virtual List<OperationLog> GetProductChanges(DateTime startDate, DateTime endDate)
-        {
-            var allProductChanges = _changeLogService.FindChangeHistory("Item", startDate, endDate).ToList();
-            var allPriceChanges = _changeLogService.FindChangeHistory("Price", startDate, endDate).ToList();
-
-            var priceIds = allPriceChanges.Select(c => c.ObjectId).ToArray();
-            var prices = GetPrices(priceIds);
-
-            // TODO: How to get product for deleted price?
-            var productsWithChangedPrice = allPriceChanges
-                .Select(c => new { c.ModifiedDate, Price = prices.ContainsKey(c.ObjectId) ? prices[c.ObjectId] : null })
-                .Where(x => x.Price != null)
-                .Select(x => new OperationLog { ObjectId = x.Price.ProductId, ModifiedDate = x.ModifiedDate, OperationType = EntryState.Modified })
-                .ToList();
-
-            allProductChanges.AddRange(productsWithChangedPrice);
-
-            // Return latest operation type for each product
-            var result = allProductChanges
-                .GroupBy(c => c.ObjectId)
-                .Select(g => new OperationLog { ObjectId = g.Key, OperationType = g.OrderByDescending(c => c.ModifiedDate).Select(c => c.OperationType).First() })
-                .ToList();
-
-            return result;
-        }
-
-        protected virtual IDictionary<string, Price> GetPrices(ICollection<string> priceIds)
-        {
-            // TODO: Get pageSize and degreeOfParallelism from settings
-            return GetPricesWithPagingAndParallelism(priceIds, 1000, 10);
-        }
-
-        protected virtual IDictionary<string, Price> GetPricesWithPagingAndParallelism(ICollection<string> priceIds, int pageSize, int degreeOfParallelism)
-        {
-            IDictionary<string, Price> result;
-
-            if (degreeOfParallelism > 1)
-            {
-                var dictionary = new ConcurrentDictionary<string, Price>();
-
-                var pages = new List<string[]>();
-                priceIds.ProcessWithPaging(pageSize, (ids, skipCount, totalCount) => pages.Add(ids.ToArray()));
-
-                var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = degreeOfParallelism };
-
-                Parallel.ForEach(pages, parallelOptions, ids =>
-                {
-                    var prices = _pricingService.GetPricesById(ids);
-                    foreach (var price in prices)
-                    {
-                        dictionary.AddOrUpdate(price.Id, price, (key, oldValue) => price);
-                    }
-                });
-
-                result = dictionary;
-            }
-            else
-            {
-                var dictionary = new Dictionary<string, Price>();
-
-                priceIds.ProcessWithPaging(pageSize, (ids, skipCount, totalCount) =>
-                {
-                    foreach (var price in _pricingService.GetPricesById(ids.ToArray()))
-                    {
-                        dictionary[price.Id] = price;
-                    }
-                });
-
-                result = dictionary;
-            }
-
-            return result;
-        }
-
-        protected virtual IEnumerable<Partition> CreatePartitions(OperationType operationType, List<string> allProductIds)
+        protected virtual IEnumerable<Partition> CreatePartitions(OperationType operationType, IList<string> allProductIds)
         {
             var partitions = new List<Partition>();
 

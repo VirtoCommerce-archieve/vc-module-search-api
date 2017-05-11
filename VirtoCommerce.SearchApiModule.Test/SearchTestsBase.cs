@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using Moq;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchApiModule.Data.Services;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Search;
@@ -36,7 +38,7 @@ namespace VirtoCommerce.SearchApiModule.Test
 
                 var connection = new SearchConnection(elasticsearchHost, scope);
                 var queryBuilder = new ElasticSearchQueryBuilder() as ISearchQueryBuilder;
-                var elasticSearchProvider = new ElasticSearchProvider(new[] { queryBuilder }, connection, searchCriteriaPreprocessors) { EnableTrace = true };
+                var elasticSearchProvider = new ElasticSearchProvider(connection, searchCriteriaPreprocessors, new[] { queryBuilder }, GetSettingsManager()) { EnableTrace = true };
                 provider = elasticSearchProvider;
             }
 
@@ -54,6 +56,15 @@ namespace VirtoCommerce.SearchApiModule.Test
                 throw new ArgumentException($"Search provider '{searchProvider}' is not supported", nameof(searchProvider));
 
             return provider;
+        }
+
+        protected static ISettingsManager GetSettingsManager()
+        {
+            var mock = new Mock<ISettingsManager>();
+            mock.Setup(s => s.GetValue(It.IsAny<string>(), It.IsAny<int>())).Returns((string name, int defaultValue) => defaultValue);
+            mock.Setup(s => s.GetValue(It.IsAny<string>(), It.IsAny<bool>())).Returns((string name, bool defaultValue) => defaultValue);
+            mock.Setup(s => s.GetModuleSettings("VirtoCommerce.Store")).Returns(new SettingEntry[] { });
+            return mock.Object;
         }
 
         public virtual void Dispose()

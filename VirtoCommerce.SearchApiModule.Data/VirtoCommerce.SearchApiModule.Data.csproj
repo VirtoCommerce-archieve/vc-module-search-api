@@ -60,8 +60,8 @@
     <Reference Include="VirtoCommerce.Platform.Core, Version=2.12.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\VirtoCommerce.Platform.Core.2.12.6\lib\net461\VirtoCommerce.Platform.Core.dll</HintPath>
     </Reference>
-    <Reference Include="VirtoCommerce.SearchModule.Core, Version=2.14.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\VirtoCommerce.SearchModule.Core.2.14.0\lib\net461\VirtoCommerce.SearchModule.Core.dll</HintPath>
+    <Reference Include="VirtoCommerce.SearchModule.Core, Version=2.14.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\VirtoCommerce.SearchModule.Core.2.14.2\lib\net461\VirtoCommerce.SearchModule.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -69,6 +69,8 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Converters\AggregationConverters.cs" />
+    <Compile Include="Extensions\DocumentOperationsProviderExtensions.cs" />
+    <Compile Include="Extensions\OperationLogExtensions.cs" />
     <Compile Include="Extensions\QueryStringExtensions.cs" />
     <Compile Include="Extensions\SearchCriteriaExtensions.cs" />
     <Compile Include="Helpers\BrowseFilterHelper.cs" />
@@ -78,6 +80,7 @@
     <Compile Include="Services\CatalogSearchCriteriaPreprocessor.cs" />
     <Compile Include="Services\CategoryBatchDocumentBuilder.cs" />
     <Compile Include="Services\CategoryDocumentBuilder.cs" />
+    <Compile Include="Services\CategoryOperationProvider.cs" />
     <Compile Include="Services\ProductBatchDocumentBuilder.cs" />
     <Compile Include="Services\ProductDocumentBuilder.cs" />
     <Compile Include="Model\CategorySearch.cs" />
@@ -98,6 +101,8 @@
     <Compile Include="Services\ICategoryBrowsingService.cs" />
     <Compile Include="Services\IItemBrowsingService.cs" />
     <Compile Include="Services\ItemBrowsingService.cs" />
+    <Compile Include="Services\ProductOperationProvider.cs" />
+    <Compile Include="Services\ProductPriceOperationProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

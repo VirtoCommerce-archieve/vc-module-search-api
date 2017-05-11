@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.Domain.Catalog.Model;
 using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.SearchApiModule.Data.Extensions;
+using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Model.Indexing;
 
@@ -17,26 +18,26 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         private readonly ISearchProvider _searchProvider;
         private readonly ICatalogSearchService _catalogSearchService;
         private readonly ICategoryService _categoryService;
-        private readonly IChangeLogService _changeLogService;
+        private readonly IOperationProvider[] _operationProviders;
         private readonly IBatchDocumentBuilder<Category>[] _batchDocumentBuilders;
 
         public CategoryIndexBuilder(
             ISearchProvider searchProvider,
             ICatalogSearchService catalogSearchService,
             ICategoryService categoryService,
-            IChangeLogService changeLogService,
+            IOperationProvider[] operationProviders,
             IBatchDocumentBuilder<Category>[] batchDocumentBuilders)
         {
             _searchProvider = searchProvider;
             _catalogSearchService = catalogSearchService;
             _categoryService = categoryService;
-            _changeLogService = changeLogService;
+            _operationProviders = operationProviders;
             _batchDocumentBuilders = batchDocumentBuilders;
         }
 
         #region ISearchIndexBuilder Members
 
-        public string DocumentType => "category";
+        public string DocumentType => CategorySearchCriteria.DocType;
 
         public IList<Partition> GetPartitions(bool rebuild, DateTime startDate, DateTime endDate)
         {
@@ -127,29 +128,13 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         protected virtual IList<Partition> GetPartitionsForModifiedCategories(DateTime startDate, DateTime endDate)
         {
-            var partitions = new List<Partition>();
+            var operations = _operationProviders.GetLatestIndexOperationForEachObject(DocumentType, startDate, endDate);
 
-            var categoryChanges = GetCategoryChanges(startDate, endDate);
-            var deletedCategoryIds = categoryChanges.Where(c => c.OperationType == EntryState.Deleted).Select(c => c.ObjectId).ToList();
-            var modifiedCategoryIds = categoryChanges.Where(c => c.OperationType != EntryState.Deleted).Select(c => c.ObjectId).ToList();
-
-            partitions.AddRange(CreatePartitions(OperationType.Remove, deletedCategoryIds));
-            partitions.AddRange(CreatePartitions(OperationType.Index, modifiedCategoryIds));
-
-            return partitions;
-        }
-
-        protected virtual List<OperationLog> GetCategoryChanges(DateTime startDate, DateTime endDate)
-        {
-            var allCategoryChanges = _changeLogService.FindChangeHistory("Category", startDate, endDate).ToList();
-
-            // Return latest operation type for each product
-            var result = allCategoryChanges
-                .GroupBy(c => c.ObjectId)
-                .Select(g => new OperationLog { ObjectId = g.Key, OperationType = g.OrderByDescending(c => c.ModifiedDate).Select(c => c.OperationType).First() })
+            var partitions = operations.GroupBy(o => o.OperationType)
+                .SelectMany(g => CreatePartitions(g.Key, g.Select(o => o.ObjectId).ToList()))
                 .ToList();
 
-            return result;
+            return partitions;
         }
 
         protected virtual IEnumerable<Partition> CreatePartitions(OperationType operationType, List<string> allCategoriesIds)
