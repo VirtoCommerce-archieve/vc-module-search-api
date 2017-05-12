@@ -27,7 +27,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
         public IList<Operation> GetOperations(DateTime startDate, DateTime endDate)
         {
-            var allPriceChanges = _changeLogService.FindChangeHistory("Price", startDate, endDate).ToList();
+            var allPriceChanges = _changeLogService.FindChangeHistory("PriceEntity", startDate, endDate).ToList();
             var priceIds = allPriceChanges.Select(c => c.ObjectId).ToArray();
             var prices = GetPrices(priceIds);
 
