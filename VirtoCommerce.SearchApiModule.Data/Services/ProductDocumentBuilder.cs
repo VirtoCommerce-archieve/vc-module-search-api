@@ -29,7 +29,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             var indexStoreNotAnalyzedStringCollection = new[] { IndexStore.Yes, IndexType.NotAnalyzed, IndexDataType.StringCollection };
             var indexStoreAnalyzedStringCollection = new[] { IndexStore.Yes, IndexType.Analyzed, IndexDataType.StringCollection };
 
-            document.Add(new DocumentField("__key", item.Id.ToLower(), indexStoreNotAnalyzed));
+            document.Add(new DocumentField("__key", item.Id.ToLowerInvariant(), indexStoreNotAnalyzed));
             document.Add(new DocumentField("__type", item.GetType().Name, indexStoreNotAnalyzed));
             document.Add(new DocumentField("__sort", item.Name, indexStoreNotAnalyzed));
 
@@ -63,14 +63,14 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
             foreach (var catalogId in catalogs)
             {
-                document.Add(new DocumentField("catalog", catalogId.ToLower(), indexStoreNotAnalyzedStringCollection));
+                document.Add(new DocumentField("catalog", catalogId.ToLowerInvariant(), indexStoreNotAnalyzedStringCollection));
             }
 
             // Add outlines to search index
             var outlineStrings = GetOutlineStrings(item.Outlines);
             foreach (var outline in outlineStrings)
             {
-                document.Add(new DocumentField("__outline", outline.ToLower(), indexStoreNotAnalyzedStringCollection));
+                document.Add(new DocumentField("__outline", outline.ToLowerInvariant(), indexStoreNotAnalyzedStringCollection));
             }
 
             // Index custom properties
@@ -175,9 +175,9 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
             foreach (var propValue in item.PropertyValues.Where(x => x.Value != null))
             {
-                var propertyName = (propValue.PropertyName ?? "").ToLower();
+                var propertyName = (propValue.PropertyName ?? "").ToLowerInvariant();
                 var property = properties.FirstOrDefault(x => string.Equals(x.Name, propValue.PropertyName, StringComparison.InvariantCultureIgnoreCase) && x.ValueType == propValue.ValueType);
-                var contentField = string.Concat("__content", property != null && property.Multilanguage && !string.IsNullOrWhiteSpace(propValue.LanguageCode) ? "_" + propValue.LanguageCode.ToLower() : string.Empty);
+                var contentField = string.Concat("__content", property != null && property.Multilanguage && !string.IsNullOrWhiteSpace(propValue.LanguageCode) ? "_" + propValue.LanguageCode.ToLowerInvariant() : string.Empty);
                 var stringCollection = property?.Multivalue == true ? IndexDataType.StringCollection : string.Empty;
 
                 switch (propValue.ValueType)
@@ -217,7 +217,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             {
                 foreach (var price in prices)
                 {
-                    document.Add(new DocumentField(string.Format(CultureInfo.InvariantCulture, "price_{0}_{1}", price.Currency, price.PricelistId).ToLower(), price.EffectiveValue, new[] { IndexStore.No, IndexType.NotAnalyzed }));
+                    document.Add(new DocumentField(string.Format(CultureInfo.InvariantCulture, "price_{0}_{1}", price.Currency, price.PricelistId).ToLowerInvariant(), price.EffectiveValue, new[] { IndexStore.No, IndexType.NotAnalyzed }));
 
                     // now save additional pricing fields for convinient user searches, store price with currency and without one
                     document.Add(new DocumentField(string.Format(CultureInfo.InvariantCulture, "price_{0}", price.Currency), price.EffectiveValue, new[] { IndexStore.No, IndexType.NotAnalyzed }));

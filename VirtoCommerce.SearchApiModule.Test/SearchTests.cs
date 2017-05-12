@@ -67,7 +67,7 @@ namespace VirtoCommerce.SearchApiModule.Test
             criteria = new CatalogItemSearchCriteria
             {
                 Catalog = "goods",
-                Outlines = new[] { "sony/186d61d8-d843-4675-9f77-ec5ef603fda1", "sony/186d61d8-d843-4675-9f77-ec5ef603fda2" },
+                Outlines = new[] { "sony/186d61d8-d843-4675-9f77-ec5ef603fda1", "SONY/186d61d8-d843-4675-9f77-ec5ef603fda2" },
                 StartingRecord = 0,
                 RecordsToRetrieve = 20,
             };

@@ -44,12 +44,12 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
                 if (!string.IsNullOrEmpty(criteria.Catalog))
                 {
-                    criteria.Apply(CreateAttributeFilter("catalog", criteria.Catalog));
+                    criteria.Apply(CreateAttributeFilter("catalog", criteria.Catalog.ToLowerInvariant()));
                 }
 
                 if (!criteria.Outlines.IsNullOrEmpty())
                 {
-                    var outlines = criteria.Outlines.Select(o => o.TrimEnd('/', '*'));
+                    var outlines = criteria.Outlines.Select(o => o.TrimEnd('/', '*').ToLowerInvariant());
                     criteria.Apply(CreateAttributeFilter("__outline", outlines));
                 }
 
@@ -64,7 +64,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         {
             if (!criteria.Outlines.IsNullOrEmpty())
             {
-                var outlines = criteria.Outlines.Select(o => o.TrimEnd('/', '*'));
+                var outlines = criteria.Outlines.Select(o => o.TrimEnd('/', '*').ToLowerInvariant());
                 criteria.Apply(CreateAttributeFilter("__outline", outlines));
             }
         }
