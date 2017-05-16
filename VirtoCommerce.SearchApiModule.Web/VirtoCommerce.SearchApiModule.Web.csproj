@@ -122,6 +122,7 @@
     <Content Include="Scripts\widgets\storePropertiesWidget.tpl.html" />
     <Content Include="Localizations\en.VirtoCommerceSearchApi.json" />
     <None Include="app.config" />
+    <Content Include="Localizations\de.VirtoCommerce.SearchApi.json" />
     <None Include="module.ignore" />
     <None Include="packages.config">
       <SubType>Designer</SubType>

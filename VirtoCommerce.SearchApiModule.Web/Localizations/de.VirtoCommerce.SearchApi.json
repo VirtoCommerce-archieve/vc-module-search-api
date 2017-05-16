@@ -1,0 +1,27 @@
+{
+  "searchApi": {
+    "filter-labels": {
+      "filter-withPrice": "Hat Preis definiert",
+      "filter-priceRange": "Preis zwischen",
+      "filter-lowStock": "Wenig auf Lager",
+      "filter-notActive": "Nicht aktiv",
+	  "filter-priceless": "Ohne Preis",
+      "filter-new": "<strong>Neuen Filter hinzufügen</strong>",
+      "unnamed-filter": "Unbenannter Filter",
+      "inactive": "Inaktiv",
+      "picture": "Bild",
+      "name": "Name",
+      "sku": "Art.-Nr."
+    },
+    "dialogs": {
+      "reindex": {
+        "title": "Suchindex durchsuchen",
+        "msg1": "Wählen Sie aus, wie Sie den Suchindex aktualisieren möchten. Optionen:",
+        "msg2": "Update: Update durch Indizierung von fehlenden oder veralteten Daten.",
+        "msg3": "Löschen + aufbauen",
+        "index": "Neuaufbau: Der aktuelle Suchindex wird gelöscht und von Grund auf neu gebaut. Beachten Sie, dass es KEINE SUCHERGEBNISSE GIBT, bis der Aufbauprozess beendet ist.",
+        "reindex": "Löschen + aufbauen"
+      }
+    }
+  }
+}
