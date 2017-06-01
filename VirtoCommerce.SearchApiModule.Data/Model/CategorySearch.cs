@@ -28,7 +28,8 @@ namespace VirtoCommerce.SearchApiModule.Data.Model
             where T : CategorySearchCriteria, new()
         {
             var criteria = new T();
-
+            criteria.StartingRecord = Skip;
+            criteria.RecordsToRetrieve = Take;
             // add outline
             var outline = string.IsNullOrEmpty(Outline) ? $"{catalog}" : $"{catalog}{Outline}";
             criteria.Outlines.Add(outline);
