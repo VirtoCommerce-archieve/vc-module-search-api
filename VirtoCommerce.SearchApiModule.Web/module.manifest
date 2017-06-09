@@ -20,7 +20,7 @@
     <owners>
         <owner>Virto Commerce</owner>
     </owners>
-    <projectUrl>https://github.com/VirtoCommerce/vc-module-search-api</projectUrl>
+    <projectUrl>https://virtocommerce.com/apps/extensions/indexed-search-api-module</projectUrl>
     <iconUrl>https://github.com/VirtoCommerce/vc-module-search-api/raw/master/VirtoCommerce.SearchApiModule.Web/Content/logo.png</iconUrl>
     <releaseNotes>Removed dependencies on specific search providers. Added universal search criteria preprocessor. Refactored search criteria. Refactored index builders. Added document builders and batch document builders.</releaseNotes>
     <copyright>Copyright © 2011-2017 Virto Commerce. All rights reserved</copyright>
