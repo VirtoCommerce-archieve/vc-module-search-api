@@ -36,6 +36,13 @@
     <settings>
         <group name="Search|General">
             <setting>
+                <name>VirtoCommerce.SearchApi.IndexPartitionSize</name>
+                <valueType>integer</valueType>
+                <defaultValue>100</defaultValue>
+                <title>The maximum items count per indexing partition</title>
+                <description>High value may will cause slow performance on machines with poor hardware</description>
+            </setting>
+            <setting>
                 <name>VirtoCommerce.SearchApi.UseCatalogIndexedSearchInManager</name>
                 <valueType>boolean</valueType>
                 <defaultValue>true</defaultValue>
