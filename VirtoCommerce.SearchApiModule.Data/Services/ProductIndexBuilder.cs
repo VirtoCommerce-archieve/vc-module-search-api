@@ -8,6 +8,7 @@ using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Domain.Pricing.Model;
 using VirtoCommerce.Domain.Pricing.Services;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchApiModule.Data.Extensions;
 using VirtoCommerce.SearchApiModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -23,8 +24,10 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         private readonly IPricingService _pricingService;
         private readonly IOperationProvider[] _operationProviders;
         private readonly IBatchDocumentBuilder<CatalogProduct>[] _batchDocumentBuilders;
+        private readonly ISettingsManager _settingsManager;
 
         public ProductIndexBuilder(
+            ISettingsManager settingsManager,
             ISearchProvider searchProvider,
             ICatalogSearchService catalogSearchService,
             IItemService itemService,
@@ -32,6 +35,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             IOperationProvider[] operationProviders,
             IBatchDocumentBuilder<CatalogProduct>[] batchDocumentBuilders)
         {
+            _settingsManager = settingsManager;
             _searchProvider = searchProvider;
             _catalogSearchService = catalogSearchService;
             _itemService = itemService;
@@ -44,7 +48,13 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         /// The maximum items count per partition.
         /// Keep it smaller to prevent too large SQL requests and too large messages in the queue.
         /// </summary>
-        protected virtual int PartitionSize => 500;
+        protected virtual int PartitionSize
+        {
+            get
+            {
+               return _settingsManager.GetValue("VirtoCommerce.SearchApi.IndexPartitionSize", 100);
+            }
+        }
 
         #region ISearchIndexBuilder Members
 
@@ -139,24 +149,21 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
 
             var result = _catalogSearchService.Search(new SearchCriteria { Take = 0, ResponseGroup = SearchResponseGroup.WithProducts, WithHidden = true });
             var parts = result.ProductsTotalCount / PartitionSize + 1;
-            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 5 };
-
-            Parallel.For(0, parts, parallelOptions, index =>
+            for (int i = 0; i < parts; i++)
             {
                 var criteria = new SearchCriteria
                 {
-                    Skip = index * PartitionSize,
+                    Skip = i * PartitionSize,
                     Take = PartitionSize,
                     ResponseGroup = SearchResponseGroup.WithProducts,
                     WithHidden = true
                 };
-
                 // TODO: Need to optimize search to return only product IDs
                 result = _catalogSearchService.Search(criteria);
 
                 var productIds = result.Products.Select(p => p.Id).ToArray();
                 partitions.Add(new Partition(OperationType.Index, productIds));
-            });
+            };
 
             return partitions.ToList();
         }

@@ -27,6 +27,7 @@ using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Assets;
 using VirtoCommerce.Platform.Data.ChangeLog;
 using VirtoCommerce.Platform.Data.DynamicProperties;
@@ -355,7 +356,7 @@ namespace VirtoCommerce.SearchApiModule.Test
             return new ISearchIndexBuilder[]
             {
                 new CategoryIndexBuilder(provider, GetSearchService(), GetCategoryService(), GetOperationProviders(), GetCategoryBatchDocumentBuilders()),
-                new ProductIndexBuilder(provider, GetSearchService(), GetItemService(), GetPricingService(), GetOperationProviders(), GetProductBatchDocumentBuilders()),
+                new ProductIndexBuilder(GetSettingsManager(), provider, GetSearchService(), GetItemService(), GetPricingService(), GetOperationProviders(), GetProductBatchDocumentBuilders()),
             };
         }
 
