@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <module>
     <id>VirtoCommerce.SearchApi</id>
-    <version>1.3.4</version>
+    <version>1.3.5</version>
     <platformVersion>2.12.6</platformVersion>
     <dependencies>
         <dependency id="VirtoCommerce.Catalog" version="2.16.2" />
