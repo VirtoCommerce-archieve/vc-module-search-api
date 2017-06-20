@@ -122,7 +122,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         /// <param name="value"></param>
         protected virtual void IndexIsProperty(IDocument document, string value)
         {
-            document.Add(new DocumentField("is", value, new[] { IndexStore.No, IndexType.NotAnalyzed, IndexDataType.StringCollection }));
+            document.Add(new DocumentField("is", value, new[] { IndexStore.Yes, IndexType.NotAnalyzed, IndexDataType.StringCollection }));
         }
 
         protected virtual string[] GetOutlineStrings(IEnumerable<Outline> outlines)
@@ -217,11 +217,11 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
             {
                 foreach (var price in prices)
                 {
-                    document.Add(new DocumentField(string.Format(CultureInfo.InvariantCulture, "price_{0}_{1}", price.Currency, price.PricelistId).ToLowerInvariant(), price.EffectiveValue, new[] { IndexStore.No, IndexType.NotAnalyzed }));
+                    document.Add(new DocumentField(string.Format(CultureInfo.InvariantCulture, "price_{0}_{1}", price.Currency, price.PricelistId).ToLowerInvariant(), price.EffectiveValue, new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
 
                     // now save additional pricing fields for convinient user searches, store price with currency and without one
-                    document.Add(new DocumentField(string.Format(CultureInfo.InvariantCulture, "price_{0}", price.Currency), price.EffectiveValue, new[] { IndexStore.No, IndexType.NotAnalyzed }));
-                    document.Add(new DocumentField("price", price.EffectiveValue, new[] { IndexStore.No, IndexType.NotAnalyzed }));
+                    document.Add(new DocumentField(string.Format(CultureInfo.InvariantCulture, "price_{0}", price.Currency), price.EffectiveValue, new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
+                    document.Add(new DocumentField("price", price.EffectiveValue, new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
                 }
 
             }

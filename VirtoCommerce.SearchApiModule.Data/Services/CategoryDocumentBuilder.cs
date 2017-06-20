@@ -91,7 +91,7 @@ namespace VirtoCommerce.SearchApiModule.Data.Services
         /// <param name="value"></param>
         protected virtual void IndexIsProperty(IDocument doc, string value)
         {
-            doc.Add(new DocumentField("is", value, new[] { IndexStore.No, IndexType.NotAnalyzed }));
+            doc.Add(new DocumentField("is", value, new[] { IndexStore.Yes, IndexType.NotAnalyzed }));
         }
 
         protected virtual string[] GetOutlineStrings(IEnumerable<Outline> outlines)
