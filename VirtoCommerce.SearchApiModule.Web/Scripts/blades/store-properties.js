@@ -23,6 +23,11 @@
     };
 
     blade.unselect = function (node) {
+        if (isDragging) {
+            isDragging = false;
+            return;
+        }
+
         node.isSelected = false;
         blade.selectedEntities.splice(blade.selectedEntities.indexOf(node), 1);
     };
@@ -66,9 +71,12 @@
         }
     ];
 
+    var isDragging = false;
+
     $scope.sortableOptions = {
         axis: 'y',
-        cursor: "move"
+        cursor: "move",
+        stop: function () { isDragging = true; }
     };
 
     blade.headIcon = 'fa-gear';
